@@ -31,3 +31,28 @@ class BatchItemResult(BaseModel):
 
 class BatchOCRResponse(BaseModel):
     results: list[BatchItemResult]
+
+
+class ExtractRequest(BaseModel):
+    text: str
+    # {field_name: field_description} -- omit/empty to use the server's
+    # default schema (conf/pipeline_conf.yaml's extract.schema, see
+    # module/extract/get_default_schema()).
+    schema_: dict[str, str] | None = Field(default=None, alias="schema")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ExtractResponse(BaseModel):
+    entities: dict[str, list[str]]
+
+
+class SchemaField(BaseModel):
+    key: str
+    desc: str
+
+
+class ExtractSchemaResponse(BaseModel):
+    schema_: list[SchemaField] = Field(alias="schema")
+
+    model_config = ConfigDict(populate_by_name=True)

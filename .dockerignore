@@ -11,3 +11,15 @@ debug_outputs
 img
 .venv
 venv
+
+# Both docker-compose.yml and docker-compose.gpu.yml already bind-mount the
+# WHOLE ./fastocr/weight host directory over /app/fastocr/weight at runtime
+# (read-only) -- that mount replaces the image's copy of the directory
+# entirely regardless of what COPY put there, so baking FastOcr.pth into the
+# image only wastes build time/image size (and duplicates a large binary
+# across every image layer/registry push) without ever actually being used.
+# Excluding it here also makes the mount NON-optional: a container started
+# without that volume (e.g. a bare `docker run`) will fail fast on missing
+# weights instead of silently falling back to whatever was baked in at
+# build time.
+fastocr/weight/FastOcr.pth

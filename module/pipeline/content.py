@@ -3,7 +3,7 @@ import re
 from ..layout import LayoutLabelSchema
 from .types import PageBlock
 
-# ── Ghép nội dung block: line break <br> + tự nhận diện list item ──────────
+# ── Ghép nội dung block: nối dòng bằng " " + tự nhận diện list item ────────
 #
 # Nhận diện 1 dòng là "list item" nếu nó bắt đầu bằng marker kiểu:
 #   a) b) c)  /  a. b. c.  /  1) 2) 3)  /  1. 2. 3.
@@ -12,7 +12,7 @@ ALPHA_ITEM_RE = re.compile(r"^\s*[a-zđ][\.\)]\s+")  # a) b) c) đ)...
 # CHỈ chữ THƯỜNG -- nếu cho phép cả chữ HOA, tiêu đề mục La Mã kiểu
 # 'I. Người sử dụng đất...' (1 ký tự HOA + dấu chấm) sẽ bị nhận NHẦM thành
 # marker list 'alpha', kéo theo mọi dòng thường phía sau bị fix
-# nối-dòng-word-wrap nuốt chung thành 1 khối, mất hết <br> phân dòng.
+# nối-dòng-word-wrap nuốt chung thành 1 khối text liên tục.
 NUM_ITEM_RE = re.compile(r"^\s*\d+[\.\)]\s+")  # 1. 2. 3)...
 MIN_LIST_ITEMS = 2
 # cần ÍT NHẤT bấy nhiêu dòng list-item LIÊN TIẾP, CÙNG NHÓM (cùng là chữ
@@ -32,12 +32,18 @@ def _list_item_type(line: str) -> str | None:
     return None
 
 
-def build_block_content(line_texts: list[str]) -> str:
+def build_block_content(line_texts: list[str], preserve_breaks: bool = False) -> str:
     """
     Ghép các "hàng" (mỗi hàng = 1 dòng chữ thật, đã gom theo tb_rows) thành
     1 chuỗi content dạng HTML-trong-Markdown:
-      - Các dòng THƯỜNG liên tiếp -> nối bằng '<br>\n' (giữ xuống dòng khi
-        render Markdown, vì '\n' đơn thuần bị coi là khoảng trắng).
+      - Các dòng THƯỜNG liên tiếp -> nối bằng ' ' (space) thành 1 đoạn văn
+        liên tục -- dòng OCR chỉ là chỗ bị ngắt do word-wrap theo khổ trang
+        gốc, không phải ranh giới đoạn thật, nên không giữ thành xuống dòng
+        cứng trong output. Trừ khi `preserve_breaks=True` (dùng cho block
+        title/header -- xem document_pipeline.py's call site): ở đó mỗi
+        dòng THƯỜNG là 1 đơn vị hiển thị có chủ đích (vd tên công ty 1
+        dòng, địa chỉ 1 dòng khác), nên nối bằng '<br>\n' để giữ xuống dòng
+        thay vì gộp.
       - Các dòng LIST ITEM liên tiếp, CÙNG NHÓM marker (toàn 'alpha' hoặc
         toàn 'num') -> gom thành 1 khối <ul>, mỗi dòng là 1 <li>...</li> --
         chỉ khi số dòng liên tiếp cùng nhóm >= MIN_LIST_ITEMS.
@@ -46,8 +52,11 @@ def build_block_content(line_texts: list[str]) -> str:
         mở khối MỚI cho nhóm marker khác, KHÔNG gộp chung 1 <ul>.
       - Nếu chỉ có 1 dòng lẻ khớp marker (dù đứng riêng hay bị đổi nhóm
         ngay sau đó), coi như text thường, không bọc <ul>.
-      - Các khối (text-run hoặc <ul>) nối với nhau bằng '\n'.
+      - 1 khối <ul> vẫn nối với text-run liền kề bằng '\n' (ranh giới
+        block-level HTML thật sự, không thể gộp bằng space/<br>) -- chỉ 2
+        text-run liền kề nhau mới áp dụng rule ' ' hoặc '<br>\n' ở trên.
     """
+    plain_sep = "<br>\n" if preserve_breaks else " "
     segments = []  # list các đoạn HTML đã hoàn chỉnh (text-run hoặc <ul>)
     buffer = []  # dòng thường đang gom (chưa flush)
     list_buffer = []  # dòng list-item đang gom (chưa flush)
@@ -55,7 +64,7 @@ def build_block_content(line_texts: list[str]) -> str:
 
     def flush_buffer():
         if buffer:
-            segments.append(("text", "<br>\n".join(buffer)))
+            segments.append(("text", plain_sep.join(buffer)))
             buffer.clear()
 
     def flush_list():
@@ -97,7 +106,7 @@ def build_block_content(line_texts: list[str]) -> str:
     for i in range(1, len(segments)):
         prev_kind, _ = segments[i - 1]
         cur_kind, cur_content = segments[i]
-        sep = "\n" if (prev_kind == "ul" or cur_kind == "ul") else "<br>\n"
+        sep = "\n" if (prev_kind == "ul" or cur_kind == "ul") else plain_sep
         result += sep + cur_content
     return result
 
@@ -105,12 +114,37 @@ def build_block_content(line_texts: list[str]) -> str:
 # ── JSON / Markdown builders ──────────────────────────────────────────────────
 
 
-def build_json(file_label: str, pages_blocks: list[list[PageBlock]]) -> dict:
+def build_json(
+    file_label: str,
+    pages_blocks: list[list[PageBlock]],
+    crop_offsets: list[tuple[float, float]] | None = None,
+    page_image_urls: list[str] | None = None,
+) -> dict:
+    """`crop_offsets[pn]` is the (x0, y0) top-left corner of that page's
+    whitespace-crop IN THE ORIGINAL (uncropped, freshly-rendered-at-pdf.dpi)
+    page image -- see crop_whitespace_before_layout. (0, 0) when no crop
+    happened. Exposed per-page as "crop_offset" so a client rendering its OWN
+    copy of the original page (e.g. via pdf.js, without re-running this
+    pipeline) can add it back to every block's bbox to realign an overlay --
+    otherwise bbox coords (relative to the CROPPED image) would be offset
+    from an uncropped re-render. Defaults to all-(0,0) so existing callers
+    that don't have this handy (there are none left in this codebase, but
+    keeps the signature non-breaking) still get a valid response.
+
+    `page_image_urls[pn]`, if given, is a URL to the EXACT image layout/OCR
+    ran on for that page -- every block's bbox is relative to THIS image
+    directly, no crop_offset math needed. Only process_pdf() (the /ocr/pdf
+    route) supplies this (see its docstring for why); other callers leave it
+    None and every page's "page_image" comes back null."""
+    if crop_offsets is None:
+        crop_offsets = [(0.0, 0.0)] * len(pages_blocks)
     return {
         "file": file_label,
         "pages": [
             {
                 "page": pn + 1,
+                "crop_offset": [round(v, 1) for v in crop_offsets[pn]],
+                "page_image": page_image_urls[pn] if page_image_urls else None,
                 "blocks": [
                     {
                         "id": j + 1,

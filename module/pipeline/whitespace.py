@@ -12,7 +12,7 @@ def crop_whitespace_before_layout(
     open_kernel: tuple[int, int] = (3, 3),
     min_contour_area_ratio: float = 0.0008,
     max_content_area_ratio: float = 0.5,
-) -> Image.Image:
+) -> tuple[Image.Image, tuple[int, int]]:
     """Crops the whitespace border around a scanned page's content, using the
     union bbox of its (denoised) contours. Ported from
     test_crop_whitespace.ipynb after parameter tuning on sample scans.
@@ -24,7 +24,17 @@ def crop_whitespace_before_layout(
     layout detection. The crop is only worth it for sparse-content pages
     (e.g. 2 small ID-card scans on an otherwise blank A4 sheet), where the
     real content would otherwise be too small relative to the frame for the
-    layout model to pick up reliably."""
+    layout model to pick up reliably.
+
+    Returns (cropped_image, (x0, y0)) -- the offset is the crop's top-left
+    corner IN THE ORIGINAL (uncropped) image's pixel space, i.e. exactly what
+    every downstream block bbox coordinate needs added back to it to map onto
+    the original page render. (0, 0) when no crop happened. Threaded all the
+    way out to the API's per-page "crop_offset" field (see
+    DocumentPipeline._process_pages_batch / build_json) specifically so a
+    client can realign an overlay drawn on its OWN from-scratch render of the
+    original page -- without that, bbox coords (relative to this crop) would
+    be silently offset from any uncropped re-render."""
     img = cv2.cvtColor(np.array(pil_img.convert("RGB")), cv2.COLOR_RGB2BGR)
     H, W = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -40,7 +50,7 @@ def crop_whitespace_before_layout(
     contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if not contours:
-        return pil_img
+        return pil_img, (0, 0)
 
     min_area = min_contour_area_ratio * W * H
     rects = [cv2.boundingRect(c) for c in contours if cv2.contourArea(c) >= min_area]
@@ -59,6 +69,6 @@ def crop_whitespace_before_layout(
 
     content_area_ratio = ((x1 - x0) * (y1 - y0)) / (W * H)
     if content_area_ratio > max_content_area_ratio:
-        return pil_img
+        return pil_img, (0, 0)
 
-    return pil_img.crop((x0, y0, x1, y1))
+    return pil_img.crop((x0, y0, x1, y1)), (x0, y0)

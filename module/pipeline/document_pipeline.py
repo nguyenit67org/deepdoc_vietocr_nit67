@@ -43,6 +43,7 @@ class _PrePage:
     per-page early-exit branching logic that doesn't itself batch cleanly."""
 
     img: Image.Image
+    crop_offset: tuple[float, float] = (0.0, 0.0)
     timings: dict[str, float] = field(default_factory=dict)
 
 
@@ -83,19 +84,40 @@ class DocumentPipeline:
             debug_dir = os.path.join(self.config.debug_dir, Path(label).stem)
             os.makedirs(debug_dir, exist_ok=True)
 
-        pages_blocks = self._process_pages_batch(pages, debug_dir)
+        pages_blocks, crop_offsets, prepped_imgs = self._process_pages_batch(pages, debug_dir)
+
+        out_dir = os.path.join(self.config.output_dir, Path(label).stem)
+        os.makedirs(out_dir, exist_ok=True)
+
+        # Saves the EXACT image layout/OCR ran on for each page (post
+        # whitespace-crop/deskew/orientation) -- only wired up for this
+        # single-PDF route (not process_pdf_group/process_image_group, i.e.
+        # not /pdfs or /images), since it's meant for the test UI's Preview
+        # tab (see server/static/index.html), not the bulk/production paths.
+        # Returning the real image sidesteps needing a client to reproduce
+        # crop/deskew/orientation itself (crop_offset alone, as used
+        # elsewhere in this JSON, only corrects crop_whitespace's
+        # TRANSLATION -- it can't correct page_deskew/page_orientation's
+        # ROTATION if either of those is ever enabled).
+        pages_dir = os.path.join(out_dir, "pages")
+        os.makedirs(pages_dir, exist_ok=True)
+        page_image_urls = []
+        for pn, img in enumerate(prepped_imgs):
+            img_path = os.path.join(pages_dir, f"page_{pn + 1}.png")
+            img.convert("RGB").save(img_path, "PNG")
+            # Matches the "/pipeline_outputs" static mount in server/main.py,
+            # which serves self.config.output_dir at that fixed URL prefix.
+            page_image_urls.append(f"/pipeline_outputs/{Path(label).stem}/pages/page_{pn + 1}.png")
 
         t_build = time.time()
         markdown = build_markdown(pages_blocks, self.layout.label_schema)
-        json_out = build_json(label, pages_blocks)
+        json_out = build_json(label, pages_blocks, crop_offsets, page_image_urls)
         logger.info("Built JSON/markdown output in %.2fs", time.time() - t_build)
 
         if debug_dir:
             with open(os.path.join(debug_dir, "output.md"), "w", encoding="utf-8") as f:
                 f.write(markdown)
 
-        out_dir = os.path.join(self.config.output_dir, Path(label).stem)
-        os.makedirs(out_dir, exist_ok=True)
         shutil.copyfile(pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf"))
         with open(os.path.join(out_dir, "output.json"), "w", encoding="utf-8") as f:
             json.dump(json_out, f, ensure_ascii=False, indent=2)
@@ -142,7 +164,10 @@ class DocumentPipeline:
             return results
 
         try:
-            pages_blocks = self._process_pages_batch(all_pages, debug_dir=None)
+            # process_pdf_group() doesn't save per-page images (see process_pdf()'s
+            # comment on why that's scoped to the single-PDF route only) -- prepped
+            # images are discarded here.
+            pages_blocks, crop_offsets, _prepped_imgs = self._process_pages_batch(all_pages, debug_dir=None)
         except Exception as e:
             logger.exception("Batched processing failed for a %d-PDF group", len(boundaries))
             for label, _pdf_path, _start, _end in boundaries:
@@ -152,7 +177,7 @@ class DocumentPipeline:
         for label, pdf_path, start, end in boundaries:
             sub_blocks = pages_blocks[start:end]
             markdown = build_markdown(sub_blocks, self.layout.label_schema)
-            json_out = build_json(label, sub_blocks)
+            json_out = build_json(label, sub_blocks, crop_offsets[start:end])
             out_dir = os.path.join(self.config.output_dir, Path(label).stem)
             os.makedirs(out_dir, exist_ok=True)
             shutil.copyfile(pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf"))
@@ -190,17 +215,17 @@ class DocumentPipeline:
             return results
 
         try:
-            pages_blocks = self._process_pages_batch(all_pages, debug_dir=None)
+            pages_blocks, crop_offsets, _prepped_imgs = self._process_pages_batch(all_pages, debug_dir=None)
         except Exception as e:
             logger.exception("Batched processing failed for a %d-image group", len(loaded))
             for label, _image_path in loaded:
                 results.append({"file": label, "status": "error", "error": str(e)})
             return results
 
-        for (label, image_path), blocks in zip(loaded, pages_blocks):
+        for i, ((label, image_path), blocks) in enumerate(zip(loaded, pages_blocks)):
             sub_blocks = [blocks]
             markdown = build_markdown(sub_blocks, self.layout.label_schema)
-            json_out = build_json(label, sub_blocks)
+            json_out = build_json(label, sub_blocks, [crop_offsets[i]])
             out_dir = os.path.join(self.config.output_dir, Path(label).stem)
             os.makedirs(out_dir, exist_ok=True)
             shutil.copyfile(image_path, os.path.join(out_dir, label))
@@ -215,18 +240,39 @@ class DocumentPipeline:
 
         return results
 
-    def _process_pages_batch(self, pages: list[Image.Image], debug_dir: str | None) -> list[list[PageBlock]]:
+    def _process_pages_batch(
+        self, pages: list[Image.Image], debug_dir: str | None
+    ) -> tuple[list[list[PageBlock]], list[tuple[float, float]], list[Image.Image]]:
         """Runs layout/OCR/table processing (batched across the whole
-        `pages` list) and returns each page's assembled blocks. Extracted
-        from process_pdf() so process_pdf_group()/process_image_group() can
-        feed it a page list concatenated from MULTIPLE source files (for
-        cross-file batching) and split the result back afterward -- this
-        method itself has no notion of "which file" a page came from.
+        `pages` list) and returns each page's assembled blocks, alongside
+        each page's whitespace-crop offset (see crop_whitespace_before_layout
+        -- (0, 0) if crop_whitespace is disabled or didn't fire for that
+        page) AND the exact per-page image (post crop/deskew/orientation)
+        that layout/OCR actually ran on -- the latter is what process_pdf()
+        saves to disk for the test UI's Preview tab, since it's a strictly
+        more robust fix than the crop_offset translation-only correction
+        (see NOTE below): the real image round-trips ANY transform
+        (crop, deskew, rotation), not just crop_whitespace's translation.
+        Extracted from process_pdf() so process_pdf_group()/
+        process_image_group() can feed it a page list concatenated from
+        MULTIPLE source files (for cross-file batching) and split the result
+        back afterward -- this method itself has no notion of "which file" a
+        page came from.
+
+        NOTE: the crop offset only accounts for crop_whitespace's
+        TRANSLATION. If page_deskew/page_orientation (both disabled by
+        default) are ever enabled, their rotation isn't captured by
+        crop_offset alone -- block bbox coords would then be relative to a
+        ROTATED image that a client-side offset-only correction can't
+        realign, only the (deskew/orientation-disabled) crop-only case is
+        round-trippable via crop_offset. The saved-image approach above
+        doesn't have this limitation.
         """
         # Phase 1a: whitespace crop + deskew -- genuinely page-specific/
         # sequential, each one lightweight.
         t_prep = time.time()
         pre_pages = [self._prepare_page_pre_orientation(pn, img) for pn, img in enumerate(pages)]
+        crop_offsets = [p.crop_offset for p in pre_pages]
         logger.info("Whitespace/deskew for %d pages in %.2fs", len(pages), time.time() - t_prep)
 
         # Phase 1b: batch-detect the 0-degree candidate orientation
@@ -406,7 +452,7 @@ class DocumentPipeline:
             self._process_page_after_layout(pn, prepped[pn], page_blocks[pn], pages_ocr_boxes[pn], debug_dir)
             for pn in range(len(pages))
         ]
-        return pages_blocks
+        return pages_blocks, crop_offsets, [p.img for p in prepped]
 
     def _prepare_page_pre_orientation(self, pn: int, img: Image.Image) -> _PrePage:
         """Whitespace crop + deskew -- kept separate from orientation
@@ -417,6 +463,7 @@ class DocumentPipeline:
         cfg = self.config
         timings: dict[str, float] = {}
         t_stage = time.time()
+        crop_offset: tuple[float, float] = (0.0, 0.0)
 
         def _mark(name: str) -> None:
             nonlocal t_stage
@@ -426,7 +473,7 @@ class DocumentPipeline:
 
         if cfg.crop_whitespace_enabled:
             orig_size = img.size
-            img = crop_whitespace_before_layout(
+            img, crop_offset = crop_whitespace_before_layout(
                 img,
                 threshold=cfg.crop_whitespace_threshold,
                 dilate_kernel=cfg.crop_whitespace_dilate_kernel,
@@ -451,7 +498,7 @@ class DocumentPipeline:
                 logger.info("Page %d: deskewed by %.2f°", pn + 1, tilt_angle)
         _mark("page_deskew")
 
-        return _PrePage(img=img, timings=timings)
+        return _PrePage(img=img, crop_offset=crop_offset, timings=timings)
 
     def _prepare_page_orientation(
         self,
@@ -597,6 +644,16 @@ class DocumentPipeline:
             logger.debug("Page %d: %d OCR boxes unmatched -> %d extra blocks", pn + 1, len(unmatched), len(extra_blocks))
         _mark("mapping")
 
+        # Title/header-like blocks keep their original line breaks (<br>) in
+        # build_block_content() instead of being flowed into 1 paragraph --
+        # each line there (company name, address, title + subtitle...) is a
+        # deliberate visual unit, unlike body text where line breaks are
+        # just page-width word-wrap artifacts. "header" isn't in
+        # label_schema (title_types/h2_types) since it's only relevant to
+        # THIS join-style decision, not to the title_types/h2_types markdown
+        # heading-level logic in build_markdown().
+        preserve_breaks_types = label_schema.title_types | label_schema.h2_types | {"header"}
+
         for b in blocks:
             if b["content_type"] == "text":
                 rows = tb_rows(b["text_items"], cfg.line_overlap_min, cfg.anchor_band_mult, cfg.anchor_min_width)
@@ -605,7 +662,8 @@ class DocumentPipeline:
                     line = " ".join(t["text"] for t in row if t["text"].strip())
                     if line:
                         line_texts.append(line)
-                b["content"] = build_block_content(line_texts)
+                preserve_breaks = b["type"].lower() in preserve_breaks_types
+                b["content"] = build_block_content(line_texts, preserve_breaks=preserve_breaks)
         _mark("content_build")
 
         blocks = sort_reading_order(

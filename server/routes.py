@@ -14,13 +14,29 @@ from pdf2image.exceptions import (
     PDFSyntaxError,
 )
 
-from module.pipeline import DocumentPipeline
+from module.extract import ExtractBackend, get_default_schema
+from module.pipeline import DocumentPipeline, load_pipeline_conf
 
-from .deps import get_pipeline
-from .schemas import BatchItemResult, BatchOCRResponse, OCRResponse
+from .deps import get_extractor, get_pipeline
+from .schemas import (
+    BatchItemResult,
+    BatchOCRResponse,
+    ExtractRequest,
+    ExtractResponse,
+    ExtractSchemaResponse,
+    OCRResponse,
+    SchemaField,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/ocr", tags=["ocr"])
+
+# Cheap (just YAML, no models) -- loaded once at import time rather than
+# threaded through app.state, since this is the ONLY thing routes.py needs
+# from the config file. Same helper server/main.py uses to build the
+# extractor itself, so this is guaranteed to match whatever schema the
+# extractor was actually configured with.
+_DEFAULT_SCHEMA = get_default_schema(load_pipeline_conf())
 
 
 def _release_memory() -> None:
@@ -446,3 +462,38 @@ async def ocr_images(
         _log_torch_tensor_stats("images: after final release_memory")
         _log_memory_hogs("images: after final release_memory")
         _log_duplicate_functions("images: after final release_memory")
+
+
+@router.get("/extract/schema", response_model=ExtractSchemaResponse, response_model_by_alias=True)
+async def get_extract_schema() -> ExtractSchemaResponse:
+    """Default extraction schema (conf/pipeline_conf.yaml's extract.schema)
+    -- what /extract falls back to when a request doesn't supply its own."""
+    return ExtractSchemaResponse(schema=[SchemaField(key=k, desc=d) for k, d in _DEFAULT_SCHEMA.items()])
+
+
+@router.post("/extract", response_model=ExtractResponse)
+async def extract_entities(
+    req: ExtractRequest,
+    extractor: ExtractBackend = Depends(get_extractor),
+) -> ExtractResponse:
+    """Runs schema-driven entity extraction over already-OCR'd text/markdown
+    -- decoupled from /pdf on purpose (see module/extract's design notes):
+    callers can re-extract with a different schema without re-running OCR,
+    and this endpoint doesn't care whether the text came from this server's
+    own /pdf route or somewhere else."""
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="text is empty")
+    schema = req.schema_ or _DEFAULT_SCHEMA
+    if not schema:
+        raise HTTPException(status_code=400, detail="No schema provided and no default schema configured")
+
+    try:
+        # extractor.__call__ is synchronous CPU/GPU-bound work -- same
+        # to_thread() treatment as pipeline.process_pdf() above, so it
+        # doesn't block the event loop.
+        entities = await asyncio.to_thread(extractor, req.text, schema)
+    except Exception:
+        logger.exception("Entity extraction failed")
+        raise HTTPException(status_code=500, detail="Internal extraction error")
+
+    return ExtractResponse(entities=entities)
