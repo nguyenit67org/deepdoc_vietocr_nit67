@@ -9,5 +9,6 @@ __pycache__/
 
 log/
 pipeline_outputs/
+pipeline_outputs*/
 debug_outputs/
 temp/

@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from ..corrector import CorrectorBackend, get_corrector_backend
 from ..layout import LayoutBackend, LayoutBlock, get_layout_backend
 from ..ocr import OCREngine, get_ocr_engine
 from ..table import TableProcessor, get_table_processor
@@ -67,11 +68,19 @@ class DocumentPipeline:
     dependency-injected so any of them can be swapped for a different
     implementation without touching this class."""
 
-    def __init__(self, layout: LayoutBackend, ocr: OCREngine, table_processor: TableProcessor, config: PipelineConfig):
+    def __init__(
+        self,
+        layout: LayoutBackend,
+        ocr: OCREngine,
+        table_processor: TableProcessor,
+        config: PipelineConfig,
+        corrector: CorrectorBackend | None = None,
+    ):
         self.layout = layout
         self.ocr = ocr
         self.table_processor = table_processor
         self.config = config
+        self.corrector = corrector
 
     def process_pdf(self, pdf_path: str, source_filename: str | None = None) -> dict:
         t_render = time.time()
@@ -452,6 +461,44 @@ class DocumentPipeline:
             self._process_page_after_layout(pn, prepped[pn], page_blocks[pn], pages_ocr_boxes[pn], debug_dir)
             for pn in range(len(pages))
         ]
+
+        # Phase 4: correct completed plain-text layout blocks across the WHOLE
+        # document. Keeping this after Phase 3c gives the model linguistic
+        # context across visual OCR line wraps, while flattening every block
+        # into one correct_batch() call lets the backend batch its chunks.
+        # Tables are deliberately excluded: their Markdown/HTML structure must
+        # be corrected cell-by-cell by a table-aware implementation instead.
+        if self.corrector is not None:
+            t_correction = time.time()
+            text_blocks = [
+                block
+                for blocks in pages_blocks
+                for block in blocks
+                if block["content_type"] == "text" and (block.get("content") or "").strip()
+            ]
+            original_contents = [block.get("content") or "" for block in text_blocks]
+            try:
+                corrected_contents = self.corrector.correct_batch(original_contents)
+                if len(corrected_contents) != len(text_blocks):
+                    raise RuntimeError(
+                        f"Corrector returned {len(corrected_contents)} blocks "
+                        f"for {len(text_blocks)} inputs"
+                    )
+            except Exception:
+                # Correction is optional post-processing. Preserve valid raw
+                # OCR rather than failing the whole document if it goes down.
+                logger.exception(
+                    "Text correction failed after %.2fs; preserving original OCR text",
+                    time.time() - t_correction,
+                )
+            else:
+                for block, corrected in zip(text_blocks, corrected_contents):
+                    block["content"] = corrected
+                logger.info(
+                    "Corrected %d text block(s) across %d pages in %.2fs",
+                    len(text_blocks), len(pages_blocks), time.time() - t_correction,
+                )
+
         return pages_blocks, crop_offsets, [p.img for p in prepped]
 
     def _prepare_page_pre_orientation(self, pn: int, img: Image.Image) -> _PrePage:
@@ -704,4 +751,5 @@ def build_pipeline(conf: dict | None = None) -> DocumentPipeline:
         ocr,
         get_table_processor(conf, ocr),
         config,
+        get_corrector_backend(conf),
     )

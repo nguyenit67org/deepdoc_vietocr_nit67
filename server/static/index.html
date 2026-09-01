@@ -407,10 +407,22 @@ function getSchema() {
 
 addRowBtn.addEventListener('click', () => addSchemaRow());
 
-// Schema bảng bắt đầu TRỐNG có chủ đích -- không auto-load schema mặc định
-// từ server nữa, người dùng tự nhập field/mô tả cần trích xuất cho từng loại
-// văn bản (server vẫn giữ GET /api/v1/ocr/extract/schema cho ai muốn dùng
-// qua API trực tiếp, chỉ UI này không tự gọi nó).
+async function loadDefaultSchema() {
+  try {
+    const res = await fetch('/api/v1/ocr/extract/schema');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
+
+    const fields = Array.isArray(data.schema) ? data.schema : [];
+    fields.forEach(field => addSchemaRow(field.key || '', field.desc || ''));
+  } catch (err) {
+    extStatus.textContent = 'Không tải được schema mặc định: ' + err.message;
+  }
+}
+
+// Seed the editor from the server's merged pipeline configuration. These are
+// ordinary editable rows, so users can still change, add, or remove fields.
+loadDefaultSchema();
 
 // Cross-highlights the block (page, id) on hover -- `source` is which pane
 // the mouse is actually in, so we only auto-scroll the OTHER pane (scrolling

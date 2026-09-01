@@ -77,6 +77,23 @@ ocr:
   # single text line vs a full page/table image).
   fastocr_max_batch_size: 128
 
+# Optional document-wide Phase 4, after OCR lines have been assembled into
+# plain-text layout blocks. Disabled means the model is not imported or loaded.
+corrector:
+  enabled: false
+  backend: protonx
+  model_name: "protonx-models/protonx-legal-tc"
+  device:       # null = auto-detect CUDA/CPU; explicit examples: cuda, cuda:0, cpu
+  # Chunk by the model tokenizer, not word count. target leaves headroom below
+  # the v1.3.1 hard context limit; no input is silently truncated.
+  target_input_tokens: 140
+  max_input_tokens: 160
+  max_new_tokens: 160
+  batch_size: 8
+  num_beams: 10
+  # Reject a generated chunk and retain raw OCR if digit sequences change.
+  preserve_numbers: true
+
 tsr:
   threshold: 0.2
 

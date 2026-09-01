@@ -32,7 +32,7 @@ def _list_item_type(line: str) -> str | None:
     return None
 
 
-def build_block_content(line_texts: list[str], preserve_breaks: bool = False) -> str:
+def build_block_content(line_texts: list[str], preserve_breaks: bool = False, preserve_format: bool = False) -> str:
     """
     Ghép các "hàng" (mỗi hàng = 1 dòng chữ thật, đã gom theo tb_rows) thành
     1 chuỗi content dạng HTML-trong-Markdown:
@@ -56,6 +56,10 @@ def build_block_content(line_texts: list[str], preserve_breaks: bool = False) ->
         block-level HTML thật sự, không thể gộp bằng space/<br>) -- chỉ 2
         text-run liền kề nhau mới áp dụng rule ' ' hoặc '<br>\n' ở trên.
     """
+    if not preserve_format:
+        plain_sep = (" ", "\n")[int(preserve_breaks)]
+        return plain_sep.join(line_texts)
+
     plain_sep = "<br>\n" if preserve_breaks else " "
     segments = []  # list các đoạn HTML đã hoàn chỉnh (text-run hoặc <ul>)
     buffer = []  # dòng thường đang gom (chưa flush)

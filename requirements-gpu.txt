@@ -6,6 +6,7 @@ matplotlib
 Pillow
 pdfplumber
 huggingface_hub
+transformers==4.57.6  # ProtonX tokenizer compatibility; module/corrector/protonx.py
 shapely
 pyclipper
 ruamel.yaml

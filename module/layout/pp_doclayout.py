@@ -27,16 +27,25 @@ class PPDocLayoutBackend:
     # typo/dead entry that can never match real model output.
     label_schema = LayoutLabelSchema(
         table_types=frozenset({"table"}),
-        skip_types=frozenset({
-            "image", "chart", "formula", "formula_number",
-            "algorithm", "number", "aside_text", "footnote",
-        }),
+        skip_types=frozenset(
+            {
+                # "image",
+                "chart",
+                "formula",
+                "formula_number",
+                "algorithm",
+                "number",
+                "aside_text",
+                "footnote",
+            }
+        ),
         title_types=frozenset({"doc_title"}),
         h2_types=frozenset({"paragraph_title"}),
     )
 
     def __init__(self, model_name: str = "PP-DocLayout_plus-L", device: str = "cpu", max_batch_size: int = 8):
         from paddleocr import LayoutDetection
+
         self._model = LayoutDetection(model_name=model_name, device=device)
         logger.info("[device] Layout (%s): device=%s", model_name, device)
         self._device = device
@@ -136,6 +145,7 @@ class PPDocLayoutBackend:
         # problem (torch starving Paddle) this was found alongside.
         if self._device.startswith("gpu"):
             import paddle
+
             # Temporary diagnostic instrumentation (mirrors the equivalent
             # torch before/after log in fastocr/tool/predictor.py's
             # predict_batch()) -- confirms on a live server whether Paddle
@@ -147,7 +157,10 @@ class PPDocLayoutBackend:
             after_reserved = paddle.device.cuda.memory_reserved() / 1024**2
             logger.info(
                 "[gpu-mem] Layout predict(%d imgs): allocated=%.0fMB reserved=%.0fMB -> %.0fMB after empty_cache()",
-                len(images), before_allocated, before_reserved, after_reserved,
+                len(images),
+                before_allocated,
+                before_reserved,
+                after_reserved,
             )
 
         if len(paddle_results) != len(images):
@@ -176,9 +189,11 @@ class PPDocLayoutBackend:
             if coord is None:
                 continue
             x0, y0, x1, y1 = float(coord[0]), float(coord[1]), float(coord[2]), float(coord[3])
-            blocks.append({
-                "type": b.get("label", "text"),
-                "bbox": [x0, y0, x1, y1],
-                "score": score,
-            })
+            blocks.append(
+                {
+                    "type": b.get("label", "text"),
+                    "bbox": [x0, y0, x1, y1],
+                    "score": score,
+                }
+            )
         return blocks
