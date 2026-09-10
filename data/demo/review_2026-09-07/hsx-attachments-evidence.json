@@ -1,0 +1,733 @@
+[
+  {
+    "file": "20160819-QD340-QD_ban_hanh_quy_che_CBTT_tai_SGDCK.json",
+    "article_id": "1281526",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281526",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20160819-QD340-QD ban hanh quy che CBTT tai SGDCK.pdf",
+            "fileType": "application/octetstream",
+            "filePath": "~/Uploads/LocalFiles/3364502817174d71970abde55a8cb723/20160830_20160819-QD340-QD ban hanh quy che CBTT tai SGDCK.pdf",
+            "publishDate": 1471539600,
+            "publishFrom": 1471539600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1471855431
+          },
+          {
+            "fileName": "20160819 - Quyet dinh ban hanh Du thao Quy che CBTT tai SGDCK TP.HCM.docx",
+            "fileType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "filePath": "~/Uploads/LocalFiles/3364502817174d71970abde55a8cb723/20160829_20160819 - Quyet dinh ban hanh Du thao Quy che CBTT tai SGDCK TP.HCM.docx",
+            "publishDate": 1471539600,
+            "publishFrom": 1471539600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1471855431
+          },
+          {
+            "fileName": "20160819 - Quy che CBTT tai SGDCK TP HCM.docx",
+            "fileType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "filePath": "~/Uploads/LocalFiles/3364502817174d71970abde55a8cb723/20160829_20160819 - Quy che CBTT tai SGDCK TP HCM.docx",
+            "publishDate": 1471539600,
+            "publishFrom": 1471539600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1471855431
+          },
+          {
+            "fileName": "20160819 - Mau  bieu, phu luc kem Du thao Quy che CBTT - HSX.docx",
+            "fileType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "filePath": "~/Uploads/LocalFiles/3364502817174d71970abde55a8cb723/20160829_20160819 - Mau  bieu, phu luc kem Du thao Quy che CBTT - HSX.docx",
+            "publishDate": 1471539600,
+            "publishFrom": 1471539600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1471855431
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 4,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20170419_Quy_Che_HDCS-HOSE.json",
+    "article_id": "1281208",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281208",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20170419_Quy Che HDCS-HOSE.PDF",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/0aef7bbd029d4b40b38fe14e02584f1d/20170419_Quy Che HDCS-HOSE.PDF",
+            "publishDate": 1492448400,
+            "publishFrom": 1492448400,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1492569812
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "QCGD_QĐ_342.json",
+    "article_id": "1281517",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281517",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "QCGD QĐ 342.pdf",
+            "fileType": "application/octetstream",
+            "filePath": "~/Uploads/LocalFiles/56d9ff8323ac4d64bed0c77a62cf8830/20160825_QCGD QĐ 342.pdf",
+            "publishDate": 1471798800,
+            "publishFrom": 1471798800,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472090125
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "QC_niem_yet_tai_SGDCK_TPHCM.json",
+    "article_id": "1281527",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281527",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "PHU LUC 1 DANH MUC HO SO.doc",
+            "fileType": "application/msword",
+            "filePath": "~/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_PHU LUC 1 DANH MUC HO SO.doc",
+            "publishDate": 1471885200,
+            "publishFrom": 1471885200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472028870
+          },
+          {
+            "fileName": "PHU LUC 2 QUY TRINH THAM DINH DKNY & HUY NY.doc",
+            "fileType": "application/msword",
+            "filePath": "~/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_PHU LUC 2 QUY TRINH THAM DINH DKNY & HUY NY.doc",
+            "publishDate": 1471885200,
+            "publishFrom": 1471885200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472028870
+          },
+          {
+            "fileName": "Quyet dinh ban hanh Quy che NY 2016-Co hieu luc tu 12.9.2016.doc",
+            "fileType": "application/msword",
+            "filePath": "~/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_Quyet dinh ban hanh Quy che NY 2016-Co hieu luc tu 12.9.2016.doc",
+            "publishDate": 1471885200,
+            "publishFrom": 1471885200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472028870
+          },
+          {
+            "fileName": "QC niem yet tai SGDCK TPHCM.pdf",
+            "fileType": "application/octetstream",
+            "filePath": "~/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_QC niem yet tai SGDCK TPHCM.pdf",
+            "publishDate": 1471885200,
+            "publishFrom": 1471885200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472028870
+          },
+          {
+            "fileName": "QUY CHE NY 2016.doc",
+            "fileType": "application/msword",
+            "filePath": "~/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_QUY CHE NY 2016.doc",
+            "publishDate": 1471885200,
+            "publishFrom": 1471885200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472028870
+          },
+          {
+            "fileName": "PHU LUC 3 CAC MAU BIEU.doc",
+            "fileType": "application/msword",
+            "filePath": "~/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_PHU LUC 3 CAC MAU BIEU.doc",
+            "publishDate": 1471885200,
+            "publishFrom": 1471885200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1472028870
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 6,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "hdcs.json",
+    "article_id": "1281524",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281524",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "hdcs.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/c2fe83cc76f142988c5fb5859b4d78a8/20151130_hdcs.pdf",
+            "publishDate": 1448816400,
+            "publishFrom": 1448816400,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1448866686
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20171127_20171122-Luu_y_viec_chot_danh_sach_co_dong_thuc_hien_quyen.json",
+    "article_id": "1281214",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281214",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20171127_20171122-Luu y viec chot danh sach co dong thuc hien quyen.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/ff93588765c748a58943edf9a0f7f4a4/20171127_20171122-Luu y viec chot danh sach co dong thuc hien quyen.pdf",
+            "publishDate": 1511283600,
+            "publishFrom": 1511283600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1511750599
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20171205_Dieu_le_So_2017_so_2399.json",
+    "article_id": "1281519",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281519",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20171205_Dieu le So 2017 so 2399.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/02b92c281643493a8aba18b1ff56acc0/20171205_Dieu le So 2017 so 2399.pdf",
+            "publishDate": 1511197200,
+            "publishFrom": 1511197200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1512463861
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20150512_20150512_-_QD_sua_doi_bo_sung_Quy_che_CBTT_ve_Quy_ETF_tai_SGDCK_TP.HCM.json",
+    "article_id": "1281525",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281525",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20150512_20150512 - QD sua doi bo sung Quy che CBTT ve Quy ETF tai SGDCK TP.HCM.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/2485ea65fb5d4cb498e2c0f52b282462/20160324_20150512_20150512 - QD sua doi bo sung Quy che CBTT ve Quy ETF tai SGDCK TP.HCM.pdf",
+            "publishDate": 1458752400,
+            "publishFrom": 1431363600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1458814379
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20170705_20170705_-_Qd_QTCS_PTBV.json",
+    "article_id": "1281209",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281209",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20170705_20170705 - Qd QTCS PTBV.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/578d39ffb2e944389aa1e1a037d0bf34/20170705_20170705 - Qd QTCS PTBV.pdf",
+            "publishDate": 1499187600,
+            "publishFrom": 1499187600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1499249912
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "Ban_hanh_Quy_tac_Chi_so_VNX_Allshare.json",
+    "article_id": "1281518",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281518",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "Ban hanh_Quy tac Chi so VNX Allshare.pdf",
+            "fileType": "application/octetstream",
+            "filePath": "~/Uploads/LocalFiles/d579b2e262a746fc969f5f45a98019ab/20160920_Ban hanh_Quy tac Chi so VNX Allshare.pdf",
+            "publishDate": 1473267600,
+            "publishFrom": 1473267600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1474342072
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_117.2020_TT-BTC.json",
+    "article_id": "1641864",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1641864",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20210119_Thong tu 117.2020 TT-BTC.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/8d03e679ce5f4aa39241533b25667101/20210119_Thong tu 117.2020 TT-BTC.pdf",
+            "publishDate": 1609347600,
+            "publishFrom": 1609347600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1611026520
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_120.2020_TT-BTC.json",
+    "article_id": "1641867",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1641867",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20210119_Thong tu 120.2020 TT-BTC.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/d7f582e40a2c43528c8476092dd1f6ad/20210119_Thong tu 120.2020 TT-BTC.pdf",
+            "publishDate": 1609347600,
+            "publishFrom": 1609347600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1611027427
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20170912_Quyet_dinh_1191_cua_Thu_tuong.json",
+    "article_id": "1281211",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281211",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20170912_Quyet dinh 1191 cua Thu tuong.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/3380bec976684e93a1bbed4a1b8d77c6/20170912_Quyet dinh 1191 cua Thu tuong.pdf",
+            "publishDate": 1502643600,
+            "publishFrom": 1502643600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1505188155
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20210106_Nghị_định_156.2020NĐ-CP_XPHC_trong_LVCK.json",
+    "article_id": "1641859",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1641859",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20210106_Nghị định 156.2020NĐ-CP XPHC trong LVCK.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/1d2a066067ab4b45aa1550f9e7f27310/20210106_Nghị định 156.2020NĐ-CP XPHC trong LVCK.pdf",
+            "publishDate": 1609347600,
+            "publishFrom": 1609347600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1609918675
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_119.2020_TT-BTC.json",
+    "article_id": "1641866",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1641866",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20210119_Thong tu 119.2020 TT-BTC.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/aae0f0a7846b438e90a276bf17f46787/20210119_Thong tu 119.2020 TT-BTC.pdf",
+            "publishDate": 1609347600,
+            "publishFrom": 1609347600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1611027183
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_118.2020_TT-BTC.json",
+    "article_id": "1641868",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1641868",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20210119_Thong tu 118.2020 TT-BTC.pdf",
+            "fileType": "application/pdf",
+            "filePath": "~/Uploads/LocalFiles/cfc5466c93df4d6c970d87dafcd64288/20210119_Thong tu 118.2020 TT-BTC.pdf",
+            "publishDate": 1609347600,
+            "publishFrom": 1609347600,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1611026962
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20170912_thong_tu_87_ban_day_du.json",
+    "article_id": "1281210",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281210",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20170912_thong tu 87 ban day du.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/a7f519f78dc04324aacfbd8fca6ba1cd/20170912_thong tu 87 ban day du.pdf",
+            "publishDate": 1502730000,
+            "publishFrom": 1507568400,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1505187791
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20171012_Thong_tu_95_2017.json",
+    "article_id": "1281212",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281212",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20171012_Thong tu 95_2017.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/e006da4c516e4e3a928775204b87465f/20171012_Thong tu 95_2017.pdf",
+            "publishDate": 1507741200,
+            "publishFrom": 1509901200,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1507797692
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  },
+  {
+    "file": "20170726_ND_71.2017_thay_the_TT121.json",
+    "article_id": "1281240",
+    "endpoint": "https://api.hsx.vn/m/api/v1/1/mediafiles/9/1281240",
+    "response": {
+      "data": {
+        "list": [
+          {
+            "fileName": "20170726_ND 71.2017 thay the TT121.pdf",
+            "fileType": "2",
+            "filePath": "~/Uploads/LocalFiles/2a16a9326aa949f19b56ee2fe75f2fee/20170726_ND 71.2017 thay the TT121.pdf",
+            "publishDate": 1496682000,
+            "publishFrom": 1496682000,
+            "relatedType": 9,
+            "publishType": null,
+            "time": "",
+            "type": "",
+            "langId": 1,
+            "createdDate": 1501051618
+          }
+        ],
+        "object": null,
+        "paging": {
+          "pageIndex": 1,
+          "pageSize": 50,
+          "totalCount": 1,
+          "totalPages": 1
+        }
+      },
+      "success": true,
+      "message": null
+    }
+  }
+]

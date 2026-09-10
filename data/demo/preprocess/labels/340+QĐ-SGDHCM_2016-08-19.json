@@ -1,0 +1,84 @@
+{
+    "information": [
+        {
+            "type": {
+                "value": "QUYẾT ĐỊNH",
+                "type": "string"
+            },
+            "title": {
+                "value": "Về việc ban hành Quy chế Công bố thông tin tại Sở Giao dịch Chứng khoán Thành phố Hồ Chí Minh",
+                "type": "string"
+            },
+            "code": {
+                "value": "340/QĐ-SGDHCM",
+                "type": "string"
+            },
+            "documentDate": {
+                "value": "19/08/2016",
+                "type": "string"
+            },
+            "officeSender": {
+                "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TPHCM/BỘ TÀI CHÍNH",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "",
+                "type": "string"
+            },
+            "recipients": {
+                "value": "Như điều 3; HĐQT, BKS; UBCKNN (để báo cáo); TTLKCK.",
+                "type": "string"
+            },
+            "signer_title": {
+                "value": "TỔNG GIÁM ĐỐC",
+                "type": "string"
+            },
+            "signer": {
+                "value": "Trần Văn Dũng",
+                "type": "string"
+            },
+            "province": {
+                "value": "Thành phố Hồ Chí Minh",
+                "type": "string"
+            },
+            "receiverDate": {
+                "value": "",
+                "type": "string"
+            },
+            "priority_level": {
+                "value": "0_BÌNH THƯỜNG",
+                "type": "string"
+            },
+            "security_level": {
+                "value": "0_BÌNH THƯỜNG",
+                "type": "string"
+            }
+        }
+    ],
+    "metadata": {
+        "document_format": {
+            "value": "scan",
+            "type": "string"
+        },
+        "has_handwriting": {
+            "value": false,
+            "type": "boolean"
+        },
+        "field": {
+            "value": "Chứng khoán",
+            "type": "string"
+        },
+        "source_name": {
+            "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+            "type": "string"
+        },
+        "source_url_detail": {
+            "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281526",
+            "type": "string"
+        },
+        "source_url_pdf": {
+            "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/3364502817174d71970abde55a8cb723/20160830_20160819-QD340-QD ban hanh quy che CBTT tai SGDCK.pdf",
+            "type": "string"
+        }
+    }
+}

@@ -1,0 +1,84 @@
+{
+    "information": [
+        {
+            "type": {
+                "value": "Công văn",
+                "type": "string"
+            },
+            "title": {
+                "value": "V/v: Lấy ý kiến cổ đông bằng văn bản",
+                "type": "string"
+            },
+            "code": {
+                "value": "262/PVIRe-HĐ",
+                "type": "string"
+            },
+            "documentDate": {
+                "value": "23/11/2020",
+                "type": "string"
+            },
+            "officeSender": {
+                "value": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "ỦY BAN CHỨNG KHOÁN NHÀ NƯỚC\nSỞ GIAO DỊCH CHỨNG KHOÁN HÀ NỘI (HNX)",
+                "type": "string"
+            },
+            "recipients": {
+                "value": "Như trên.",
+                "type": "string"
+            },
+            "signer_title": {
+                "value": "NGƯỜI ỦY QUYỀN CBTT GIÁM ĐỐC KHỐI HOẠT ĐỘNG",
+                "type": "string"
+            },
+            "signer": {
+                "value": "Phan Trịnh Quốc Kiên",
+                "type": "string"
+            },
+            "province": {
+                "value": "Hà Nội",
+                "type": "string"
+            },
+            "receiverDate": {
+                "value": "26/11/2020",
+                "type": "string"
+            },
+            "priority_level": {
+                "value": "0_BÌNH THƯỜNG",
+                "type": "string"
+            },
+            "security_level": {
+                "value": "0_BÌNH THƯỜNG",
+                "type": "string"
+            }
+        }
+    ],
+    "metadata": {
+        "document_format": {
+            "value": "scan",
+            "type": "string"
+        },
+        "has_handwriting": {
+            "value": true,
+            "type": "boolean"
+        },
+        "field": {
+            "value": "Chứng khoán",
+            "type": "string"
+        },
+        "source_name": {
+            "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+            "type": "string"
+        },
+        "source_url_detail": {
+            "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+            "type": "string"
+        },
+        "source_url_pdf": {
+            "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201130/30233-bn_2020-11-26_1.PDF",
+            "type": "string"
+        }
+    }
+}

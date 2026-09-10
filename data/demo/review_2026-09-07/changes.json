@@ -1,0 +1,3482 @@
+[
+  {
+    "file": "28914-bn_2020-11-02_1.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Nghị quyết",
+        "after": "NGHỊ QUYẾT"
+      },
+      {
+        "field": "information.title",
+        "before": "Về việc chốt danh sách cổ đông để thực hiện lấy ý kiến bằng văn bản HỘI ĐỒNG QUẢN TRỊ TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+        "after": "Về việc chốt danh sách cổ đông để thực hiện lấy ý kiến bằng văn bản"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như trên.",
+        "after": "Như Điều 3 (để th/hiện); PVI (để b/cáo)."
+      },
+      {
+        "field": "information.signer_title",
+        "before": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+        "after": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "02/11/2020"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Nghị quyết",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc chốt danh sách cổ đông để thực hiện lấy ý kiến bằng văn bản HỘI ĐỒNG QUẢN TRỊ TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+            "type": "string"
+          },
+          "code": {
+            "value": "12/NQ-PVIRe",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "30/10/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Nguyễn Anh Tuấn",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201103/28914-bn_2020-11-02_1.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "28981-bn_2020-11-03_1.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông báo",
+        "after": "THÔNG BÁO"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "",
+        "after": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "03/11/2020"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông báo",
+            "type": "string"
+          },
+          "title": {
+            "value": "(Về ngày đăng ký cuối cùng để thực hiện quyền)",
+            "type": "string"
+          },
+          "code": {
+            "value": "240/TB-PVIRe",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "30/10/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên; UBCKNN (để b/cáo); CT HĐQT (để b/cáo).",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trịnh Anh Tuấn",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201104/28981-bn_2020-11-03_1.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "30233-bn_2020-11-26_1.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "Công văn trang 1 kèm bộ tài liệu lấy ý kiến; không lấy người ký từ tài liệu kèm theo.",
+    "changes": [
+      {
+        "field": "information.signer",
+        "before": "GIÁM ĐỐC KHỐI HOẠT ĐỘNG Phan Trịnh Quốc Kiên",
+        "after": "Phan Trịnh Quốc Kiên"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "NGƯỜI ỦY QUYỀN CBTT",
+        "after": "NGƯỜI ỦY QUYỀN CBTT GIÁM ĐỐC KHỐI HOẠT ĐỘNG"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "26/11/2020"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Công văn",
+            "type": "string"
+          },
+          "title": {
+            "value": "V/v: Lấy ý kiến cổ đông bằng văn bản",
+            "type": "string"
+          },
+          "code": {
+            "value": "262/PVIRe-HĐ",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "23/11/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "NGƯỜI ỦY QUYỀN CBTT",
+            "type": "string"
+          },
+          "signer": {
+            "value": "GIÁM ĐỐC KHỐI HOẠT ĐỘNG Phan Trịnh Quốc Kiên",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201130/30233-bn_2020-11-26_1.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "30829-bn_2020-12-07_1.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "Công văn trang 1 kèm nghị quyết và biên bản kiểm phiếu.",
+    "changes": [
+      {
+        "field": "information.signer",
+        "before": "GIÁM ĐỐC KHỐI HOẠT ĐỘNG Phan Trịnh Quốc Kiên",
+        "after": "Phan Trịnh Quốc Kiên"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "",
+        "after": "NGƯỜI ỦY QUYỀN CBTT GIÁM ĐỐC KHỐI HOẠT ĐỘNG"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "07/12/2020"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Công văn",
+            "type": "string"
+          },
+          "title": {
+            "value": "V/v: Công bố thông tin Nghị quyết Đại hội đồng cổ đông",
+            "type": "string"
+          },
+          "code": {
+            "value": "270/PVIRe-HĐ",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "04/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "GIÁM ĐỐC KHỐI HOẠT ĐỘNG Phan Trịnh Quốc Kiên",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201208/30829-bn_2020-12-07_1.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "31772-bn_2020-12-21_1.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "Crop trang 1 cho thấy TỔNG GIÁM ĐỐC và tên Ngô Trí Thịnh, dấu che tên đệm. Đối chiếu phụ trợ tin Công đoàn TKV tháng 12/2020; vẫn đưa vào review do dấu đè. https://congdoantkv.vn/tin-tuc/chi-tiet/25499/Nhiet-%C4%91ien-Cam-Pha-hoan-thanh-ke-hoach-2020-%C4%91at-36-ty-kWh-%C4%91ien",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông báo",
+        "after": "THÔNG BÁO"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "HỒ GIÁM ĐỐC",
+        "after": "TỔNG GIÁM ĐỐC"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như kính gửi; HĐQT BKS (e-copy b/c); Các PTGĐ KTTr (e-copy); Các Ban ĐLTKV (e-copy).",
+        "after": "Như kính gửi; HĐQT, BKS (e-copy, b/c); Các PTGĐ, KTTr (e-copy); Các Ban ĐLTKV (e-copy)."
+      },
+      {
+        "field": "information.signer",
+        "before": "Ngô Thị Thịnh",
+        "after": "Ngô Trí Thịnh"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông báo",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc thay đổi thời gian họp Đại hội đồng cổ đông bất thường năm 2020 Tổng công ty Điện lực - TKV",
+            "type": "string"
+          },
+          "code": {
+            "value": "2125/TB-ĐLTKV",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "21/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "TỔNG CÔNG TY ĐIỆN LỰC - TKV/TẬP ĐOÀN CÔNG NGHIỆP THAN - KHOÁNG SẢN VIỆT NAM",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như kính gửi; HĐQT BKS (e-copy b/c); Các PTGĐ KTTr (e-copy); Các Ban ĐLTKV (e-copy).",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "HỒ GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Ngô Thị Thịnh",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "21/12/2020",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201223/31772-bn_2020-12-21_1.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "BCF_DHCD2.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "Crop 220 dpi: số 03/BC (không phải 93); ngày văn bản đọc 26/02/2020 nhưng dấu đến 24/02/2020. Giữ đúng hai thông tin hiển thị, cần người dùng duyệt mâu thuẫn ngày.",
+    "changes": [
+      {
+        "field": "information.code",
+        "before": "93/BC",
+        "after": "03/BC"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "",
+        "after": "CÔNG TY CP THỰC PHẨM BÍCH CHI"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "",
+        "after": "NGƯỜI THỰC HIỆN CÔNG BỐ THÔNG TIN"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "24/02/2020"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Công văn",
+            "type": "string"
+          },
+          "title": {
+            "value": "\"V/v CBTT chốt DSCĐ để tổ chức ĐHĐCĐ thường niên 2020\"",
+            "type": "string"
+          },
+          "code": {
+            "value": "93/BC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "26/02/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Phạm Thanh Bình",
+            "type": "string"
+          },
+          "province": {
+            "value": "Đồng Tháp",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20200227/BCF DHCD2.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "BCF_DHCD.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "Nhãn cũ lấy nơi nhận/chức danh từ nghị quyết kèm theo; đã lấy từ thông báo trang 1–2.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông báo",
+        "after": "THÔNG BÁO"
+      },
+      {
+        "field": "information.title",
+        "before": "\"Ngày đăng ký cuối cùng để thực hiện quyền tham dự Đại Hội đồng cổ đông thường niên năm 2020",
+        "after": "“Ngày đăng ký cuối cùng để thực hiện quyền tham dự Đại Hội đồng cổ đông thường niên năm 2020”"
+      },
+      {
+        "field": "information.code",
+        "before": "03/BC-HĐQT",
+        "after": "03/BC.HĐQT"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 2 (để thực hiện); BKS.",
+        "after": "Như trên; UBCKNN, HNX “để báo cáo”."
+      },
+      {
+        "field": "information.signer_title",
+        "before": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH",
+        "after": "ĐẠI DIỆN PHÁP LUẬT Chủ tịch HĐQT kiêm Tổng Giám đốc"
+      },
+      {
+        "field": "information.province",
+        "before": "GIAO DỊCH CHỦNG KHOÁ\nĐồng Tháp",
+        "after": "Đồng Tháp"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông báo",
+            "type": "string"
+          },
+          "title": {
+            "value": "\"Ngày đăng ký cuối cùng để thực hiện quyền tham dự Đại Hội đồng cổ đông thường niên năm 2020",
+            "type": "string"
+          },
+          "code": {
+            "value": "03/BC-HĐQT",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "20/02/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "CÔNG TY CỔ PHẦN THỰC PHẨM BÍCH CHI",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 2 (để thực hiện); BKS.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Phạm Thanh Bình",
+            "type": "string"
+          },
+          "province": {
+            "value": "GIAO DỊCH CHỦNG KHOÁ\nĐồng Tháp",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "24/02/2020",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20200227/BCF DHCD.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "PRE_Ngay_dang_ky_cuoi_cung.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông báo",
+        "after": "THÔNG BÁO"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "04/11/2020"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông báo",
+            "type": "string"
+          },
+          "title": {
+            "value": "(Về ngày đăng ký cuối cùng và xác nhận danh sách người sở hữu chứng khoán)",
+            "type": "string"
+          },
+          "code": {
+            "value": "3269/TB-VSD",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "02/11/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "TRUNG TÂM LƯU KÝ CHỨNG KHOÁN VIỆT NAM",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên; Tổng CTCP Tái bảo hiểm PVI; TGĐ; KSNB; THPC (Tổ website).",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. TỔNG GIÁM ĐỐC PHÓ TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Nguyễn Thị Thanh Hà",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20201106/PRE Ngay dang ky cuoi cung.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "14501-bn_2017-07-03_1651_1.json",
+    "evidence_pdf_pages": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "note": "Nghị quyết trang 1–3, biên bản riêng từ trang 4.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Nghị quyết",
+        "after": "NGHỊ QUYẾT"
+      },
+      {
+        "field": "information.documentDate",
+        "before": "29/06/2023",
+        "after": "29/06/2017"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": "03/07/2017"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Nghị quyết",
+            "type": "string"
+          },
+          "title": {
+            "value": "ĐẠI HỘI ĐỒNG CỔ ĐÔNG THƯỜNG NIÊN NĂM 2017 CÔNG TY CỔ PHẦN GẠCH KHANG MINH",
+            "type": "string"
+          },
+          "code": {
+            "value": "02/NQ-KM/2017",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "29/06/2023",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "CÔNG TY CỔ PHẦN GẠCH KHANG MINH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "TGĐ (để thực hiện); Các Ủy viên HĐQT; Các thành viên BKS.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "T/M ĐẠI HỘI ĐỒNG CỔ ĐÔNG CHỦ TỊCH HĐQT",
+            "type": "string"
+          },
+          "signer": {
+            "value": "ĐẶNG VIỆT LÊ",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nam",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20170704/14501-bn_2017-07-03_1651_1.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20160819-QD340-QD_ban_hanh_quy_che_CBTT_tai_SGDCK.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như điều 3; HĐQT BKS; UBCKNN (để báo cáo); TTLKCK.",
+        "after": "Như điều 3; HĐQT, BKS; UBCKNN (để báo cáo); TTLKCK."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc ban hành Quy chế Công bố thông tin tại Sở Giao dịch Chứng khoán Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "code": {
+            "value": "340/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "19/08/2016",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TPHCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như điều 3; HĐQT BKS; UBCKNN (để báo cáo); TTLKCK.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Văn Dũng",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281526",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/3364502817174d71970abde55a8cb723/20160830_20160819-QD340-QD ban hanh quy che CBTT tai SGDCK.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20170419_Quy_Che_HDCS-HOSE.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "TM. HỘI ĐỒNG QUẢN TRỊ SỞ GIAO1 CHỦ TỊCH",
+        "after": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 3; UBCKNN (để b/c); HĐQT (để b/c); Ban TGĐ BKS (để b/c).",
+        "after": "Như Điều 3; UBCKNN (để b/c); HĐQT (để b/c); Ban TGĐ, BKS (để b/c)."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc ban hành Quy chế tổ chức và hoạt động của Hội đồng chỉ số Sở Giao dịch chứng khoán thành phố Hồ Chí Minh.",
+            "type": "string"
+          },
+          "code": {
+            "value": "131/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "18/4/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 3; UBCKNN (để b/c); HĐQT (để b/c); Ban TGĐ BKS (để b/c).",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TM. HỘI ĐỒNG QUẢN TRỊ SỞ GIAO1 CHỦ TỊCH",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Văn Dũng",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281208",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/0aef7bbd029d4b40b38fe14e02584f1d/20170419_Quy Che HDCS-HOSE.PDF",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "QCGD_QĐ_342.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 3; UBCKNN; HĐQT BKS; CTCKTV TCNY; TTLKCKVN TVLK NHCĐTT.",
+        "after": "Như Điều 3; UBCKNN; HĐQT, BKS; CTCKTV, TCNY; TTLKCKVN, TVLK, NHCĐTT."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc ban hành Quy định thời gian giao dịch, biên độ dao động giá, đơn vị giao dịch, loại lệnh áp dụng tại Sở Giao dịch Chứng khoán Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "code": {
+            "value": "342/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "22/08/2016",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 3; UBCKNN; HĐQT BKS; CTCKTV TCNY; TTLKCKVN TVLK NHCĐTT.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Văn Dũng",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281517",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/56d9ff8323ac4d64bed0c77a62cf8830/20160825_QCGD QĐ 342.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "QC_niem_yet_tai_SGDCK_TPHCM.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 3; HĐQT BKS; UBCKNN (để báo cáo); TTLKCKVN.",
+        "after": "Như Điều 3; HĐQT, BKS; UBCKNN (để báo cáo); TTLKCKVN."
+      },
+      {
+        "field": "information.province",
+        "before": "Thành phố Hồ Chí Minh N",
+        "after": "Thành phố Hồ Chí Minh"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc ban hành Quy chế niêm yết chứng khoán tại Sở giao dịch Chứng khoán Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "code": {
+            "value": "346/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "23/08/2016",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 3; HĐQT BKS; UBCKNN (để báo cáo); TTLKCKVN.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Văn Dũng",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh N",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281527",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/dfa402dadd6044db8fd92aab65822956/20160824_QC niem yet tai SGDCK TPHCM.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "hdcs.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.documentDate",
+        "before": "25/1/2015",
+        "after": "25/11/2015"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 5; HĐQT Ban TGĐ.",
+        "after": "Như Điều 5; HĐQT, Ban TGĐ."
+      },
+      {
+        "field": "information.province",
+        "before": "Thành phố Hồ Chí Minh N",
+        "after": "Thành phố Hồ Chí Minh"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc thành lập Hội đồng chỉ số Sở Giao dịch Chứng khoán Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "code": {
+            "value": "53/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "25/1/2015",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 5; HĐQT Ban TGĐ.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Đắc Sinh",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh N",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281524",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/c2fe83cc76f142988c5fb5859b4d78a8/20151130_hdcs.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20171127_20171122-Luu_y_viec_chot_danh_sach_co_dong_thuc_hien_quyen.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Công văn",
+            "type": "string"
+          },
+          "title": {
+            "value": "V/v: Lưu ý việc chốt danh sách cổ đông thực hiện quyền",
+            "type": "string"
+          },
+          "code": {
+            "value": "1637/SGDHCM-NY",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "22/11/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TPHCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như trên; TTLKCK.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. TỔNG GIÁM ĐỐC PHÓ TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Anh Đào",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281214",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/ff93588765c748a58943edf9a0f7f4a4/20171127_20171122-Luu y viec chot danh sach co dong thuc hien quyen.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20171205_Dieu_le_So_2017_so_2399.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 3; TTCP các Phó TTCP; Các Bộ KHĐT NHNN Tư Pháp LĐTBXH; UBND TP HN TP HCM; Các đơn vị thuộc Bộ; Website Bộ Tài chính.",
+        "after": "Như Điều 3; TTCP, các Phó TTCP; Các Bộ: KHĐT, NHNN, Tư Pháp, LĐTBXH; UBND: TP HN, TP HCM; Các đơn vị thuộc Bộ; Website Bộ Tài chính."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Ban hành Điều lệ tổ chức và hoạt động của Sở Giao dịch Chứng khoán thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "code": {
+            "value": "2399/QĐ-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "21/11/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 3; TTCP các Phó TTCP; Các Bộ KHĐT NHNN Tư Pháp LĐTBXH; UBND TP HN TP HCM; Các đơn vị thuộc Bộ; Website Bộ Tài chính.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Văn Hiếu",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281519",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/02b92c281643493a8aba18b1ff56acc0/20171205_Dieu le So 2017 so 2399.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20150512_20150512_-_QD_sua_doi_bo_sung_Quy_che_CBTT_ve_Quy_ETF_tai_SGDCK_TP.HCM.json",
+    "evidence_pdf_pages": [
+      1,
+      2,
+      3
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 3; HĐQT BKS; UBCKNN (để báo cáo); TTLKCKVN.",
+        "after": "Như Điều 3; HĐQT, BKS; UBCKNN (để báo cáo); TTLKCKVN."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "print"
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc sửa đổi, bổ sung một số điều của Quy chế Công bố thông tin về Quỹ hoán đổi danh mục tại Sở Giao dịch Chứng khoán Thành phố Hồ Chí Minh ban hành kèm theo Quyết định số 285/QĐ-SGDHCM ngày 29/7/2014",
+            "type": "string"
+          },
+          "code": {
+            "value": "158/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "12/05/2015",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 3; HĐQT BKS; UBCKNN (để báo cáo); TTLKCKVN.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TỔNG GIÁM ĐỐC",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Phan Thị Tường Tâm",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281525",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/2485ea65fb5d4cb498e2c0f52b282462/20160324_20150512_20150512 - QD sua doi bo sung Quy che CBTT ve Quy ETF tai SGDCK TP.HCM.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20170705_20170705_-_Qd_QTCS_PTBV.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như Điều 3; UBCKNN (để b/c); HĐQT (để b/c); Ban TGĐ BKS (để b/c).",
+        "after": "Như Điều 3; UBCKNN (để b/c); HĐQT (để b/c); Ban TGĐ, BKS (để b/c)."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc ban hành Quy tắc xây dựng và quản lý Bộ chỉ số HOSE-Index - Chỉ số Phát triển bền vững phiên bản 1.0",
+            "type": "string"
+          },
+          "code": {
+            "value": "237/QĐ-SGDHCM",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "5/07/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM/BỘ TÀI CHÍNH",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như Điều 3; UBCKNN (để b/c); HĐQT (để b/c); Ban TGĐ BKS (để b/c).",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. TỔNG GIÁM ĐỐC PHÓ TỔNG GIÁM ĐỐC PHỤ TRÁCH",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Lê Hải Trà",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281209",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/578d39ffb2e944389aa1e1a037d0bf34/20170705_20170705 - Qd QTCS PTBV.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "Ban_hanh_Quy_tac_Chi_so_VNX_Allshare.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "Hai cơ quan đồng ban hành, không phải quan hệ cơ quan con/cha; hai người ký cùng trang 1.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định liên tịch",
+        "after": "QUYẾT ĐỊNH LIÊN TỊCH"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "SỞ GIAO DỊCH CHỨNG KHOÁN HÀ NỘI/SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM",
+        "after": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM - SỞ GIAO DỊCH CHỨNG KHOÁN HÀ NỘI"
+      },
+      {
+        "field": "information.signer",
+        "before": "Nguyễn Thành Long Trần Đắc Sinh",
+        "after": "Nguyễn Thành Long; Trần Đắc Sinh"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "BỘ TÀI CHÍNH SỞ GIAO DỊCH CHỨNG KHOÁN SỞ GIAO DỊCH CHỨNG KHOÁN TP HỒ CHÍ MINH",
+        "after": "SỞ GDCK HÀ NỘI TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH; SỞ GDCK TP.HCM TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH"
+      },
+      {
+        "field": "information.province",
+        "before": "Thành phố Hồ Chí Minh N",
+        "after": "Thành phố Hồ Chí Minh"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định liên tịch",
+            "type": "string"
+          },
+          "title": {
+            "value": "Ban hành Quy tắc xây dựng và quản lý Chỉ số VNX Allshare",
+            "type": "string"
+          },
+          "code": {
+            "value": "03/QĐLT-SGDHCM-SGDHN",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "08/09/2016",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "SỞ GIAO DỊCH CHỨNG KHOÁN HÀ NỘI/SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như điều 3; UBCKNN (để b/c); Trung tâm lưu ký chứng khoán Việt Nam.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "BỘ TÀI CHÍNH SỞ GIAO DỊCH CHỨNG KHOÁN SỞ GIAO DỊCH CHỨNG KHOÁN TP HỒ CHÍ MINH",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Nguyễn Thành Long Trần Đắc Sinh",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh N",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281518",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/d579b2e262a746fc969f5f45a98019ab/20160920_Ban hanh_Quy tac Chi so VNX Allshare.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_117.2020_TT-BTC.json",
+    "evidence_pdf_pages": [
+      1,
+      9
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông tư",
+        "after": "THÔNG TƯ"
+      },
+      {
+        "field": "information.title",
+        "before": "Quy định phương pháp tính khoản thu trái pháp luật. số lợi bất hợp pháp có được do thực hiện hành vi vi phạm pháp luậ về chứng khoản và thị trường chứng khoản",
+        "after": "Quy định phương pháp tính khoản thu trái pháp luật, số lợi bất hợp pháp có được do thực hiện hành vi vi phạm pháp luật về chứng khoán và thị trường chứng khoán"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.province",
+        "before": "Hà Nội N",
+        "after": "Hà Nội"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Cơ quan TW của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Tòa án nhân dân tối cao; HĐND UBND các tỉnh thành phố trực thuộc Trung ương; Kiểm toán nhà nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoản Nhà nước.",
+        "after": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng, các Phó Thủ tướng Chính phủ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; Cơ quan TW của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Tòa án nhân dân tối cao; HĐND, UBND các tỉnh, thành phố trực thuộc Trung ương; Kiểm toán nhà nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoán Nhà nước."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông tư",
+            "type": "string"
+          },
+          "title": {
+            "value": "Quy định phương pháp tính khoản thu trái pháp luật. số lợi bất hợp pháp có được do thực hiện hành vi vi phạm pháp luậ về chứng khoản và thị trường chứng khoản",
+            "type": "string"
+          },
+          "code": {
+            "value": "117/2020/TT-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "31/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Cơ quan TW của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Tòa án nhân dân tối cao; HĐND UBND các tỉnh thành phố trực thuộc Trung ương; Kiểm toán nhà nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoản Nhà nước.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Huỳnh Quang Hải",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội N",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1641864",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/8d03e679ce5f4aa39241533b25667101/20210119_Thong tu 117.2020 TT-BTC.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_120.2020_TT-BTC.json",
+    "evidence_pdf_pages": [
+      1,
+      14
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông tư",
+        "after": "THÔNG TƯ"
+      },
+      {
+        "field": "information.title",
+        "before": "Quy định giao dịch cổ phiếu niêm yết, dăng ký giao dịch và chứng chỉ quỹ, trái phiếu doanh nghiệp, chứng quyền có bảo đảm niêm yế trên hệ thống giao dịch chứng khoán",
+        "after": "Quy định giao dịch cổ phiếu niêm yết, đăng ký giao dịch và chứng chỉ quỹ, trái phiếu doanh nghiệp, chứng quyền có bảo đảm niêm yết trên hệ thống giao dịch chứng khoán"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.province",
+        "before": "Hà Nội N",
+        "after": "Hà Nội"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Cơ quan Trung ương của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; HĐND UBND các tỉnh thành phố trực thuộc Trung ương; Kiểm toán Nhà nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoản Nhà nước.",
+        "after": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng, các Phó Thủ tướng Chính phủ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; Cơ quan Trung ương của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; HĐND, UBND các tỉnh, thành phố trực thuộc Trung ương; Kiểm toán Nhà nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoán Nhà nước."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông tư",
+            "type": "string"
+          },
+          "title": {
+            "value": "Quy định giao dịch cổ phiếu niêm yết, dăng ký giao dịch và chứng chỉ quỹ, trái phiếu doanh nghiệp, chứng quyền có bảo đảm niêm yế trên hệ thống giao dịch chứng khoán",
+            "type": "string"
+          },
+          "code": {
+            "value": "120/2020/TT-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "31/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Cơ quan Trung ương của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; HĐND UBND các tỉnh thành phố trực thuộc Trung ương; Kiểm toán Nhà nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoản Nhà nước.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Huỳnh Quang Hải",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội N",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1641867",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/d7f582e40a2c43528c8476092dd1f6ad/20210119_Thong tu 120.2020 TT-BTC.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20170912_Quyet_dinh_1191_cua_Thu_tuong.json",
+    "evidence_pdf_pages": [
+      1,
+      11
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Quyết định",
+        "after": "QUYẾT ĐỊNH"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Thủ tướng Chính Phủ",
+        "after": "THỦ TƯỚNG CHÍNH PHỦ"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Ban Bí thư Trung ương Đảng; Thủ tướng các Phó Thủ tướng Chính phủ; Các bộ cơ quan ngang bộ cơ quan thuộc Chính phủ; HĐND UBND các tỉnh thành phố trực thuộc trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Hội đồng dân tộc và các Ủy ban của Quốc hội; Văn phòng Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách Xã hội; Ngân hàng Phát triển Việt Nam; Ủy ban trung ương Mặt trận Tổ quốc Việt Nam; Cơ quan trung ương của các đoàn thể; VPCP BTCN các PCN Trợ lý TTg TGĐ Cổng TTĐT; các Vụ Cục đơn vị trực thuộc Công báo.",
+        "after": "Ban Bí thư Trung ương Đảng; Thủ tướng, các Phó Thủ tướng Chính phủ; Các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ; HĐND, UBND các tỉnh, thành phố trực thuộc trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Hội đồng dân tộc và các Ủy ban của Quốc hội; Văn phòng Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách Xã hội; Ngân hàng Phát triển Việt Nam; Ủy ban trung ương Mặt trận Tổ quốc Việt Nam; Cơ quan trung ương của các đoàn thể; VPCP: BTCN, các PCN, Trợ lý TTg, TGĐ Cổng TTĐT, các Vụ, Cục, đơn vị trực thuộc, Công báo."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Quyết định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Phê duyệt Lộ trình phát triển thị trường trái phiếu giai đoạn 2017 - 2020, tầm nhìn đến năm 2030",
+            "type": "string"
+          },
+          "code": {
+            "value": "1191/QĐ-TTg",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "14/8/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Thủ tướng Chính Phủ",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Ban Bí thư Trung ương Đảng; Thủ tướng các Phó Thủ tướng Chính phủ; Các bộ cơ quan ngang bộ cơ quan thuộc Chính phủ; HĐND UBND các tỉnh thành phố trực thuộc trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Hội đồng dân tộc và các Ủy ban của Quốc hội; Văn phòng Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách Xã hội; Ngân hàng Phát triển Việt Nam; Ủy ban trung ương Mặt trận Tổ quốc Việt Nam; Cơ quan trung ương của các đoàn thể; VPCP BTCN các PCN Trợ lý TTg TGĐ Cổng TTĐT; các Vụ Cục đơn vị trực thuộc Công báo.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "THỦ TƯỚNG",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Nguyễn Xuân Phúc",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281211",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/3380bec976684e93a1bbed4a1b8d77c6/20170912_Quyet dinh 1191 cua Thu tuong.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20210106_Nghị_định_156.2020NĐ-CP_XPHC_trong_LVCK.json",
+    "evidence_pdf_pages": [
+      1,
+      69
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Nghị định",
+        "after": "NGHỊ ĐỊNH"
+      },
+      {
+        "field": "information.signer",
+        "before": "",
+        "after": "Nguyễn Xuân Phúc"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "",
+        "after": "TM. CHÍNH PHỦ THỦ TƯỚNG"
+      },
+      {
+        "field": "information.recipients",
+        "before": "",
+        "after": "Ban Bí thư Trung ương Đảng; Thủ tướng, các Phó Thủ tướng Chính phủ; Các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ; HĐND, UBND các tỉnh, thành phố trực thuộc trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Hội đồng Dân tộc và các Ủy ban của Quốc hội; Văn phòng Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách Xã hội; Ngân hàng Phát triển Việt Nam; Ủy ban Trung ương Mặt trận Tổ quốc Việt Nam; Cơ quan trung ương của các đoàn thể; VPCP: BTCN, các PCN, Trợ lý TTg, TGĐ Cổng TTĐT, các Vụ, Cục, đơn vị trực thuộc, Công báo."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": false,
+        "after": true
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Nghị định",
+            "type": "string"
+          },
+          "title": {
+            "value": "Quy định xử phạt vi phạm hành chính trong lĩnh vực chứng khoán và thị trường chứng khoán",
+            "type": "string"
+          },
+          "code": {
+            "value": "156/2020/NĐ-CP",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "31/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "CHÍNH PHỦ",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": false,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1641859",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/1d2a066067ab4b45aa1550f9e7f27310/20210106_Nghị định 156.2020NĐ-CP XPHC trong LVCK.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_119.2020_TT-BTC.json",
+    "evidence_pdf_pages": [
+      1,
+      45
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông tư",
+        "after": "THÔNG TƯ"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.signer",
+        "before": "",
+        "after": "Huỳnh Quang Hải"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "",
+        "after": "KT. BỘ TRƯỞNG THỨ TRƯỞNG"
+      },
+      {
+        "field": "information.recipients",
+        "before": "",
+        "after": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng, các Phó Thủ tướng Chính phủ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; Cơ quan Trung ương của các đoàn thể; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; HĐND, UBND các tỉnh, thành phố trực thuộc Trung ương; Kiểm toán Nhà Nước; Công báo; Cổng Thông tin điện tử Chính phủ; Cục kiểm tra văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Cổng Thông tin điện tử Bộ Tài chính; Cổng Thông tin điện tử Ủy ban Chứng khoán Nhà nước."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông tư",
+            "type": "string"
+          },
+          "title": {
+            "value": "Quy định hoạt động đăng ký, lưu ký, bù trừ và thanh toán giao dịch chứng khoán",
+            "type": "string"
+          },
+          "code": {
+            "value": "119/2020/TT-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "31/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": false,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1641866",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/aae0f0a7846b438e90a276bf17f46787/20210119_Thong tu 119.2020 TT-BTC.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20210119_Thong_tu_118.2020_TT-BTC.json",
+    "evidence_pdf_pages": [
+      1,
+      12,
+      13,
+      14,
+      15
+    ],
+    "note": "Thông tư chỉ 12 trang; từ trang 13 là danh mục và bộ mẫu phụ lục, toàn PDF 353 trang. Đề xuất tách bản dùng đánh giá, chờ duyệt.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông tư",
+        "after": "THÔNG TƯ"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.signer",
+        "before": "",
+        "after": "Huỳnh Quang Hải"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "",
+        "after": "KT. BỘ TRƯỞNG THỨ TRƯỞNG"
+      },
+      {
+        "field": "information.recipients",
+        "before": "",
+        "after": "Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chính phủ; Văn phòng Quốc hội; Văn phòng Chủ tịch nước; Thủ tướng, các Phó Thủ tướng Chính phủ; Văn phòng Ban chỉ đạo Trung ương về phòng, chống tham nhũng; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; HĐND, UBND các tỉnh, thành phố trực thuộc Trung ương; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; Kiểm toán Nhà nước; Cơ quan Trung ương của các đoàn thể; Công báo; Cổng thông tin điện tử Chính phủ; Cục kiểm tra văn bản - Bộ Tư pháp; Các đơn vị thuộc Bộ Tài chính; Cổng thông tin điện tử Bộ Tài chính; Cổng thông tin điện tử Ủy ban Chứng khoán Nhà nước."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": false,
+        "after": true
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông tư",
+            "type": "string"
+          },
+          "title": {
+            "value": "Hướng dẫn một số nội dung về chào bán, phát hành chứng khoán, chào mua công khai, mua lại cổ phiếu, đăng ký công ty đại chúng và hủy tư cách công ty đại chúng",
+            "type": "string"
+          },
+          "code": {
+            "value": "118/2020/TT-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "31/12/2020",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "scan",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": false,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1641868",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/cfc5466c93df4d6c970d87dafcd64288/20210119_Thong tu 118.2020 TT-BTC.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20170912_thong_tu_87_ban_day_du.json",
+    "evidence_pdf_pages": [
+      1,
+      33
+    ],
+    "note": "PDF hỗn hợp: phần lớn trang print nhưng trang ký 33 là scan. Cần duyệt quy ước nhãn format toàn file.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông tư",
+        "after": "THÔNG TƯ"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Ban chỉ đạo TW về phòng chống tham những; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; Kiểm toán Nhà nước; HĐND UBND các tỉnh thành phố trực thuộc Trung ương; Công báo; Website Chính phủ; Cục Kiểm tra Văn bản-Bộ Tư pháp; Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính.",
+        "after": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Ban chỉ đạo TW về phòng chống tham nhũng; Thủ tướng, các Phó Thủ tướng Chính phủ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; Kiểm toán Nhà nước; HĐND, UBND các tỉnh, thành phố trực thuộc Trung ương; Công báo; Website Chính phủ; Cục Kiểm tra Văn bản - Bộ Tư pháp; Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông tư",
+            "type": "string"
+          },
+          "title": {
+            "value": "Quy định chỉ tiêu an toàn tài chính và biện pháp xử lý đối với tổ chức kinh doanh chứng khoán không đáp ứng chỉ tiêu an toàn tài chính",
+            "type": "string"
+          },
+          "code": {
+            "value": "87/2017/TT-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "15/8/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Ban chỉ đạo TW về phòng chống tham những; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; Kiểm toán Nhà nước; HĐND UBND các tỉnh thành phố trực thuộc Trung ương; Công báo; Website Chính phủ; Cục Kiểm tra Văn bản-Bộ Tư pháp; Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Xuân Hà",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281210",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/a7f519f78dc04324aacfbd8fca6ba1cd/20170912_thong tu 87 ban day du.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20171012_Thong_tu_95_2017.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông tư",
+        "after": "THÔNG TƯ"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "Bộ Tài chính",
+        "after": "BỘ TÀI CHÍNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng TƯ và các Ban của Đảng; Văn phòng Ban chỉ đạo TƯ về phòng chống tham nhũng; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Tòa án nhân dân tối cao; Kiểm toán nhà nước; HĐND UBND các tỉnh thành phố trực thuộc TƯ; Website Chính phủ; Cục Kiểm tra Văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính UBCKNN.",
+        "after": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng TƯ và các Ban của Đảng; Văn phòng Ban chỉ đạo TƯ về phòng chống tham nhũng; Thủ tướng, các Phó Thủ tướng Chính phủ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Tòa án nhân dân tối cao; Kiểm toán nhà nước; HĐND, UBND các tỉnh, thành phố trực thuộc TƯ; Website Chính phủ; Cục Kiểm tra Văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính, UBCKNN."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "print"
+      },
+      {
+        "field": "metadata.has_handwriting",
+        "before": true,
+        "after": false
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông tư",
+            "type": "string"
+          },
+          "title": {
+            "value": "HƯỚNG DẪN MỘT SỐ ĐIỀU CỦA NGHỊ ĐỊNH SỐ 71/2017/NĐ-CP NGÀY 6 THÁNG 6 NĂM 2017 CỦA CHÍNH PHỦ HƯỚNG DẪN VỀ QUẢN TRỊ CÔNG TY ÁP DỤNG ĐỐI VỚI CÔNG TY ĐẠI CHÚNG",
+            "type": "string"
+          },
+          "code": {
+            "value": "95/2017/TT-BTC",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "22/9/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "Bộ Tài chính",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng TƯ và các Ban của Đảng; Văn phòng Ban chỉ đạo TƯ về phòng chống tham nhũng; Thủ tướng các Phó Thủ tướng Chính phủ; Các Bộ cơ quan ngang Bộ cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Tòa án nhân dân tối cao; Kiểm toán nhà nước; HĐND UBND các tỉnh thành phố trực thuộc TƯ; Website Chính phủ; Cục Kiểm tra Văn bản (Bộ Tư pháp); Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính UBCKNN.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Trần Xuân Hà",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281212",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/e006da4c516e4e3a928775204b87465f/20171012_Thong tu 95_2017.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "20170726_ND_71.2017_thay_the_TT121.json",
+    "evidence_pdf_pages": [
+      1,
+      14,
+      15
+    ],
+    "note": "Không có khối người ký trong bản PDF này, giữ trống signer và signer_title. Không lấy từ bản văn bản khác.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Nghị định",
+        "after": "NGHỊ ĐỊNH"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Ban Bí thư Trung ương Đảng; Thủ tướng các Phó Thủ tướng Chính phủ; Các bộ cơ quan ngang bộ cơ quan thuộc; Chính phủ; HĐND UBND các tỉnh thành phố trực thuộc; trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Quốc hội; Hội đồng dân tộc và các Ủy ban của Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách xã hội.",
+        "after": "Ban Bí thư Trung ương Đảng; Thủ tướng, các Phó Thủ tướng Chính phủ; Các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ; HĐND, UBND các tỉnh, thành phố trực thuộc trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Quốc hội; Hội đồng dân tộc và các Ủy ban của Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách xã hội; Ngân hàng Phát triển Việt Nam; Ủy ban trung ương Mặt trận Tổ quốc Việt Nam; Cơ quan trung ương của các đoàn thể; VPCP: BTCN, các PCN, Trợ lý TTg, TGĐ Cổng TTĐT, các Vụ, Cục, đơn vị trực thuộc, Công báo."
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "print"
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Nghị định",
+            "type": "string"
+          },
+          "title": {
+            "value": "HƯỚNG DẪN VỀ QUẢN TRỊ CÔNG TY ÁP DỤNG ĐỐI VỚI CÔNG TY ĐẠI CHÚNG",
+            "type": "string"
+          },
+          "code": {
+            "value": "71/2017/NĐ-CP",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "06/06/2017",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "CHÍNH PHỦ",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Ban Bí thư Trung ương Đảng; Thủ tướng các Phó Thủ tướng Chính phủ; Các bộ cơ quan ngang bộ cơ quan thuộc; Chính phủ; HĐND UBND các tỉnh thành phố trực thuộc; trung ương; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Quốc hội; Hội đồng dân tộc và các Ủy ban của Quốc hội; Tòa án nhân dân tối cao; Viện kiểm sát nhân dân tối cao; Kiểm toán nhà nước; Ủy ban Giám sát tài chính Quốc gia; Ngân hàng Chính sách xã hội.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": false,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281240",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/2a16a9326aa949f19b56ee2fe75f2fee/20170726_ND 71.2017 thay the TT121.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "GDW-TB_chot_DS.json",
+    "evidence_pdf_pages": [
+      1
+    ],
+    "note": "Thiếu phần số trước /TB–QLNY; không có khối ký, nơi nhận. Cơ quan cha suy từ câu Sở GDCK Hà Nội trân trọng thông báo. Chờ duyệt giữ/loại.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Thông báo",
+        "after": "THÔNG BÁO"
+      },
+      {
+        "field": "information.code",
+        "before": "/TBQLNY",
+        "after": "/TB–QLNY"
+      },
+      {
+        "field": "information.province",
+        "before": "Hà Nội",
+        "after": "Hà nội"
+      },
+      {
+        "field": "information.officeSender",
+        "before": "PHÒNG QUẢN LÝ NIÊM YẾT",
+        "after": "PHÒNG QUẢN LÝ NIÊM YẾT/Sở GDCK Hà Nội"
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "print"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Thông báo",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về ngày đăng ký cuối cùng lập danh sách cổ đông CTCP Cấp nước Gia Định (MCK: GDW)",
+            "type": "string"
+          },
+          "code": {
+            "value": "/TBQLNY",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "11/12/2018",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "PHÒNG QUẢN LÝ NIÊM YẾT",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "",
+            "type": "string"
+          },
+          "signer": {
+            "value": "",
+            "type": "string"
+          },
+          "province": {
+            "value": "Hà Nội",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": false,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20181211/GDW-TB chot DS.pdf",
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "file": "SPC_CBTT_Quy_che_cong_bo_thong_tin_nam_2022_cham_dut_VPDD_Bac_Lieu.json",
+    "evidence_pdf_pages": [
+      1,
+      2
+    ],
+    "note": "Nhãn cũ trộn số công bố trang 1 với tiêu đề/người ký/nơi nhận quyết định trang 2. Trích yếu lấy nguyên câu Nội dung thông tin công bố trang 1; không có mục Nơi nhận ở trang 1 nên để trống.",
+    "changes": [
+      {
+        "field": "information.type",
+        "before": "Công bố thông tin bất thường",
+        "after": "CÔNG BỐ THÔNG TIN BẤT THƯỜNG"
+      },
+      {
+        "field": "information.title",
+        "before": "Về việc ban hành Quy chế Công bố thông tin",
+        "after": "Nghị quyết Hội đồng quản trị về việc điều chỉnh, sửa đổi Quy chế công bố thông tin và chấm dứt hoạt động Văn phòng đại diện CTCP Bảo vệ Thực vật Sài Gòn tại Bạc Liêu."
+      },
+      {
+        "field": "information.signer",
+        "before": "Lê Thị Phượng",
+        "after": "ĐIÊU QUANG TRUNG"
+      },
+      {
+        "field": "information.signer_title",
+        "before": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH",
+        "after": "NGƯỜI CÔNG BỐ THÔNG TIN PHÓ GIÁM ĐỐC"
+      },
+      {
+        "field": "information.recipients",
+        "before": "Như điều 3.",
+        "after": ""
+      },
+      {
+        "field": "information.receiverDate",
+        "before": "07/09/2026",
+        "after": ""
+      },
+      {
+        "field": "metadata.document_format",
+        "before": "pdf_in",
+        "after": "scan"
+      },
+      {
+        "field": "metadata.source_url_detail",
+        "before": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+        "after": ""
+      }
+    ],
+    "original_label": {
+      "information": [
+        {
+          "type": {
+            "value": "Công bố thông tin bất thường",
+            "type": "string"
+          },
+          "title": {
+            "value": "Về việc ban hành Quy chế Công bố thông tin",
+            "type": "string"
+          },
+          "code": {
+            "value": "88/BVTVSG-TCKT",
+            "type": "string"
+          },
+          "documentDate": {
+            "value": "21/01/2022",
+            "type": "string"
+          },
+          "officeSender": {
+            "value": "CÔNG TY CỔ PHẦN BẢO VỆ THỰC VẬT SÀI GÒN/TỔNG CÔNG TY NÔNG NGHIỆP SÀI GÒN TNHH MỘT THÀNH VIÊN",
+            "type": "string"
+          },
+          "recipients": {
+            "value": "Như điều 3.",
+            "type": "string"
+          },
+          "signer_title": {
+            "value": "TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH",
+            "type": "string"
+          },
+          "signer": {
+            "value": "Lê Thị Phượng",
+            "type": "string"
+          },
+          "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+          },
+          "receiverDate": {
+            "value": "07/09/2026",
+            "type": "string"
+          },
+          "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          },
+          "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+          }
+        }
+      ],
+      "metadata": {
+        "document_format": {
+          "value": "pdf_in",
+          "type": "string"
+        },
+        "has_handwriting": {
+          "value": true,
+          "type": "boolean"
+        },
+        "field": {
+          "value": "Chứng khoán",
+          "type": "string"
+        },
+        "source_name": {
+          "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
+          "type": "string"
+        },
+        "source_url_detail": {
+          "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
+          "type": "string"
+        },
+        "source_url_pdf": {
+          "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20220125/SPC_CBTT_Quy_che_cong_bo_thong_tin_nam_2022_cham_dut_VPDD_Bac_Lieu.pdf",
+          "type": "string"
+        }
+      }
+    }
+  }
+]

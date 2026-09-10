@@ -1,809 +1,1311 @@
 <!doctype html>
 <html lang="vi">
-<head>
-<meta charset="utf-8">
-<title>FastOCR</title>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
-<style>
-  /* ── Theme tokens -- mirrors enterprise.html's Material 3 palette (monochrome
+    <head>
+        <meta charset="utf-8" />
+        <title>FastOCR</title>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
+        />
+        <style>
+            /* ── Theme tokens -- mirrors enterprise.html's Material 3 palette (monochrome
      primary, Inter type, rounded-xl/lg radii) so this tool matches the same
      brand look. ── */
-  :root {
-    --primary: #000000; --on-primary: #ffffff;
-    --primary-container: #1b1b1b; --on-primary-container: #848484;
-    --secondary: #0058bc; --on-secondary: #ffffff;
-    --background: #faf8fe; --on-background: #1a1b1f;
-    --surface: #faf8fe; --on-surface: #1a1b1f;
-    --surface-variant: #e3e2e7; --on-surface-variant: #4c4546;
-    --surface-container-lowest: #ffffff;
-    --surface-container-low: #f4f3f8;
-    --surface-container: #efedf3;
-    --surface-container-high: #e9e7ed;
-    --surface-container-highest: #e3e2e7;
-    --outline: #7e7576; --outline-variant: #cfc4c5;
-    --error: #ba1a1a; --on-error: #ffffff; --error-container: #ffdad6; --on-error-container: #93000a;
-    --success: #146c2e; --success-container: #d3f5dc;
-    --radius-sm: 0.25rem; --radius: 0.5rem; --radius-lg: 0.75rem; --radius-full: 9999px;
-    --shadow-sm: 0 1px 2px rgba(26,27,31,.06), 0 1px 8px rgba(26,27,31,.04);
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    font-family: 'Inter', -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    color: var(--on-surface); background: var(--background);
-  }
-  .material-symbols-outlined {
-    font-variation-settings: 'opsz' 24, 'wght' 400, 'FILL' 0, 'GRAD' 0;
-    font-size: 20px; line-height: 1; vertical-align: middle;
-  }
-  header {
-    display: flex; align-items: center; gap: 10px;
-    padding: 0 20px; height: 56px;
-    background: rgba(250,248,254,.85); backdrop-filter: blur(16px);
-    color: var(--primary);
-    font-size: 16px; font-weight: 700;
-    letter-spacing: -.01em;
-    box-shadow: 0 1px 8px rgba(26,27,31,.06);
-  }
-  header .logo {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 30px; height: 30px; border-radius: var(--radius);
-    background: var(--primary); color: var(--on-primary);
-    font-size: 16px;
-  }
-  header .version {
-    font-size: 11px; font-weight: 600; color: var(--primary);
-    background: rgba(0,0,0,.08); border-radius: var(--radius-full);
-    padding: 3px 9px;
-  }
-  .layout {
-    display: flex; gap: 16px;
-    height: calc(100% - 56px);
-    padding: 16px;
-  }
-  .col {
-    overflow-y: auto;
-    padding: 20px;
-    background: var(--surface-container-low);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-  }
-  .col-upload { flex: 0 0 300px; }
-  .col-json, .col-md { flex: 1 1 0; min-width: 0; }
-  h2 {
-    font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--on-surface-variant); font-weight: 600; margin: 0 0 12px;
-  }
-  .dropzone {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    border: 2px dashed var(--outline-variant); border-radius: var(--radius-lg);
-    padding: 28px 14px; text-align: center; color: var(--on-surface-variant);
-    font-size: 12.5px; line-height: 1.5; cursor: pointer;
-    transition: border-color .15s, background-color .15s;
-    background: var(--surface-container-lowest);
-  }
-  .dropzone:hover { border-color: var(--primary); background: var(--surface-container); }
-  .dropzone.drag { border-color: var(--primary); color: var(--primary); background: var(--surface-container); }
-  .dropzone svg { width: 30px; height: 30px; stroke: var(--outline); flex-shrink: 0; }
-  .dropzone.drag svg, .dropzone:hover svg { stroke: var(--primary); }
-  .dropzone .main-txt { font-weight: 600; color: var(--on-surface); font-size: 13.5px; }
-  .dropzone.drag .main-txt, .dropzone:hover .main-txt { color: var(--primary); }
-  .dropzone .sub-txt { color: var(--outline); }
-  input[type=file] { display: none; }
-  .filename {
-    margin-top: 12px; padding: 8px 10px;
-    background: var(--surface-container); border-radius: var(--radius);
-    font-size: 12.5px; color: var(--on-surface);
-    word-break: break-all;
-  }
-  button {
-    margin-top: 12px; width: 100%; padding: 10px 0;
-    background: var(--primary); color: var(--on-primary); border: none; border-radius: var(--radius);
-    font-size: 13.5px; font-weight: 600; cursor: pointer;
-    font-family: inherit; transition: background-color .15s, transform .1s;
-  }
-  button:hover:not(:disabled) { background: var(--primary-container); }
-  button:active:not(:disabled) { transform: scale(.98); }
-  button:disabled { background: var(--surface-container-highest); color: var(--outline); cursor: not-allowed; }
-  .status { margin-top: 10px; font-size: 13px; }
-  .status.err { color: var(--error); white-space: pre-wrap; }
-  .status.ok { color: var(--success); }
-  .spinner {
-    display: inline-block; width: 13px; height: 13px;
-    border: 2px solid var(--surface-container-highest); border-top-color: var(--primary);
-    border-radius: 50%; animation: spin .7s linear infinite;
-    vertical-align: -2px; margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  pre#jsonOut {
-    margin: 0; font-size: 12.5px; line-height: 1.5;
-    white-space: pre-wrap; overflow-wrap: break-word;
-    font-family: ui-monospace, Consolas, monospace;
-  }
-  .tabs {
-    display: flex; gap: 4px; margin: -4px 0 14px;
-    border-bottom: 1px solid var(--outline-variant);
-  }
-  .tab, .subtab {
-    padding: 6px 12px; font-size: 12.5px; font-weight: 600;
-    color: var(--on-surface-variant); cursor: pointer; border-bottom: 2px solid transparent;
-    margin-bottom: -1px; transition: color .15s, border-color .15s;
-  }
-  .tab:hover, .subtab:hover { color: var(--primary); }
-  .tab.active, .subtab.active { color: var(--primary); border-bottom-color: var(--primary); }
-  .preview-pane { display: none; }
-  .preview-pane.active { display: block; }
-  .page-nav {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
-    font-size: 12.5px; color: var(--on-surface-variant);
-  }
-  .page-nav button {
-    margin: 0; width: auto; padding: 4px 10px; font-size: 12.5px;
-  }
-  .page-nav button:disabled { background: var(--surface-container-highest); }
-  #previewCanvasWrap { overflow: auto; border: 1px solid var(--outline-variant); border-radius: var(--radius); }
-  .preview-stage { position: relative; display: inline-block; }
-  #previewCanvas { display: block; max-width: 100%; height: auto; }
-  #bboxOverlay { position: absolute; inset: 0; }
-  .bbox-box {
-    position: absolute; box-sizing: border-box; border-width: 2px; border-style: solid;
-    cursor: pointer; transition: background-color .1s, border-width .1s;
-  }
-  .bbox-box:hover, .bbox-box.hovered { background-color: rgba(0,0,0,.12); border-width: 3px; }
-  .bbox-label {
-    position: absolute; top: -16px; left: -2px; font-size: 10.5px; line-height: 16px;
-    color: #fff; padding: 0 4px; white-space: nowrap;
-    font-family: ui-monospace, Consolas, monospace;
-  }
-  .md-body { font-size: 14px; line-height: 1.6; }
-  .md-body table { border-collapse: collapse; margin: 10px 0; font-size: 13px; }
-  .md-body th, .md-body td { border: 1px solid var(--outline-variant); padding: 4px 8px; }
-  .md-body h1 { font-size: 20px; }
-  .md-body h2 { font-size: 16px; text-transform: none; letter-spacing: 0; color: inherit; }
-  .md-block { transition: background-color .15s; border-radius: var(--radius-sm); scroll-margin: 60px 0; }
-  .md-block.highlight { background: #fef9c3; outline: 2px solid #eab308; }
-  .md-page-divider {
-    font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--outline);
-    margin: 16px 0 6px; padding-top: 6px; border-top: 1px dashed var(--outline-variant);
-  }
-  .md-page-divider:first-child { margin-top: 0; border-top: none; padding-top: 0; }
-  .placeholder { color: var(--outline); font-size: 13px; }
+            :root {
+                --primary: #000000;
+                --on-primary: #ffffff;
+                --primary-container: #1b1b1b;
+                --on-primary-container: #848484;
+                --secondary: #0058bc;
+                --on-secondary: #ffffff;
+                --background: #faf8fe;
+                --on-background: #1a1b1f;
+                --surface: #faf8fe;
+                --on-surface: #1a1b1f;
+                --surface-variant: #e3e2e7;
+                --on-surface-variant: #4c4546;
+                --surface-container-lowest: #ffffff;
+                --surface-container-low: #f4f3f8;
+                --surface-container: #efedf3;
+                --surface-container-high: #e9e7ed;
+                --surface-container-highest: #e3e2e7;
+                --outline: #7e7576;
+                --outline-variant: #cfc4c5;
+                --error: #ba1a1a;
+                --on-error: #ffffff;
+                --error-container: #ffdad6;
+                --on-error-container: #93000a;
+                --success: #146c2e;
+                --success-container: #d3f5dc;
+                --radius-sm: 0.25rem;
+                --radius: 0.5rem;
+                --radius-lg: 0.75rem;
+                --radius-full: 9999px;
+                --shadow-sm:
+                    0 1px 2px rgba(26, 27, 31, 0.06),
+                    0 1px 8px rgba(26, 27, 31, 0.04);
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                font-family:
+                    'Inter',
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+                color: var(--on-surface);
+                background: var(--background);
+            }
+            .material-symbols-outlined {
+                font-variation-settings:
+                    'opsz' 24,
+                    'wght' 400,
+                    'FILL' 0,
+                    'GRAD' 0;
+                font-size: 20px;
+                line-height: 1;
+                vertical-align: middle;
+            }
+            header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 20px;
+                height: 56px;
+                background: rgba(250, 248, 254, 0.85);
+                backdrop-filter: blur(16px);
+                color: var(--primary);
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -0.01em;
+                box-shadow: 0 1px 8px rgba(26, 27, 31, 0.06);
+            }
+            header .logo {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                border-radius: var(--radius);
+                background: var(--primary);
+                color: var(--on-primary);
+                font-size: 16px;
+            }
+            header .version {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--primary);
+                background: rgba(0, 0, 0, 0.08);
+                border-radius: var(--radius-full);
+                padding: 3px 9px;
+            }
+            .layout {
+                display: flex;
+                gap: 16px;
+                height: calc(100% - 56px);
+                padding: 16px;
+            }
+            .col {
+                overflow-y: auto;
+                padding: 20px;
+                background: var(--surface-container-low);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-sm);
+            }
+            .col-upload {
+                flex: 0 0 300px;
+            }
+            .col-json,
+            .col-md {
+                flex: 1 1 0;
+                min-width: 0;
+            }
+            h2 {
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: var(--on-surface-variant);
+                font-weight: 600;
+                margin: 0 0 12px;
+            }
+            .dropzone {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                border: 2px dashed var(--outline-variant);
+                border-radius: var(--radius-lg);
+                padding: 28px 14px;
+                text-align: center;
+                color: var(--on-surface-variant);
+                font-size: 12.5px;
+                line-height: 1.5;
+                cursor: pointer;
+                transition:
+                    border-color 0.15s,
+                    background-color 0.15s;
+                background: var(--surface-container-lowest);
+            }
+            .dropzone:hover {
+                border-color: var(--primary);
+                background: var(--surface-container);
+            }
+            .dropzone.drag {
+                border-color: var(--primary);
+                color: var(--primary);
+                background: var(--surface-container);
+            }
+            .dropzone svg {
+                width: 30px;
+                height: 30px;
+                stroke: var(--outline);
+                flex-shrink: 0;
+            }
+            .dropzone.drag svg,
+            .dropzone:hover svg {
+                stroke: var(--primary);
+            }
+            .dropzone .main-txt {
+                font-weight: 600;
+                color: var(--on-surface);
+                font-size: 13.5px;
+            }
+            .dropzone.drag .main-txt,
+            .dropzone:hover .main-txt {
+                color: var(--primary);
+            }
+            .dropzone .sub-txt {
+                color: var(--outline);
+            }
+            input[type='file'] {
+                display: none;
+            }
+            .filename {
+                margin-top: 12px;
+                padding: 8px 10px;
+                background: var(--surface-container);
+                border-radius: var(--radius);
+                font-size: 12.5px;
+                color: var(--on-surface);
+                word-break: break-all;
+            }
+            button {
+                margin-top: 12px;
+                width: 100%;
+                padding: 10px 0;
+                background: var(--primary);
+                color: var(--on-primary);
+                border: none;
+                border-radius: var(--radius);
+                font-size: 13.5px;
+                font-weight: 600;
+                cursor: pointer;
+                font-family: inherit;
+                transition:
+                    background-color 0.15s,
+                    transform 0.1s;
+            }
+            button:hover:not(:disabled) {
+                background: var(--primary-container);
+            }
+            button:active:not(:disabled) {
+                transform: scale(0.98);
+            }
+            button:disabled {
+                background: var(--surface-container-highest);
+                color: var(--outline);
+                cursor: not-allowed;
+            }
+            .status {
+                margin-top: 10px;
+                font-size: 13px;
+            }
+            .status.err {
+                color: var(--error);
+                white-space: pre-wrap;
+            }
+            .status.ok {
+                color: var(--success);
+            }
+            .spinner {
+                display: inline-block;
+                width: 13px;
+                height: 13px;
+                border: 2px solid var(--surface-container-highest);
+                border-top-color: var(--primary);
+                border-radius: 50%;
+                animation: spin 0.7s linear infinite;
+                vertical-align: -2px;
+                margin-right: 6px;
+            }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            pre#jsonOut {
+                margin: 0;
+                font-size: 12.5px;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                overflow-wrap: break-word;
+                font-family: ui-monospace, Consolas, monospace;
+            }
+            .tabs {
+                display: flex;
+                gap: 4px;
+                margin: -4px 0 14px;
+                border-bottom: 1px solid var(--outline-variant);
+            }
+            .tab,
+            .subtab {
+                padding: 6px 12px;
+                font-size: 12.5px;
+                font-weight: 600;
+                color: var(--on-surface-variant);
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                margin-bottom: -1px;
+                transition:
+                    color 0.15s,
+                    border-color 0.15s;
+            }
+            .tab:hover,
+            .subtab:hover {
+                color: var(--primary);
+            }
+            .tab.active,
+            .subtab.active {
+                color: var(--primary);
+                border-bottom-color: var(--primary);
+            }
+            .preview-pane {
+                display: none;
+            }
+            .preview-pane.active {
+                display: block;
+            }
+            .page-nav {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 10px;
+                font-size: 12.5px;
+                color: var(--on-surface-variant);
+            }
+            .page-nav button {
+                margin: 0;
+                width: auto;
+                padding: 4px 10px;
+                font-size: 12.5px;
+            }
+            .page-nav button:disabled {
+                background: var(--surface-container-highest);
+            }
+            #previewCanvasWrap {
+                overflow: auto;
+                border: 1px solid var(--outline-variant);
+                border-radius: var(--radius);
+            }
+            .preview-stage {
+                position: relative;
+                display: inline-block;
+            }
+            #previewCanvas {
+                display: block;
+                max-width: 100%;
+                height: auto;
+            }
+            #bboxOverlay {
+                position: absolute;
+                inset: 0;
+            }
+            .bbox-box {
+                position: absolute;
+                box-sizing: border-box;
+                border-width: 2px;
+                border-style: solid;
+                cursor: pointer;
+                transition:
+                    background-color 0.1s,
+                    border-width 0.1s;
+            }
+            .bbox-box:hover,
+            .bbox-box.hovered {
+                background-color: rgba(0, 0, 0, 0.12);
+                border-width: 3px;
+            }
+            .bbox-label {
+                position: absolute;
+                top: -16px;
+                left: -2px;
+                font-size: 10.5px;
+                line-height: 16px;
+                color: #fff;
+                padding: 0 4px;
+                white-space: nowrap;
+                font-family: ui-monospace, Consolas, monospace;
+            }
+            .md-body {
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            .md-body table {
+                border-collapse: collapse;
+                margin: 10px 0;
+                font-size: 13px;
+            }
+            .md-body th,
+            .md-body td {
+                border: 1px solid var(--outline-variant);
+                padding: 4px 8px;
+            }
+            .md-body h1 {
+                font-size: 20px;
+            }
+            .md-body h2 {
+                font-size: 16px;
+                text-transform: none;
+                letter-spacing: 0;
+                color: inherit;
+            }
+            .md-block {
+                transition: background-color 0.15s;
+                border-radius: var(--radius-sm);
+                scroll-margin: 60px 0;
+            }
+            .md-block.highlight {
+                background: #fef9c3;
+                outline: 2px solid #eab308;
+            }
+            .md-page-divider {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--outline);
+                margin: 16px 0 6px;
+                padding-top: 6px;
+                border-top: 1px dashed var(--outline-variant);
+            }
+            .md-page-divider:first-child {
+                margin-top: 0;
+                border-top: none;
+                padding-top: 0;
+            }
+            .placeholder {
+                color: var(--outline);
+                font-size: 13px;
+            }
 
-  /* ── Entities tab ── */
-  .ent-schema { padding-bottom: 12px; border-bottom: 1px solid var(--outline-variant); margin-bottom: 12px; }
-  .schema-scroll { max-height: 220px; overflow-y: auto; }
-  table.stbl { width: 100%; border-collapse: collapse; font-size: 12px; }
-  table.stbl th {
-    text-align: left; font-size: 10.5px; text-transform: uppercase;
-    letter-spacing: .05em; color: var(--on-surface-variant); font-weight: 700;
-    padding: 0 6px 6px; position: sticky; top: 0; background: var(--surface-container-low);
-  }
-  table.stbl td { padding: 3px 6px 3px 0; vertical-align: middle; }
-  table.stbl input {
-    width: 100%; padding: 4px 7px; border: 1px solid var(--outline-variant);
-    border-radius: var(--radius-sm); font-size: 12px; outline: none; background: var(--surface-container-lowest);
-    transition: border-color .15s; box-sizing: border-box; font-family: inherit;
-  }
-  table.stbl input:focus { border-color: var(--primary); }
-  .btn-del {
-    background: none; border: none; cursor: pointer; color: var(--outline);
-    font-size: 14px; padding: 2px 5px; border-radius: var(--radius-sm); margin: 0;
-    transition: color .15s, background-color .15s;
-  }
-  .btn-del:hover { color: var(--error); background: var(--error-container); }
-  .ent-actions { display: flex; gap: 7px; align-items: center; margin-top: 9px; flex-wrap: wrap; }
-  .btn-ghost {
-    margin: 0; width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;
-    background: var(--surface-container-high); color: var(--on-surface); border: 1px solid var(--outline-variant);
-    border-radius: var(--radius); cursor: pointer; font-family: inherit;
-  }
-  .btn-ghost:hover { background: var(--surface-container-highest); }
-  .btn-extract {
-    margin: 0; width: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
-    background: var(--primary); color: var(--on-primary); border: none; border-radius: var(--radius); cursor: pointer;
-    font-family: inherit;
-  }
-  .btn-extract:hover:not(:disabled) { background: var(--primary-container); }
-  .btn-extract:disabled { background: var(--surface-container-highest); color: var(--outline); cursor: not-allowed; }
-  .ext-status { font-size: 11.5px; color: var(--on-surface-variant); }
-  .field-block { margin-bottom: 12px; }
-  .field-name {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11.5px; font-weight: 700; color: var(--on-surface); margin-bottom: 5px;
-  }
-  .field-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .field-vals { display: flex; flex-wrap: wrap; gap: 5px; }
-  .chip { padding: 3px 9px; border-radius: var(--radius-full); font-size: 12px; border: 1px solid transparent; }
-  .chip-empty { color: var(--outline); font-size: 11.5px; font-style: italic; }
-  .ent-md mark { padding: 1px 2px; border-radius: var(--radius-sm); border: 1px solid transparent; }
-  pre#entJsonOut {
-    margin: 0; font-size: 12.5px; line-height: 1.5;
-    white-space: pre-wrap; overflow-wrap: break-word;
-    font-family: ui-monospace, Consolas, monospace;
-  }
-</style>
-</head>
-<body>
-<header>
-  <span class="logo"><span class="material-symbols-outlined" style="font-size:17px">description</span></span>
-  FastOCR<span class="version">v0.3</span>
-</header>
-<div class="layout">
-  <div class="col col-upload">
-    <h2>Upload PDF</h2>
-    <label class="dropzone" id="dropzone">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M7 18a4.6 4.4 0 0 1-1.9-8.8 5 4.5 0 0 1 9.9-1A4.5 4.5 0 0 1 17 18H7Z"></path>
-        <path d="M12 12v6"></path>
-        <path d="M9.5 14.5 12 12l2.5 2.5"></path>
-      </svg>
-      <span class="main-txt">Bấm để chọn file</span>
-      <span class="sub-txt">hoặc kéo thả file .pdf vào đây</span>
-      <input type="file" id="fileInput" accept="application/pdf,.pdf">
-    </label>
-    <div class="filename" id="filename"></div>
-    <button id="submitBtn" disabled>Xử lý</button>
-    <div class="status" id="status"></div>
-  </div>
-  <div class="col col-json">
-    <div class="tabs">
-      <div class="tab active" data-tab="json">JSON</div>
-      <div class="tab" data-tab="preview">Preview</div>
-      <div class="tab" data-tab="entities">Entities</div>
-    </div>
-    <pre id="jsonOut" class="preview-pane active"><span class="placeholder">Chưa có kết quả</span></pre>
-    <div id="previewPane" class="preview-pane">
-      <div class="page-nav" id="pageNav" style="display:none">
-        <button id="prevPageBtn">&larr;</button>
-        <span id="pageIndicator">Trang 1 / 1</span>
-        <button id="nextPageBtn">&rarr;</button>
-      </div>
-      <div id="previewCanvasWrap" style="display:none">
-        <div class="preview-stage">
-          <canvas id="previewCanvas"></canvas>
-          <div id="bboxOverlay"></div>
+            /* ── Entities tab ── */
+            .ent-schema {
+                padding-bottom: 12px;
+                border-bottom: 1px solid var(--outline-variant);
+                margin-bottom: 12px;
+            }
+            .schema-scroll {
+                max-height: 220px;
+                overflow-y: auto;
+            }
+            table.stbl {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            table.stbl th {
+                text-align: left;
+                font-size: 10.5px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--on-surface-variant);
+                font-weight: 700;
+                padding: 0 6px 6px;
+                position: sticky;
+                top: 0;
+                background: var(--surface-container-low);
+            }
+            table.stbl td {
+                padding: 3px 6px 3px 0;
+                vertical-align: middle;
+            }
+            table.stbl input {
+                width: 100%;
+                padding: 4px 7px;
+                border: 1px solid var(--outline-variant);
+                border-radius: var(--radius-sm);
+                font-size: 12px;
+                outline: none;
+                background: var(--surface-container-lowest);
+                transition: border-color 0.15s;
+                box-sizing: border-box;
+                font-family: inherit;
+            }
+            table.stbl input:focus {
+                border-color: var(--primary);
+            }
+            .btn-del {
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--outline);
+                font-size: 14px;
+                padding: 2px 5px;
+                border-radius: var(--radius-sm);
+                margin: 0;
+                transition:
+                    color 0.15s,
+                    background-color 0.15s;
+            }
+            .btn-del:hover {
+                color: var(--error);
+                background: var(--error-container);
+            }
+            .ent-actions {
+                display: flex;
+                gap: 7px;
+                align-items: center;
+                margin-top: 9px;
+                flex-wrap: wrap;
+            }
+            .btn-ghost {
+                margin: 0;
+                width: auto;
+                padding: 6px 12px;
+                font-size: 12px;
+                font-weight: 600;
+                background: var(--surface-container-high);
+                color: var(--on-surface);
+                border: 1px solid var(--outline-variant);
+                border-radius: var(--radius);
+                cursor: pointer;
+                font-family: inherit;
+            }
+            .btn-ghost:hover {
+                background: var(--surface-container-highest);
+            }
+            .btn-extract {
+                margin: 0;
+                width: auto;
+                padding: 6px 16px;
+                font-size: 12px;
+                font-weight: 600;
+                background: var(--primary);
+                color: var(--on-primary);
+                border: none;
+                border-radius: var(--radius);
+                cursor: pointer;
+                font-family: inherit;
+            }
+            .btn-extract:hover:not(:disabled) {
+                background: var(--primary-container);
+            }
+            .btn-extract:disabled {
+                background: var(--surface-container-highest);
+                color: var(--outline);
+                cursor: not-allowed;
+            }
+            .ext-status {
+                font-size: 11.5px;
+                color: var(--on-surface-variant);
+            }
+            .field-block {
+                margin-bottom: 12px;
+            }
+            .field-name {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11.5px;
+                font-weight: 700;
+                color: var(--on-surface);
+                margin-bottom: 5px;
+            }
+            .field-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .field-vals {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .chip {
+                padding: 3px 9px;
+                border-radius: var(--radius-full);
+                font-size: 12px;
+                border: 1px solid transparent;
+            }
+            .chip-empty {
+                color: var(--outline);
+                font-size: 11.5px;
+                font-style: italic;
+            }
+            .ent-md mark {
+                padding: 1px 2px;
+                border-radius: var(--radius-sm);
+                border: 1px solid transparent;
+            }
+            pre#entJsonOut {
+                margin: 0;
+                font-size: 12.5px;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                overflow-wrap: break-word;
+                font-family: ui-monospace, Consolas, monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <span class="logo"
+                ><span class="material-symbols-outlined" style="font-size: 17px"
+                    >description</span
+                ></span
+            >
+            FastOCR<span class="version">v0.3</span>
+        </header>
+        <div class="layout">
+            <div class="col col-upload">
+                <h2>Upload PDF</h2>
+                <label class="dropzone" id="dropzone">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path
+                            d="M7 18a4.6 4.4 0 0 1-1.9-8.8 5 4.5 0 0 1 9.9-1A4.5 4.5 0 0 1 17 18H7Z"
+                        ></path>
+                        <path d="M12 12v6"></path>
+                        <path d="M9.5 14.5 12 12l2.5 2.5"></path>
+                    </svg>
+                    <span class="main-txt">Bấm để chọn file</span>
+                    <span class="sub-txt">hoặc kéo thả file .pdf vào đây</span>
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept="application/pdf,.pdf"
+                    />
+                </label>
+                <div class="filename" id="filename"></div>
+                <button id="submitBtn" disabled>Xử lý</button>
+                <div class="status" id="status"></div>
+            </div>
+            <div class="col col-json">
+                <div class="tabs">
+                    <div class="tab active" data-tab="json">JSON</div>
+                    <div class="tab" data-tab="preview">Preview</div>
+                    <div class="tab" data-tab="entities">Entities</div>
+                </div>
+                <pre
+                    id="jsonOut"
+                    class="preview-pane active"
+                ><span class="placeholder">Chưa có kết quả</span></pre>
+                <div id="previewPane" class="preview-pane">
+                    <div class="page-nav" id="pageNav" style="display: none">
+                        <button id="prevPageBtn">&larr;</button>
+                        <span id="pageIndicator">Trang 1 / 1</span>
+                        <button id="nextPageBtn">&rarr;</button>
+                    </div>
+                    <div id="previewCanvasWrap" style="display: none">
+                        <div class="preview-stage">
+                            <canvas id="previewCanvas"></canvas>
+                            <div id="bboxOverlay"></div>
+                        </div>
+                    </div>
+                    <div id="previewPlaceholder" class="placeholder">
+                        Chưa có kết quả
+                    </div>
+                </div>
+                <div id="entitiesPane" class="preview-pane">
+                    <div class="ent-schema">
+                        <h2 style="margin-bottom: 8px">Schema trích xuất</h2>
+                        <div class="schema-scroll">
+                            <table class="stbl" id="schemaTbl">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36%">Tên trường</th>
+                                        <th>Mô tả</th>
+                                        <th style="width: 26px"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schemaTbody"></tbody>
+                            </table>
+                        </div>
+                        <div class="ent-actions">
+                            <button
+                                class="btn-ghost"
+                                id="addRowBtn"
+                                type="button"
+                            >
+                                + Thêm trường
+                            </button>
+                            <button
+                                class="btn-extract"
+                                id="extractBtn"
+                                type="button"
+                                disabled
+                            >
+                                Trích xuất
+                            </button>
+                            <span class="ext-status" id="extStatus"></span>
+                        </div>
+                    </div>
+                    <div
+                        class="tabs"
+                        id="entResultTabs"
+                        style="margin-top: 14px"
+                    >
+                        <div class="subtab active" data-ent-tab="chips">
+                            Kết quả
+                        </div>
+                        <div class="subtab" data-ent-tab="json">JSON</div>
+                    </div>
+                    <div
+                        class="ent-results preview-pane active"
+                        id="entResults"
+                    >
+                        <span class="placeholder"
+                            >Kết quả trích xuất sẽ hiện ở đây.</span
+                        >
+                    </div>
+                    <pre
+                        class="preview-pane"
+                        id="entJsonOut"
+                    ><span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span></pre>
+                </div>
+            </div>
+            <div class="col col-md">
+                <h2>Markdown</h2>
+                <div class="md-body" id="mdOut">
+                    <span class="placeholder">Chưa có kết quả</span>
+                </div>
+            </div>
         </div>
-      </div>
-      <div id="previewPlaceholder" class="placeholder">Chưa có kết quả</div>
-    </div>
-    <div id="entitiesPane" class="preview-pane">
-      <div class="ent-schema">
-        <h2 style="margin-bottom:8px">Schema trích xuất</h2>
-        <div class="schema-scroll">
-          <table class="stbl" id="schemaTbl">
-            <thead><tr><th style="width:36%">Tên trường</th><th>Mô tả</th><th style="width:26px"></th></tr></thead>
-            <tbody id="schemaTbody"></tbody>
-          </table>
-        </div>
-        <div class="ent-actions">
-          <button class="btn-ghost" id="addRowBtn" type="button">+ Thêm trường</button>
-          <button class="btn-extract" id="extractBtn" type="button" disabled>Trích xuất</button>
-          <span class="ext-status" id="extStatus"></span>
-        </div>
-      </div>
-      <div class="tabs" id="entResultTabs" style="margin-top:14px">
-        <div class="subtab active" data-ent-tab="chips">Kết quả</div>
-        <div class="subtab" data-ent-tab="json">JSON</div>
-      </div>
-      <div class="ent-results preview-pane active" id="entResults">
-        <span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span>
-      </div>
-      <pre class="preview-pane" id="entJsonOut"><span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span></pre>
-    </div>
-  </div>
-  <div class="col col-md">
-    <h2>Markdown</h2>
-    <div class="md-body" id="mdOut"><span class="placeholder">Chưa có kết quả</span></div>
-  </div>
-</div>
 
-<script>
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
-const filenameEl = document.getElementById('filename');
-const submitBtn = document.getElementById('submitBtn');
-const statusEl = document.getElementById('status');
-const jsonOut = document.getElementById('jsonOut');
-const mdOut = document.getElementById('mdOut');
+        <script>
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('fileInput');
+            const filenameEl = document.getElementById('filename');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusEl = document.getElementById('status');
+            const jsonOut = document.getElementById('jsonOut');
+            const mdOut = document.getElementById('mdOut');
 
-const tabs = document.querySelectorAll('.tab');
-const previewPane = document.getElementById('previewPane');
-const previewPlaceholder = document.getElementById('previewPlaceholder');
-const previewCanvasWrap = document.getElementById('previewCanvasWrap');
-const previewCanvas = document.getElementById('previewCanvas');
-const pageNav = document.getElementById('pageNav');
-const pageIndicator = document.getElementById('pageIndicator');
-const prevPageBtn = document.getElementById('prevPageBtn');
-const nextPageBtn = document.getElementById('nextPageBtn');
-const bboxOverlay = document.getElementById('bboxOverlay');
+            const tabs = document.querySelectorAll('.tab');
+            const previewPane = document.getElementById('previewPane');
+            const previewPlaceholder =
+                document.getElementById('previewPlaceholder');
+            const previewCanvasWrap =
+                document.getElementById('previewCanvasWrap');
+            const previewCanvas = document.getElementById('previewCanvas');
+            const pageNav = document.getElementById('pageNav');
+            const pageIndicator = document.getElementById('pageIndicator');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const bboxOverlay = document.getElementById('bboxOverlay');
 
-const entitiesPane = document.getElementById('entitiesPane');
-const schemaTbody = document.getElementById('schemaTbody');
-const addRowBtn = document.getElementById('addRowBtn');
-const extractBtn = document.getElementById('extractBtn');
-const extStatus = document.getElementById('extStatus');
-const entResults = document.getElementById('entResults');
-const entJsonOut = document.getElementById('entJsonOut');
-const entResultTabs = document.querySelectorAll('#entResultTabs .subtab');
+            const entitiesPane = document.getElementById('entitiesPane');
+            const schemaTbody = document.getElementById('schemaTbody');
+            const addRowBtn = document.getElementById('addRowBtn');
+            const extractBtn = document.getElementById('extractBtn');
+            const extStatus = document.getElementById('extStatus');
+            const entResults = document.getElementById('entResults');
+            const entJsonOut = document.getElementById('entJsonOut');
+            const entResultTabs = document.querySelectorAll(
+                '#entResultTabs .subtab',
+            );
 
-const BBOX_COLORS = { table: '#ea580c', skip: '#94a3b8', text: '#2563eb' };
+            const BBOX_COLORS = {
+                table: '#ea580c',
+                skip: '#94a3b8',
+                text: '#2563eb',
+            };
 
-// Cycled through in schema-row order to color-code extracted fields
-// consistently between the result chips and the <mark> highlights in the
-// Markdown pane.
-const ENTITY_PALETTE = [
-  { bg: '#fef08a', bd: '#ca8a04', dot: '#eab308' },
-  { bg: '#bbf7d0', bd: '#16a34a', dot: '#22c55e' },
-  { bg: '#bfdbfe', bd: '#3b82f6', dot: '#3b82f6' },
-  { bg: '#fecaca', bd: '#dc2626', dot: '#ef4444' },
-  { bg: '#e9d5ff', bd: '#9333ea', dot: '#a855f7' },
-  { bg: '#fed7aa', bd: '#ea580c', dot: '#f97316' },
-  { bg: '#a5f3fc', bd: '#0891b2', dot: '#06b6d4' },
-  { bg: '#f9a8d4', bd: '#db2777', dot: '#ec4899' },
-  { bg: '#d9f99d', bd: '#65a30d', dot: '#84cc16' },
-  { bg: '#c7d2fe', bd: '#4f46e5', dot: '#6366f1' },
-];
+            // Cycled through in schema-row order to color-code extracted fields
+            // consistently between the result chips and the <mark> highlights in the
+            // Markdown pane.
+            const ENTITY_PALETTE = [
+                { bg: '#fef08a', bd: '#ca8a04', dot: '#eab308' },
+                { bg: '#bbf7d0', bd: '#16a34a', dot: '#22c55e' },
+                { bg: '#bfdbfe', bd: '#3b82f6', dot: '#3b82f6' },
+                { bg: '#fecaca', bd: '#dc2626', dot: '#ef4444' },
+                { bg: '#e9d5ff', bd: '#9333ea', dot: '#a855f7' },
+                { bg: '#fed7aa', bd: '#ea580c', dot: '#f97316' },
+                { bg: '#a5f3fc', bd: '#0891b2', dot: '#06b6d4' },
+                { bg: '#f9a8d4', bd: '#db2777', dot: '#ec4899' },
+                { bg: '#d9f99d', bd: '#65a30d', dot: '#84cc16' },
+                { bg: '#c7d2fe', bd: '#4f46e5', dot: '#6366f1' },
+            ];
 
-// Mirrors build_markdown()'s title_types/h2_types (module/pipeline/content.py)
-// for the ONLY layout backend wired up (pp_doclayout / PP-DocLayout_plus-L,
-// see module/layout/pp_doclayout.py) -- needed so the Markdown pane can be
-// rebuilt PER-BLOCK here (instead of just dumping the server's single
-// markdown string) to tag each rendered chunk with its page/block id, which
-// is what makes the image<->text hover link below possible.
-const TITLE_TYPES = new Set(['doc_title']);
-const H2_TYPES = new Set(['paragraph_title']);
+            // Mirrors build_markdown()'s title_types/h2_types (module/pipeline/content.py)
+            // for the ONLY layout backend wired up (pp_doclayout / PP-DocLayout_plus-L,
+            // see module/layout/pp_doclayout.py) -- needed so the Markdown pane can be
+            // rebuilt PER-BLOCK here (instead of just dumping the server's single
+            // markdown string) to tag each rendered chunk with its page/block id, which
+            // is what makes the image<->text hover link below possible.
+            const TITLE_TYPES = new Set(['doc_title']);
+            const H2_TYPES = new Set(['paragraph_title']);
 
-let selectedFile = null;
-let lastOcrData = null;   // { file, json, markdown } from the last successful OCR call
-let currentPreviewPage = 1;
-let hoveredBboxEl = null;
-let hoveredMdEl = null;
-let lastEntityHighlight = null; // { pairs: [{v, field}], colorMap: {field: paletteEntry} } | null
+            let selectedFile = null;
+            let lastOcrData = null; // { file, json, markdown } from the last successful OCR call
+            let currentPreviewPage = 1;
+            let hoveredBboxEl = null;
+            let hoveredMdEl = null;
+            let lastEntityHighlight = null; // { pairs: [{v, field}], colorMap: {field: paletteEntry} } | null
 
-function resetPreview() {
-  currentPreviewPage = 1;
-  lastOcrData = null;
-  previewCanvasWrap.style.display = 'none';
-  pageNav.style.display = 'none';
-  previewPlaceholder.style.display = '';
-  bboxOverlay.innerHTML = '';
-  resetEntities();
-}
+            function resetPreview() {
+                currentPreviewPage = 1;
+                lastOcrData = null;
+                previewCanvasWrap.style.display = 'none';
+                pageNav.style.display = 'none';
+                previewPlaceholder.style.display = '';
+                bboxOverlay.innerHTML = '';
+                resetEntities();
+            }
 
-function resetEntities() {
-  lastEntityHighlight = null;
-  extractBtn.disabled = true;
-  extStatus.textContent = '';
-  entResults.innerHTML = '<span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span>';
-  entJsonOut.innerHTML = '<span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span>';
-}
+            function resetEntities() {
+                lastEntityHighlight = null;
+                extractBtn.disabled = true;
+                extStatus.textContent = '';
+                entResults.innerHTML =
+                    '<span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span>';
+                entJsonOut.innerHTML =
+                    '<span class="placeholder">Kết quả trích xuất sẽ hiện ở đây.</span>';
+            }
 
-// ── Schema editor (Entities tab) ──────────────────────────────────────────
-function escAttr(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-}
+            // ── Schema editor (Entities tab) ──────────────────────────────────────────
+            function escAttr(s) {
+                return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            }
 
-function addSchemaRow(key = '', desc = '') {
-  const tr = document.createElement('tr');
-  tr.innerHTML =
-    '<td><input type="text" class="sk" placeholder="tenTruong" value="' + escAttr(key) + '"></td>' +
-    '<td><input type="text" class="sd" placeholder="Mô tả để model hiểu cần trích gì..." value="' + escAttr(desc) + '"></td>' +
-    '<td><button class="btn-del" type="button" title="Xóa">&times;</button></td>';
-  tr.querySelector('.btn-del').addEventListener('click', () => tr.remove());
-  schemaTbody.appendChild(tr);
-}
+            function addSchemaRow(key = '', desc = '') {
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td><input type="text" class="sk" placeholder="tenTruong" value="' +
+                    escAttr(key) +
+                    '"></td>' +
+                    '<td><input type="text" class="sd" placeholder="Mô tả để model hiểu cần trích gì..." value="' +
+                    escAttr(desc) +
+                    '"></td>' +
+                    '<td><button class="btn-del" type="button" title="Xóa">&times;</button></td>';
+                tr.querySelector('.btn-del').addEventListener('click', () =>
+                    tr.remove(),
+                );
+                schemaTbody.appendChild(tr);
+            }
 
-function getSchema() {
-  const schema = {};
-  schemaTbody.querySelectorAll('tr').forEach(tr => {
-    const k = tr.querySelector('.sk').value.trim();
-    const d = tr.querySelector('.sd').value.trim();
-    if (k) schema[k] = d;
-  });
-  return schema;
-}
+            function getSchema() {
+                const schema = {};
+                schemaTbody.querySelectorAll('tr').forEach((tr) => {
+                    const k = tr.querySelector('.sk').value.trim();
+                    const d = tr.querySelector('.sd').value.trim();
+                    if (k) schema[k] = d;
+                });
+                return schema;
+            }
 
-addRowBtn.addEventListener('click', () => addSchemaRow());
+            addRowBtn.addEventListener('click', () => addSchemaRow());
 
-async function loadDefaultSchema() {
-  try {
-    const res = await fetch('/api/v1/ocr/extract/schema');
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
+            async function loadDefaultSchema() {
+                try {
+                    const res = await fetch('/api/v1/ocr/extract/schema');
+                    const data = await res.json();
+                    if (!res.ok)
+                        throw new Error(data.detail || 'HTTP ' + res.status);
 
-    const fields = Array.isArray(data.schema) ? data.schema : [];
-    fields.forEach(field => addSchemaRow(field.key || '', field.desc || ''));
-  } catch (err) {
-    extStatus.textContent = 'Không tải được schema mặc định: ' + err.message;
-  }
-}
+                    const fields = Array.isArray(data.schema)
+                        ? data.schema
+                        : [];
+                    fields.forEach((field) =>
+                        addSchemaRow(field.key || '', field.desc || ''),
+                    );
+                } catch (err) {
+                    extStatus.textContent =
+                        'Không tải được schema mặc định: ' + err.message;
+                }
+            }
 
-// Seed the editor from the server's merged pipeline configuration. These are
-// ordinary editable rows, so users can still change, add, or remove fields.
-loadDefaultSchema();
+            // Seed the editor from the server's merged pipeline configuration. These are
+            // ordinary editable rows, so users can still change, add, or remove fields.
+            loadDefaultSchema();
 
-// Cross-highlights the block (page, id) on hover -- `source` is which pane
-// the mouse is actually in, so we only auto-scroll the OTHER pane (scrolling
-// the pane the cursor is already inside of would fight the user's mouse).
-function setHovered(page, id, source) {
-  if (hoveredBboxEl) hoveredBboxEl.classList.remove('hovered');
-  if (hoveredMdEl) hoveredMdEl.classList.remove('highlight');
-  hoveredBboxEl = null;
-  hoveredMdEl = null;
-  if (page == null) return;
+            // Cross-highlights the block (page, id) on hover -- `source` is which pane
+            // the mouse is actually in, so we only auto-scroll the OTHER pane (scrolling
+            // the pane the cursor is already inside of would fight the user's mouse).
+            function setHovered(page, id, source) {
+                if (hoveredBboxEl) hoveredBboxEl.classList.remove('hovered');
+                if (hoveredMdEl) hoveredMdEl.classList.remove('highlight');
+                hoveredBboxEl = null;
+                hoveredMdEl = null;
+                if (page == null) return;
 
-  // Only the CURRENTLY VIEWED preview page's boxes exist in the overlay DOM
-  // (rebuilt per page change) -- if the hovered markdown block is on a
-  // different page than what's shown, there's simply no bbox to highlight.
-  hoveredBboxEl = bboxOverlay.querySelector('.bbox-box[data-block-id="' + id + '"]');
-  hoveredMdEl = mdOut.querySelector('.md-block[data-page="' + page + '"][data-block-id="' + id + '"]');
+                // Only the CURRENTLY VIEWED preview page's boxes exist in the overlay DOM
+                // (rebuilt per page change) -- if the hovered markdown block is on a
+                // different page than what's shown, there's simply no bbox to highlight.
+                hoveredBboxEl = bboxOverlay.querySelector(
+                    '.bbox-box[data-block-id="' + id + '"]',
+                );
+                hoveredMdEl = mdOut.querySelector(
+                    '.md-block[data-page="' +
+                        page +
+                        '"][data-block-id="' +
+                        id +
+                        '"]',
+                );
 
-  if (hoveredBboxEl) {
-    hoveredBboxEl.classList.add('hovered');
-    if (source === 'markdown') hoveredBboxEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
-  if (hoveredMdEl) {
-    hoveredMdEl.classList.add('highlight');
-    if (source === 'image') hoveredMdEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
-}
+                if (hoveredBboxEl) {
+                    hoveredBboxEl.classList.add('hovered');
+                    if (source === 'markdown')
+                        hoveredBboxEl.scrollIntoView({
+                            block: 'center',
+                            behavior: 'smooth',
+                        });
+                }
+                if (hoveredMdEl) {
+                    hoveredMdEl.classList.add('highlight');
+                    if (source === 'image')
+                        hoveredMdEl.scrollIntoView({
+                            block: 'center',
+                            behavior: 'smooth',
+                        });
+                }
+            }
 
-// Reproduces ONE block's slice of build_markdown()'s output (heading level
-// by layout type, table content passed through as-is, skip/empty dropped).
-function blockToMarkdown(b) {
-  const content = (b.content || '').trim();
-  if (!content) return null;
-  if (b.content_type === 'table') return content;
-  const btype = (b.type || '').toLowerCase();
-  if (TITLE_TYPES.has(btype)) return '# ' + content;
-  if (H2_TYPES.has(btype)) return '## ' + content;
-  return content;
-}
+            // Reproduces ONE block's slice of build_markdown()'s output (heading level
+            // by layout type, table content passed through as-is, skip/empty dropped).
+            function blockToMarkdown(b) {
+                const content = (b.content || '').trim();
+                if (!content) return null;
+                if (b.content_type === 'table') return content;
+                const btype = (b.type || '').toLowerCase();
+                if (TITLE_TYPES.has(btype)) return '# ' + content;
+                if (H2_TYPES.has(btype)) return '## ' + content;
+                return content;
+            }
 
-function escapeRegex(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+            function escapeRegex(s) {
+                return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
 
-// Wraps every occurrence of each extracted entity value in `mdText` with a
-// colored <mark> BEFORE it gets parsed as markdown -- `highlight.pairs` is
-// pre-sorted longest-value-first (see the extractBtn handler) so a shorter
-// value that happens to be a substring of a longer one doesn't get marked
-// (and thus excluded from the longer match) first.
-function applyEntityHighlight(mdText, highlight) {
-  if (!highlight) return mdText;
-  let result = mdText;
-  for (const { v, field } of highlight.pairs) {
-    const c = highlight.colorMap[field];
-    if (!c) continue;
-    const re = new RegExp(escapeRegex(v), 'g');
-    result = result.replace(re, m =>
-      '<mark style="background:' + c.bg + ';border-color:' + c.bd + '" title="' + escAttr(field) + '">' + m + '</mark>'
-    );
-  }
-  return result;
-}
+            // Wraps every occurrence of each extracted entity value in `mdText` with a
+            // colored <mark> BEFORE it gets parsed as markdown -- `highlight.pairs` is
+            // pre-sorted longest-value-first (see the extractBtn handler) so a shorter
+            // value that happens to be a substring of a longer one doesn't get marked
+            // (and thus excluded from the longer match) first.
+            function applyEntityHighlight(mdText, highlight) {
+                if (!highlight) return mdText;
+                let result = mdText;
+                for (const { v, field } of highlight.pairs) {
+                    const c = highlight.colorMap[field];
+                    if (!c) continue;
+                    const re = new RegExp(escapeRegex(v), 'g');
+                    // result = result.replace(re, m =>
+                    //   '<mark style="background:' + c.bg + ';border-color:' + c.bd + '" title="' + escAttr(field) + '">' + m + '</mark>'
+                    // );
+                }
+                return result;
+            }
 
-// Rebuilds the Markdown pane from data.json (NOT from data.markdown directly)
-// so every rendered chunk can be wrapped in a .md-block tagged with
-// data-page/data-block-id -- that tag is what setHovered() looks up. Content
-// and formatting match data.markdown exactly, just split per source block.
-// `highlight` (optional, from the Entities tab's last successful extraction)
-// wraps matching values in <mark> -- applied to each block's OWN markdown
-// source before parsing, so the .md-block hover-link wrapper survives.
-function renderMarkdownPane(jsonData, highlight) {
-  mdOut.innerHTML = '';
-  let lastPage = null;
-  for (const pageObj of jsonData.pages) {
-    for (const b of pageObj.blocks) {
-      if (b.content_type === 'skip') continue;
-      const md = blockToMarkdown(b);
-      if (md === null) continue;
+            // Rebuilds the Markdown pane from data.json (NOT from data.markdown directly)
+            // so every rendered chunk can be wrapped in a .md-block tagged with
+            // data-page/data-block-id -- that tag is what setHovered() looks up. Content
+            // and formatting match data.markdown exactly, just split per source block.
+            // `highlight` (optional, from the Entities tab's last successful extraction)
+            // wraps matching values in <mark> -- applied to each block's OWN markdown
+            // source before parsing, so the .md-block hover-link wrapper survives.
+            function renderMarkdownPane(jsonData, highlight) {
+                mdOut.innerHTML = '';
+                let lastPage = null;
+                for (const pageObj of jsonData.pages) {
+                    for (const b of pageObj.blocks) {
+                        if (b.content_type === 'skip') continue;
+                        const md = blockToMarkdown(b);
+                        if (md === null) continue;
 
-      if (pageObj.page !== lastPage) {
-        const divider = document.createElement('div');
-        divider.className = 'md-page-divider';
-        divider.textContent = 'Trang ' + pageObj.page;
-        mdOut.appendChild(divider);
-        lastPage = pageObj.page;
-      }
+                        if (pageObj.page !== lastPage) {
+                            const divider = document.createElement('div');
+                            divider.className = 'md-page-divider';
+                            divider.textContent = 'Trang ' + pageObj.page;
+                            mdOut.appendChild(divider);
+                            lastPage = pageObj.page;
+                        }
 
-      const finalMd = applyEntityHighlight(md, highlight);
-      const wrap = document.createElement('div');
-      wrap.className = 'md-block';
-      wrap.dataset.page = pageObj.page;
-      wrap.dataset.blockId = b.id;
-      wrap.innerHTML = window.marked ? marked.parse(finalMd) : finalMd;
-      wrap.addEventListener('mouseenter', () => setHovered(pageObj.page, b.id, 'markdown'));
-      wrap.addEventListener('mouseleave', () => setHovered(null, null));
-      mdOut.appendChild(wrap);
-    }
-  }
-  if (!mdOut.children.length) {
-    mdOut.innerHTML = '<span class="placeholder">Chưa có kết quả</span>';
-  }
-}
+                        const finalMd = applyEntityHighlight(md, highlight);
+                        const wrap = document.createElement('div');
+                        wrap.className = 'md-block';
+                        wrap.dataset.page = pageObj.page;
+                        wrap.dataset.blockId = b.id;
+                        wrap.innerHTML = window.marked
+                            ? marked.parse(finalMd)
+                            : finalMd;
+                        wrap.addEventListener('mouseenter', () =>
+                            setHovered(pageObj.page, b.id, 'markdown'),
+                        );
+                        wrap.addEventListener('mouseleave', () =>
+                            setHovered(null, null),
+                        );
+                        mdOut.appendChild(wrap);
+                    }
+                }
+                if (!mdOut.children.length) {
+                    mdOut.innerHTML =
+                        '<span class="placeholder">Chưa có kết quả</span>';
+                }
+            }
 
-const TAB_PANES = { json: jsonOut, preview: previewPane, entities: entitiesPane };
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const activeKey = tab.dataset.tab;
-    for (const [key, pane] of Object.entries(TAB_PANES)) {
-      pane.classList.toggle('active', key === activeKey);
-    }
-    if (activeKey === 'preview' && lastOcrData) renderPreviewPage(currentPreviewPage);
-  });
-});
+            const TAB_PANES = {
+                json: jsonOut,
+                preview: previewPane,
+                entities: entitiesPane,
+            };
+            tabs.forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach((t) => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const activeKey = tab.dataset.tab;
+                    for (const [key, pane] of Object.entries(TAB_PANES)) {
+                        pane.classList.toggle('active', key === activeKey);
+                    }
+                    if (activeKey === 'preview' && lastOcrData)
+                        renderPreviewPage(currentPreviewPage);
+                });
+            });
 
-const ENT_RESULT_PANES = { chips: entResults, json: entJsonOut };
-entResultTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    entResultTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const activeKey = tab.dataset.entTab;
-    for (const [key, pane] of Object.entries(ENT_RESULT_PANES)) {
-      pane.classList.toggle('active', key === activeKey);
-    }
-  });
-});
+            const ENT_RESULT_PANES = { chips: entResults, json: entJsonOut };
+            entResultTabs.forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    entResultTabs.forEach((t) => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const activeKey = tab.dataset.entTab;
+                    for (const [key, pane] of Object.entries(
+                        ENT_RESULT_PANES,
+                    )) {
+                        pane.classList.toggle('active', key === activeKey);
+                    }
+                });
+            });
 
-prevPageBtn.addEventListener('click', () => {
-  if (currentPreviewPage > 1) renderPreviewPage(currentPreviewPage - 1);
-});
-nextPageBtn.addEventListener('click', () => {
-  const total = lastOcrData ? lastOcrData.json.pages.length : 1;
-  if (currentPreviewPage < total) renderPreviewPage(currentPreviewPage + 1);
-});
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPreviewPage > 1)
+                    renderPreviewPage(currentPreviewPage - 1);
+            });
+            nextPageBtn.addEventListener('click', () => {
+                const total = lastOcrData ? lastOcrData.json.pages.length : 1;
+                if (currentPreviewPage < total)
+                    renderPreviewPage(currentPreviewPage + 1);
+            });
 
-// Loads an <img> from `src` and resolves once it has decoded -- wraps the
-// load/error events in a promise so renderPreviewPage() can just await it.
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Không tải được ảnh: ' + src));
-    img.src = src;
-  });
-}
+            // Loads an <img> from `src` and resolves once it has decoded -- wraps the
+            // load/error events in a promise so renderPreviewPage() can just await it.
+            function loadImage(src) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () =>
+                        reject(new Error('Không tải được ảnh: ' + src));
+                    img.src = src;
+                });
+            }
 
-async function renderPreviewPage(pageNum) {
-  if (!lastOcrData) return;
-  currentPreviewPage = pageNum;
-  const pages = lastOcrData.json.pages;
-  const total = pages.length;
-  const pageData = pages[pageNum - 1] || {};
+            async function renderPreviewPage(pageNum) {
+                if (!lastOcrData) return;
+                currentPreviewPage = pageNum;
+                const pages = lastOcrData.json.pages;
+                const total = pages.length;
+                const pageData = pages[pageNum - 1] || {};
 
-  pageNav.style.display = total > 1 ? 'flex' : 'none';
-  pageIndicator.textContent = 'Trang ' + pageNum + ' / ' + total;
-  prevPageBtn.disabled = pageNum <= 1;
-  nextPageBtn.disabled = pageNum >= total;
+                pageNav.style.display = total > 1 ? 'flex' : 'none';
+                pageIndicator.textContent = 'Trang ' + pageNum + ' / ' + total;
+                prevPageBtn.disabled = pageNum <= 1;
+                nextPageBtn.disabled = pageNum >= total;
 
-  // page_image is the EXACT image layout/OCR ran on server-side (post
-  // whitespace-crop/deskew/orientation -- see DocumentPipeline.process_pdf),
-  // saved and served just for this preview. Every block's bbox is already
-  // relative to THIS image directly, no coordinate correction needed --
-  // only /ocr/pdf (what this UI calls) populates it; /pdfs and /images leave
-  // it null since they don't save preview images (see build_json()).
-  if (!pageData.page_image) {
-    previewCanvasWrap.style.display = 'none';
-    previewPlaceholder.style.display = '';
-    previewPlaceholder.textContent = 'Server không trả ảnh preview cho trang này';
-    return;
-  }
+                // page_image is the EXACT image layout/OCR ran on server-side (post
+                // whitespace-crop/deskew/orientation -- see DocumentPipeline.process_pdf),
+                // saved and served just for this preview. Every block's bbox is already
+                // relative to THIS image directly, no coordinate correction needed --
+                // only /ocr/pdf (what this UI calls) populates it; /pdfs and /images leave
+                // it null since they don't save preview images (see build_json()).
+                if (!pageData.page_image) {
+                    previewCanvasWrap.style.display = 'none';
+                    previewPlaceholder.style.display = '';
+                    previewPlaceholder.textContent =
+                        'Server không trả ảnh preview cho trang này';
+                    return;
+                }
 
-  let img;
-  try {
-    img = await loadImage(pageData.page_image);
-  } catch (err) {
-    previewCanvasWrap.style.display = 'none';
-    previewPlaceholder.style.display = '';
-    previewPlaceholder.textContent = err.message;
-    return;
-  }
-  if (currentPreviewPage !== pageNum) return; // a newer page nav click won the race
+                let img;
+                try {
+                    img = await loadImage(pageData.page_image);
+                } catch (err) {
+                    previewCanvasWrap.style.display = 'none';
+                    previewPlaceholder.style.display = '';
+                    previewPlaceholder.textContent = err.message;
+                    return;
+                }
+                if (currentPreviewPage !== pageNum) return; // a newer page nav click won the race
 
-  previewPlaceholder.style.display = 'none';
-  previewCanvasWrap.style.display = '';
-  previewCanvas.width = img.naturalWidth;
-  previewCanvas.height = img.naturalHeight;
-  previewCanvas.getContext('2d').drawImage(img, 0, 0);
+                previewPlaceholder.style.display = 'none';
+                previewCanvasWrap.style.display = '';
+                previewCanvas.width = img.naturalWidth;
+                previewCanvas.height = img.naturalHeight;
+                previewCanvas.getContext('2d').drawImage(img, 0, 0);
 
-  // Boxes are positioned as PERCENTAGES of the canvas's own pixel size
-  // (== the image's natural size, same coordinate space as bbox) rather
-  // than fixed px -- so they stay aligned to the page image regardless of
-  // how much the canvas itself gets CSS-scaled down (max-width:100% above)
-  // to fit the column, with no resize listener needed.
-  setHovered(null, null);
-  bboxOverlay.innerHTML = '';
-  const blocks = pageData.blocks || [];
-  for (const b of blocks) {
-    const [x0, y0, x1, y1] = b.bbox;
-    const color = BBOX_COLORS[b.content_type] || BBOX_COLORS.text;
+                // Boxes are positioned as PERCENTAGES of the canvas's own pixel size
+                // (== the image's natural size, same coordinate space as bbox) rather
+                // than fixed px -- so they stay aligned to the page image regardless of
+                // how much the canvas itself gets CSS-scaled down (max-width:100% above)
+                // to fit the column, with no resize listener needed.
+                setHovered(null, null);
+                bboxOverlay.innerHTML = '';
+                const blocks = pageData.blocks || [];
+                for (const b of blocks) {
+                    const [x0, y0, x1, y1] = b.bbox;
+                    const color =
+                        BBOX_COLORS[b.content_type] || BBOX_COLORS.text;
 
-    const box = document.createElement('div');
-    box.className = 'bbox-box';
-    box.dataset.blockId = b.id;
-    box.style.borderColor = color;
-    box.style.left = (x0 / img.naturalWidth * 100) + '%';
-    box.style.top = (y0 / img.naturalHeight * 100) + '%';
-    box.style.width = ((x1 - x0) / img.naturalWidth * 100) + '%';
-    box.style.height = ((y1 - y0) / img.naturalHeight * 100) + '%';
+                    const box = document.createElement('div');
+                    box.className = 'bbox-box';
+                    box.dataset.blockId = b.id;
+                    box.style.borderColor = color;
+                    box.style.left = (x0 / img.naturalWidth) * 100 + '%';
+                    box.style.top = (y0 / img.naturalHeight) * 100 + '%';
+                    box.style.width =
+                        ((x1 - x0) / img.naturalWidth) * 100 + '%';
+                    box.style.height =
+                        ((y1 - y0) / img.naturalHeight) * 100 + '%';
 
-    const label = document.createElement('span');
-    label.className = 'bbox-label';
-    label.style.background = color;
-    label.textContent = b.id;
-    box.appendChild(label);
+                    const label = document.createElement('span');
+                    label.className = 'bbox-label';
+                    label.style.background = color;
+                    label.textContent = b.id;
+                    box.appendChild(label);
 
-    box.addEventListener('mouseenter', () => setHovered(pageNum, b.id, 'image'));
-    box.addEventListener('mouseleave', () => setHovered(null, null));
-    bboxOverlay.appendChild(box);
-  }
-}
+                    box.addEventListener('mouseenter', () =>
+                        setHovered(pageNum, b.id, 'image'),
+                    );
+                    box.addEventListener('mouseleave', () =>
+                        setHovered(null, null),
+                    );
+                    bboxOverlay.appendChild(box);
+                }
+            }
 
-function setFile(file) {
-  if (!file) return;
-  if (!file.name.toLowerCase().endsWith('.pdf')) {
-    statusEl.className = 'status err';
-    statusEl.textContent = 'Chỉ chấp nhận file .pdf';
-    return;
-  }
-  selectedFile = file;
-  filenameEl.textContent = file.name + '  (' + (file.size / 1024).toFixed(0) + ' KB)';
-  submitBtn.disabled = false;
-  statusEl.className = 'status';
-  statusEl.textContent = '';
-  resetPreview();
-}
+            function setFile(file) {
+                if (!file) return;
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    statusEl.className = 'status err';
+                    statusEl.textContent = 'Chỉ chấp nhận file .pdf';
+                    return;
+                }
+                selectedFile = file;
+                filenameEl.textContent =
+                    file.name + '  (' + (file.size / 1024).toFixed(0) + ' KB)';
+                submitBtn.disabled = false;
+                statusEl.className = 'status';
+                statusEl.textContent = '';
+                resetPreview();
+            }
 
-fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+            fileInput.addEventListener('change', () =>
+                setFile(fileInput.files[0]),
+            );
 
-['dragenter', 'dragover'].forEach(evt =>
-  dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); })
-);
-['dragleave', 'drop'].forEach(evt =>
-  dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag'); })
-);
-dropzone.addEventListener('drop', e => {
-  const file = e.dataTransfer.files && e.dataTransfer.files[0];
-  setFile(file);
-});
+            ['dragenter', 'dragover'].forEach((evt) =>
+                dropzone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('drag');
+                }),
+            );
+            ['dragleave', 'drop'].forEach((evt) =>
+                dropzone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('drag');
+                }),
+            );
+            dropzone.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                setFile(file);
+            });
 
-extractBtn.addEventListener('click', async () => {
-  if (!lastOcrData) return;
-  const schema = getSchema();
-  const fields = Object.keys(schema);
-  if (!fields.length) {
-    extStatus.textContent = 'Thêm ít nhất một trường trước khi trích xuất.';
-    return;
-  }
+            extractBtn.addEventListener('click', async () => {
+                if (!lastOcrData) return;
+                const schema = getSchema();
+                const fields = Object.keys(schema);
+                if (!fields.length) {
+                    extStatus.textContent =
+                        'Thêm ít nhất một trường trước khi trích xuất.';
+                    return;
+                }
 
-  extractBtn.disabled = true;
-  extStatus.innerHTML = '<span class="spinner"></span>Đang trích xuất...';
-  entResults.innerHTML = '<span class="placeholder">Đang chạy model...</span>';
-  entJsonOut.innerHTML = '<span class="placeholder">Đang chạy model...</span>';
+                extractBtn.disabled = true;
+                extStatus.innerHTML =
+                    '<span class="spinner"></span>Đang trích xuất...';
+                entResults.innerHTML =
+                    '<span class="placeholder">Đang chạy model...</span>';
+                entJsonOut.innerHTML =
+                    '<span class="placeholder">Đang chạy model...</span>';
 
-  try {
-    const res = await fetch('/api/v1/ocr/extract', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: lastOcrData.markdown || '', schema }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
+                try {
+                    const res = await fetch('/api/v1/ocr/extract', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: lastOcrData.markdown || '',
+                            schema,
+                        }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok)
+                        throw new Error(data.detail || 'HTTP ' + res.status);
 
-    extStatus.textContent = 'Xong';
-    const entities = data.entities || {};
-    entJsonOut.textContent = JSON.stringify(entities, null, 2);
+                    extStatus.textContent = 'Xong';
+                    const entities = data.entities || {};
+                    entJsonOut.textContent = JSON.stringify(entities, null, 2);
 
-    const colorMap = {};
-    fields.forEach((f, i) => { colorMap[f] = ENTITY_PALETTE[i % ENTITY_PALETTE.length]; });
+                    const colorMap = {};
+                    fields.forEach((f, i) => {
+                        colorMap[f] = ENTITY_PALETTE[i % ENTITY_PALETTE.length];
+                    });
 
-    entResults.innerHTML = '';
-    for (const field of fields) {
-      const c = colorMap[field];
-      const vals = entities[field] || [];
+                    entResults.innerHTML = '';
+                    for (const field of fields) {
+                        const c = colorMap[field];
+                        const vals = entities[field] || [];
 
-      const block = document.createElement('div');
-      block.className = 'field-block';
+                        const block = document.createElement('div');
+                        block.className = 'field-block';
 
-      const nameEl = document.createElement('div');
-      nameEl.className = 'field-name';
-      nameEl.innerHTML = '<span class="field-dot" style="background:' + c.dot + '"></span><span>' + escAttr(field) + '</span>';
-      block.appendChild(nameEl);
+                        const nameEl = document.createElement('div');
+                        nameEl.className = 'field-name';
+                        nameEl.innerHTML =
+                            '<span class="field-dot" style="background:' +
+                            c.dot +
+                            '"></span><span>' +
+                            escAttr(field) +
+                            '</span>';
+                        block.appendChild(nameEl);
 
-      const valsEl = document.createElement('div');
-      valsEl.className = 'field-vals';
-      if (vals.length) {
-        for (const v of vals) {
-          const chip = document.createElement('span');
-          chip.className = 'chip';
-          chip.style.cssText = 'background:' + c.bg + ';border-color:' + c.bd;
-          chip.textContent = v;
-          valsEl.appendChild(chip);
-        }
-      } else {
-        const empty = document.createElement('span');
-        empty.className = 'chip-empty';
-        empty.textContent = 'không tìm thấy';
-        valsEl.appendChild(empty);
-      }
-      block.appendChild(valsEl);
-      entResults.appendChild(block);
-    }
+                        const valsEl = document.createElement('div');
+                        valsEl.className = 'field-vals';
+                        if (vals.length) {
+                            for (const v of vals) {
+                                const chip = document.createElement('span');
+                                chip.className = 'chip';
+                                chip.style.cssText =
+                                    'background:' +
+                                    c.bg +
+                                    ';border-color:' +
+                                    c.bd;
+                                chip.textContent = v;
+                                valsEl.appendChild(chip);
+                            }
+                        } else {
+                            const empty = document.createElement('span');
+                            empty.className = 'chip-empty';
+                            empty.textContent = 'không tìm thấy';
+                            valsEl.appendChild(empty);
+                        }
+                        block.appendChild(valsEl);
+                        entResults.appendChild(block);
+                    }
 
-    // Longest value first -- see applyEntityHighlight()'s comment.
-    const pairs = [];
-    for (const [field, vals] of Object.entries(entities)) {
-      for (const v of vals) if (v) pairs.push({ v, field });
-    }
-    pairs.sort((a, b) => b.v.length - a.v.length);
+                    // Longest value first -- see applyEntityHighlight()'s comment.
+                    const pairs = [];
+                    for (const [field, vals] of Object.entries(entities)) {
+                        for (const v of vals) if (v) pairs.push({ v, field });
+                    }
+                    pairs.sort((a, b) => b.v.length - a.v.length);
 
-    lastEntityHighlight = { pairs, colorMap };
-    renderMarkdownPane(lastOcrData.json, lastEntityHighlight);
-  } catch (err) {
-    extStatus.textContent = 'Lỗi: ' + err.message;
-    entResults.innerHTML = '<span class="placeholder">Trích xuất thất bại.</span>';
-    entJsonOut.innerHTML = '<span class="placeholder">Trích xuất thất bại.</span>';
-  } finally {
-    extractBtn.disabled = false;
-  }
-});
+                    lastEntityHighlight = { pairs, colorMap };
+                    renderMarkdownPane(lastOcrData.json, lastEntityHighlight);
+                } catch (err) {
+                    extStatus.textContent = 'Lỗi: ' + err.message;
+                    entResults.innerHTML =
+                        '<span class="placeholder">Trích xuất thất bại.</span>';
+                    entJsonOut.innerHTML =
+                        '<span class="placeholder">Trích xuất thất bại.</span>';
+                } finally {
+                    extractBtn.disabled = false;
+                }
+            });
 
-submitBtn.addEventListener('click', async () => {
-  if (!selectedFile) return;
-  submitBtn.disabled = true;
-  statusEl.className = 'status';
-  statusEl.innerHTML = '<span class="spinner"></span>Đang xử lý...';
-  jsonOut.innerHTML = '<span class="placeholder">Đang xử lý...</span>';
-  mdOut.innerHTML = '<span class="placeholder">Đang xử lý...</span>';
-  resetPreview();
-  previewPlaceholder.textContent = 'Đang xử lý...';
+            submitBtn.addEventListener('click', async () => {
+                if (!selectedFile) return;
+                submitBtn.disabled = true;
+                statusEl.className = 'status';
+                statusEl.innerHTML =
+                    '<span class="spinner"></span>Đang xử lý...';
+                jsonOut.innerHTML =
+                    '<span class="placeholder">Đang xử lý...</span>';
+                mdOut.innerHTML =
+                    '<span class="placeholder">Đang xử lý...</span>';
+                resetPreview();
+                previewPlaceholder.textContent = 'Đang xử lý...';
 
-  const formData = new FormData();
-  formData.append('file', selectedFile);
+                const formData = new FormData();
+                formData.append('file', selectedFile);
 
-  try {
-    const res = await fetch('/api/v1/ocr/pdf', {
-      method: 'POST',
-      body: formData,
-      // Bypasses ngrok's free-tier HTML warning interstitial, which
-      // otherwise intercepts non-navigation requests (fetch/XHR) and
-      // returns an HTML page instead of the actual JSON response.
-      headers: { 'ngrok-skip-browser-warning': 'true' },
-    });
-    const data = await res.json();
+                try {
+                    const res = await fetch('/api/v1/ocr/pdf', {
+                        method: 'POST',
+                        body: formData,
+                        // Bypasses ngrok's free-tier HTML warning interstitial, which
+                        // otherwise intercepts non-navigation requests (fetch/XHR) and
+                        // returns an HTML page instead of the actual JSON response.
+                        headers: { 'ngrok-skip-browser-warning': 'true' },
+                    });
+                    const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.detail || ('HTTP ' + res.status));
-    }
+                    if (!res.ok) {
+                        throw new Error(data.detail || 'HTTP ' + res.status);
+                    }
 
-    statusEl.className = 'status ok';
-    statusEl.textContent = 'Xong: ' + data.file;
+                    statusEl.className = 'status ok';
+                    statusEl.textContent = 'Xong: ' + data.file;
 
-    jsonOut.textContent = JSON.stringify(data.json, null, 2);
+                    jsonOut.textContent = JSON.stringify(data.json, null, 2);
 
-    lastOcrData = data;
-    previewPlaceholder.textContent = 'Chưa có kết quả';
-    if (document.querySelector('.tab.active').dataset.tab === 'preview') {
-      renderPreviewPage(1);
-    }
+                    lastOcrData = data;
+                    previewPlaceholder.textContent = 'Chưa có kết quả';
+                    if (
+                        document.querySelector('.tab.active').dataset.tab ===
+                        'preview'
+                    ) {
+                        renderPreviewPage(1);
+                    }
 
-    extractBtn.disabled = false;
-    renderMarkdownPane(data.json, lastEntityHighlight);
-  } catch (err) {
-    statusEl.className = 'status err';
-    statusEl.textContent = 'Lỗi: ' + err.message;
-    jsonOut.innerHTML = '<span class="placeholder">Chưa có kết quả</span>';
-    mdOut.innerHTML = '<span class="placeholder">Chưa có kết quả</span>';
-    previewPlaceholder.textContent = 'Chưa có kết quả';
-  } finally {
-    submitBtn.disabled = false;
-  }
-});
-</script>
-</body>
+                    extractBtn.disabled = false;
+                    renderMarkdownPane(data.json, lastEntityHighlight);
+                } catch (err) {
+                    statusEl.className = 'status err';
+                    statusEl.textContent = 'Lỗi: ' + err.message;
+                    jsonOut.innerHTML =
+                        '<span class="placeholder">Chưa có kết quả</span>';
+                    mdOut.innerHTML =
+                        '<span class="placeholder">Chưa có kết quả</span>';
+                    previewPlaceholder.textContent = 'Chưa có kết quả';
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+        </script>
+    </body>
 </html>

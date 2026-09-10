@@ -1,0 +1,34 @@
+{
+  "reviewed_json_count": 30,
+  "changed_values": 156,
+  "remaining_pdf_count": 39,
+  "remaining_json_count": 39,
+  "all_remaining_pdfs_byte_identical": true,
+  "user_checked_jsons_byte_identical": [
+    "155.2020_Nd-CP_-_huong_dan_LCK.json",
+    "116.2020_TT-BTC.json",
+    "126-v_2021-01-19_1.json",
+    "434-bn_2021-01-08_1.json",
+    "10247-bn_2017-04-28_0850_1.json",
+    "125-v_2021-01-19_1.json",
+    "10608-bn_2017-05-04_1624_1.json",
+    "121.2020_TT-BTC.json",
+    "4623-bn_2020-03-05_1.json"
+  ],
+  "schema_and_value_types_valid": true,
+  "deleted_only_authorized_pair": [
+    {
+      "file": "155.2020_Nd-CP_-_huong_dan_LCK_-_Phu_luc.pdf",
+      "sha256": "adbdc9eb38c1148289dacf8f84b49e867c279c431a15a6799444e818ff385bf8"
+    },
+    {
+      "file": "155.2020_Nd-CP_-_huong_dan_LCK_-_Phu_luc.json",
+      "sha256": "018fb4c1584a1f3a316719a9d99677d4c3cf11a295be57db8c285ffdbe06385b"
+    }
+  ],
+  "hsx_source_article_and_attachment_matches": 19,
+  "hnx_detail_urls_missing": 11,
+  "hnx_live_verification": "TLS certificate issuer failure; existing PDF source links retained",
+  "no_ocr_api_called": true,
+  "env_file_not_read": true
+}

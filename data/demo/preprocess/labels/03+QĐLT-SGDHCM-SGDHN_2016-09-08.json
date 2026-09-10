@@ -1,0 +1,84 @@
+{
+    "information": [
+        {
+            "type": {
+                "value": "QUYẾT ĐỊNH LIÊN TỊCH",
+                "type": "string"
+            },
+            "title": {
+                "value": "Ban hành Quy tắc xây dựng và quản lý Chỉ số VNX Allshare",
+                "type": "string"
+            },
+            "code": {
+                "value": "03/QĐLT-SGDHCM-SGDHN",
+                "type": "string"
+            },
+            "documentDate": {
+                "value": "08/09/2016",
+                "type": "string"
+            },
+            "officeSender": {
+                "value": "SỞ GIAO DỊCH CHỨNG KHOÁN TP.HCM - SỞ GIAO DỊCH CHỨNG KHOÁN HÀ NỘI",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "",
+                "type": "string"
+            },
+            "recipients": {
+                "value": "Như điều 3; UBCKNN (để b/c); Trung tâm lưu ký chứng khoán Việt Nam.",
+                "type": "string"
+            },
+            "signer_title": {
+                "value": "SỞ GDCK HÀ NỘI TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH; SỞ GDCK TP.HCM TM. HỘI ĐỒNG QUẢN TRỊ CHỦ TỊCH",
+                "type": "string"
+            },
+            "signer": {
+                "value": "Nguyễn Thành Long; Trần Đắc Sinh",
+                "type": "string"
+            },
+            "province": {
+                "value": "Thành phố Hồ Chí Minh",
+                "type": "string"
+            },
+            "receiverDate": {
+                "value": "",
+                "type": "string"
+            },
+            "priority_level": {
+                "value": "0_BÌNH THƯỜNG",
+                "type": "string"
+            },
+            "security_level": {
+                "value": "0_BÌNH THƯỜNG",
+                "type": "string"
+            }
+        }
+    ],
+    "metadata": {
+        "document_format": {
+            "value": "print",
+            "type": "string"
+        },
+        "has_handwriting": {
+            "value": true,
+            "type": "boolean"
+        },
+        "field": {
+            "value": "Chứng khoán",
+            "type": "string"
+        },
+        "source_name": {
+            "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
+            "type": "string"
+        },
+        "source_url_detail": {
+            "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281518",
+            "type": "string"
+        },
+        "source_url_pdf": {
+            "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/d579b2e262a746fc969f5f45a98019ab/20160920_Ban hanh_Quy tac Chi so VNX Allshare.pdf",
+            "type": "string"
+        }
+    }
+}
