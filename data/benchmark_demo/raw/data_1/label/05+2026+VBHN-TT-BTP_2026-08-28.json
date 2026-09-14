@@ -1,6 +1,4 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
@@ -55,15 +53,15 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "print",
             "type": "string"
         },
         "has_handwriting": {
-            "value": true,
+            "value": false,
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Nội chính - An ninh",
             "type": "string"
         },
         "source_name": {
@@ -71,11 +69,7 @@
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
-            "type": "string"
-        },
-        "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219305",
             "type": "string"
         }
     }

@@ -1,30 +1,28 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "Quyết định",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Ban hành Quy tắc ứng xử nghề nghiệp của người làm công tác thư viện",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "3815/QĐ-BVHTTDL",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "30/12/2022",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "BỘ VĂN HÓA, THỂ THAO VÀ DU LỊCH",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Như Điều 3; Thủ tướng và các Phó Thủ tướng Chính phủ (để báo cáo); Ban Tuyên giáo Trung ương; Ủy ban Văn hóa, Giáo dục của Quốc hội; Bộ VHTTDL: Bộ trưởng, các Thứ trưởng Các đơn vị thuộc Bộ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; UBND các tỉnh, thành phố trực thuộc Trung ương; Sở VHTTDL, VHTTTTDL, VHTT; Các Thư viện, Trung tâm Thông tin - Thư viện và tương đương; Hội Thư viện Việt Nam; Cổng TTĐT Bộ VHTTDL; Báo Văn hóa; Báo ĐT Tổ quốc.",
                 "type": "string"
             },
             "signer_title": {
@@ -32,7 +30,7 @@
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Trịnh Thị Thủy",
                 "type": "string"
             },
             "province": {
@@ -55,27 +53,23 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "print",
             "type": "string"
         },
         "has_handwriting": {
-            "value": true,
+            "value": false,
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Văn hóa - Thể thao - Du lịch",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Cổng TTĐT Bộ Văn hóa, Thể thao và Du lịch",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
-            "type": "string"
-        },
-        "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://bvhttdl.gov.vn/uploads/vanban/2025/12/17/110483/qd3815-1672802663467688046394.pdf",
             "type": "string"
         }
     }

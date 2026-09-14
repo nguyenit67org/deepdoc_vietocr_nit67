@@ -1,30 +1,28 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "Quyết định",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Ban hành Quy chế phát ngôn và cung cấp thông tin cho báo chí của Bộ Xây dựng",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "1432/QĐ-BXD",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "14/08/2026",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "BỘ XÂY DỰNG",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Như Điều 3; Bộ trưởng (để b/c); Ban Tuyên giáo Trung ương; Văn phòng Chính phủ; Bộ Văn hóa, Thể thao và Du lịch; Các Thứ trưởng Bộ Xây dựng; Đảng ủy Bộ Xây dựng; Công đoàn Xây dựng Việt Nam; Đoàn TNCS Hồ Chí Minh Bộ Xây dựng; Các cơ quan, đơn vị thuộc Bộ; Cổng TTĐT Chính phủ; Các cơ quan thông tấn báo chí.",
                 "type": "string"
             },
             "signer_title": {
@@ -32,7 +30,7 @@
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Nguyễn Danh Huy",
                 "type": "string"
             },
             "province": {
@@ -55,27 +53,23 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "print",
             "type": "string"
         },
         "has_handwriting": {
-            "value": true,
+            "value": false,
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Thông tin và Truyền thông",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Cổng TTĐT Cục Hàng không Việt Nam",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
-            "type": "string"
-        },
-        "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://caa.gov.vn/van-ban/1432-qd-bxd-32963.htm",
             "type": "string"
         }
     }

@@ -1,30 +1,28 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "Quyết định",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Về việc điều chỉnh dự toán chi ngân sách nhà nước năm 2026",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "2246/QĐ-BTC",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "17/08/2026",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "BỘ TÀI CHÍNH",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Như Điều 3; Bộ trưởng Ngô Văn Tuấn (để b/c); Các Vụ: NSNN, KTN; Kiểm toán Nhà nước; Kho bạc Nhà nước; Kho bạc Nhà nước nơi giao dịch (gửi qua đơn vị sử dụng ngân sách); Cục CNTT (để công khai).",
                 "type": "string"
             },
             "signer_title": {
@@ -32,7 +30,7 @@
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Nguyễn Thị Bích Ngọc",
                 "type": "string"
             },
             "province": {
@@ -55,7 +53,7 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "scan",
             "type": "string"
         },
         "has_handwriting": {
@@ -63,19 +61,15 @@
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Tài chính - Ngân sách",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Cổng TTĐT Bộ Tài chính",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
-            "type": "string"
-        },
-        "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://vbpq.mof.gov.vn/Detail?contentType=LegalDocument_VBDH&id=611870&tab=4",
             "type": "string"
         }
     }

@@ -1,0 +1,78 @@
+{
+    "information": {
+        "type": {
+            "value": "Công văn",
+            "type": "string"
+        },
+        "title": {
+            "value": "V/v triển khai thực hiện Công điện số 83/CĐ-TTg ngày 07/6/2025 của Thủ tướng Chính phủ tiếp tục đẩy mạnh phân cấp, phân quyền; phân định thẩm quyền trong các lĩnh vực",
+            "type": "string"
+        },
+        "code": {
+            "value": "5324/UBND-TH",
+            "type": "string"
+        },
+        "documentDate": {
+            "value": "11/06/2025",
+            "type": "string"
+        },
+        "officeSender": {
+            "value": "ỦY BAN NHÂN DÂN/TỈNH NGHỆ AN",
+            "type": "string"
+        },
+        "recipients": {
+            "value": "Như trên; Chủ tịch, các PCT UBND tỉnh; UBND các huyện, thành phố, thị xã; Chánh VP UBND tỉnh;",
+            "type": "string"
+        },
+        "signer": {
+            "value": "Đặng Thanh Tùng",
+            "type": "string"
+        },
+        "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+        },
+        "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+        },
+        "receiverDate": {
+            "value": null,
+            "type": "string"
+        },
+        "signer_title": {
+            "value": "TL. CHỦ TỊCH; CHÁNH VĂN PHÒNG",
+            "type": "string"
+        },
+        "province": {
+            "value": "Nghệ An",
+            "type": "string"
+        }
+    },
+    "metadata": {
+        "source_name": {
+            "value": "Cổng thông tin điện tử tỉnh Nghệ An",
+            "type": "string"
+        },
+        "source_url_detail": {
+            "value": "https://www.nghean.gov.vn/?p_steering=87551&pageid=71897",
+            "type": "string"
+        },
+        "source_url_pdf": {
+            "value": "https://datafiles.nghean.gov.vn/nan-ubnd/1/steeringdocument/5324144640_202506110257329409420250611025736182_Signed.pdf",
+            "type": "string"
+        },
+        "field": {
+            "value": "Hành chính",
+            "type": "string"
+        },
+        "document_format": {
+            "value": "scan",
+            "type": "string"
+        },
+        "has_handwriting": {
+            "value": true,
+            "type": "boolean"
+        }
+    }
+}

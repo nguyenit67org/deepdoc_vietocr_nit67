@@ -1,30 +1,32 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "QUYẾT ĐỊNH",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Ban hành Điều lệ tổ chức và hoạt động của Sở Giao dịch Chứng khoán thành phố Hồ Chí Minh",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "2399/QĐ-BTC",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "21/11/2017",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "BỘ TÀI CHÍNH",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Như Điều 3; TTCP, các Phó TTCP; Các Bộ: KHĐT, NHNN, Tư Pháp, LĐTBXH; UBND: TP HN, TP HCM; Các đơn vị thuộc Bộ; Website Bộ Tài chính.",
                 "type": "string"
             },
             "signer_title": {
@@ -32,7 +34,7 @@
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Trần Văn Hiếu",
                 "type": "string"
             },
             "province": {
@@ -55,27 +57,27 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "scan",
             "type": "string"
         },
         "has_handwriting": {
-            "value": true,
+            "value": false,
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Chứng khoán",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
+            "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281519",
             "type": "string"
         },
         "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/02b92c281643493a8aba18b1ff56acc0/20171205_Dieu le So 2017 so 2399.pdf",
             "type": "string"
         }
     }

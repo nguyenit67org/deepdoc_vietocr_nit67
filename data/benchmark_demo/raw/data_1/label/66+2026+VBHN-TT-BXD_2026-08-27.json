@@ -1,6 +1,4 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
@@ -8,23 +6,23 @@
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Quy định trình tự, thủ tục cấp mới, cấp lại, tạm đình chỉ hoạt động, thu hồi giấy chứng nhận đủ điều kiện hoạt động kiểm định xe cơ giới của cơ sở đăng kiểm xe cơ giới, cơ sở kiểm định khí thải xe mô tô, xe gắn máy",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "66/2026/VBHN-TT-BXD",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "27/08/2026",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "BỘ XÂY DỰNG",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Bộ trưởng (để b/c); Văn phòng Chính phủ (để đăng Công báo); Vụ Pháp chế (để đăng trên Cơ sở dữ liệu quốc gia về pháp luật); Cổng Thông tin điện tử Chính phủ (để đăng tải); Cổng Thông tin điện tử Bộ Xây dựng (để đăng tải).",
                 "type": "string"
             },
             "signer_title": {
@@ -32,7 +30,7 @@
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Lê Anh Tuấn",
                 "type": "string"
             },
             "province": {
@@ -55,11 +53,11 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "print",
             "type": "string"
         },
         "has_handwriting": {
-            "value": true,
+            "value": false,
             "type": "boolean"
         },
         "field": {
@@ -71,11 +69,7 @@
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
-            "type": "string"
-        },
-        "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219320",
             "type": "string"
         }
     }

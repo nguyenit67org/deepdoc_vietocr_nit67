@@ -1,0 +1,78 @@
+{
+    "information": {
+        "type": {
+            "value": "Quyết định",
+            "type": "string"
+        },
+        "title": {
+            "value": "Về việc phê duyệt Chương trình khuyến nông tỉnh Nghệ An giai đoạn 2026-2030",
+            "type": "string"
+        },
+        "code": {
+            "value": "2472/QĐ-UBND",
+            "type": "string"
+        },
+        "documentDate": {
+            "value": "01/08/2025",
+            "type": "string"
+        },
+        "officeSender": {
+            "value": "ỦY BAN NHÂN DÂN/TỈNH NGHỆ AN",
+            "type": "string"
+        },
+        "recipients": {
+            "value": "Như điều 3; Bộ Nông nghiệp và Môi trường; Chủ tịch UBND tỉnh; Phó Chủ tịch UBND tỉnh; PCVP (KT) UBND tỉnh;",
+            "type": "string"
+        },
+        "signer": {
+            "value": "Nguyễn Văn Đệ",
+            "type": "string"
+        },
+        "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+        },
+        "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+        },
+        "receiverDate": {
+            "value": null,
+            "type": "string"
+        },
+        "signer_title": {
+            "value": "KT. CHỦ TỊCH; PHÓ CHỦ TỊCH",
+            "type": "string"
+        },
+        "province": {
+            "value": "Nghệ An",
+            "type": "string"
+        }
+    },
+    "metadata": {
+        "source_name": {
+            "value": "Cổng thông tin điện tử tỉnh Nghệ An",
+            "type": "string"
+        },
+        "source_url_detail": {
+            "value": "https://www.nghean.gov.vn/?p_steering=116544&pageid=71897",
+            "type": "string"
+        },
+        "source_url_pdf": {
+            "value": "https://datafiles.nghean.gov.vn/nan-ubnd/1/quantritintuc20258/2472%20Quy%E1%BA%BFt%20%C4%91%E1%BB%8Bnh%20ph%C3%AA%20duy%E1%BB%87t%20Ch%C6%B0%C6%A1ng%20tr%C3%ACnh%20Khuy%E1%BA%BFn%20n%C3%B4ng%20t%E1%BB%89nh%20giai%20%C4%91o%E1%BA%A1n%202026-2030.pdf",
+            "type": "string"
+        },
+        "field": {
+            "value": "Nông thôn mới",
+            "type": "string"
+        },
+        "document_format": {
+            "value": "scan",
+            "type": "string"
+        },
+        "has_handwriting": {
+            "value": true,
+            "type": "boolean"
+        }
+    }
+}

@@ -1,46 +1,48 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "NGHỊ QUYẾT",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "ĐẠI HỘI ĐỒNG CỔ ĐÔNG THƯỜNG NIÊN NĂM 2017",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "03/NQ-ĐHCĐ",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "25/4/2017",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "CÔNG TY CỔ PHẦN DU LỊCH - THƯƠNG MẠI TN",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Cổ đông.",
                 "type": "string"
             },
             "signer_title": {
-                "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+                "value": "TM. ĐOÀN CHỦ TỊCH CHỦ TỌA",
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Lê Hữu Phước",
                 "type": "string"
             },
             "province": {
-                "value": "Hà Nội",
+                "value": "Tây Ninh",
                 "type": "string"
             },
             "receiverDate": {
-                "value": "",
+                "value": "27/04/2017",
                 "type": "string"
             },
             "priority_level": {
@@ -55,7 +57,7 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "scan",
             "type": "string"
         },
         "has_handwriting": {
@@ -63,19 +65,19 @@
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Chứng khoán",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Sở Giao dịch Chứng khoán Hà Nội (HNX)",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
+            "value": "https://portal.hnx.vn/thong-tin-cong-bo-ny-tcphchuagd.html",
             "type": "string"
         },
         "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://owa.hnx.vn/ftp//PORTALNEW/HEADER_IMAGES/20170503/10247-bn_2017-04-28_0850_1.PDF",
             "type": "string"
         }
     }

@@ -1,38 +1,40 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "QUYẾT ĐỊNH",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Về việc sửa đổi Quy chế hướng dẫn giao dịch ký quỹ chứng khoán",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "1205/QĐ-UBCK",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "27/12/2017",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "ỦY BAN CHỨNG KHOÁN NHÀ NƯỚC/BỘ TÀI CHÍNH",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Như Điều 3 (để thực hiện); Lãnh đạo BTC (để báo cáo).",
                 "type": "string"
             },
             "signer_title": {
-                "value": "KT. BỘ TRƯỞNG THỨ TRƯỞNG",
+                "value": "CHỦ TỊCH",
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Trần Văn Dũng",
                 "type": "string"
             },
             "province": {
@@ -40,7 +42,7 @@
                 "type": "string"
             },
             "receiverDate": {
-                "value": "",
+                "value": "28/12/2017",
                 "type": "string"
             },
             "priority_level": {
@@ -55,7 +57,7 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "scan",
             "type": "string"
         },
         "has_handwriting": {
@@ -63,19 +65,19 @@
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Chứng khoán",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
+            "value": "https://www.hsx.vn/vi/van-ban-phap-quy/quyet-dinh-ve-viec-sua-doi-quy-che-huong-dan-giao-dich-ky-quy-chung-khoan/1281241",
             "type": "string"
         },
         "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/adf6ca47daca4da8b6e14ec1e7c1cc36/20171228_20171228%20-%20QD%201205%20cua%20UBCK%20sua%20doi%20Quy%20che%20huong%20dan%20giao%20dich%20ky%20quy.pdf",
             "type": "string"
         }
     }

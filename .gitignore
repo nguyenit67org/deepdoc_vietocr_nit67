@@ -1,3 +1,7 @@
+*.[pP][dD][fF]
+
+ocr-collab/
+
 # Local config overrides (per-machine/environment, not shared)
 conf/local.*.yaml
 

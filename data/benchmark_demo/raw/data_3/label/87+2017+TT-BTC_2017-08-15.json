@@ -1,30 +1,32 @@
 {
-    "raw_file": "data/benchmark_demo/raw/data_1/label/05%2B2026%2BVBHN-TT-BTP_2026-08-28.json",
-    "pdf_file": "data/benchmark_demo/raw/data_1/05%2B2026%2BVBHN-TT-BTP_2026-08-28.pdf",
     "information": [
         {
             "type": {
-                "value": "Thông tư",
+                "value": "THÔNG TƯ",
                 "type": "string"
             },
             "title": {
-                "value": "Quy định tiêu chí phân loại, điều kiện thành lập, sáp nhập, hợp nhất, giải thể đơn vị sự nghiệp công lập thuộc ngành, lĩnh vực tư pháp",
+                "value": "Quy định chỉ tiêu an toàn tài chính và biện pháp xử lý đối với tổ chức kinh doanh chứng khoán không đáp ứng chỉ tiêu an toàn tài chính",
                 "type": "string"
             },
             "code": {
-                "value": "05/2026/VBHN-TT-BTP",
+                "value": "87/2017/TT-BTC",
                 "type": "string"
             },
             "documentDate": {
-                "value": "28/08/2026",
+                "value": "15/8/2017",
                 "type": "string"
             },
             "officeSender": {
-                "value": "BỘ TƯ PHÁP",
+                "value": "BỘ TÀI CHÍNH",
+                "type": "string"
+            },
+            "first_recipients": {
+                "value": "",
                 "type": "string"
             },
             "recipients": {
-                "value": "Văn phòng Chính phủ (để đăng Công báo); Bộ trưởng (để báo cáo); Các Thứ trưởng (để biết); Cổng Pháp luật quốc gia; CSDL quốc gia về pháp luật (để đăng tải); Cổng Thông tin điện tử Bộ Tư pháp; Cục Kiểm tra văn bản và Tổ chức thi hành pháp luật - Bộ Tư pháp.",
+                "value": "Văn phòng Quốc hội; Văn phòng Tổng Bí thư; Văn phòng Chủ tịch nước; Văn phòng Trung ương và các Ban của Đảng; Văn phòng Ban chỉ đạo TW về phòng chống tham nhũng; Thủ tướng, các Phó Thủ tướng Chính phủ; Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ; Viện Kiểm sát nhân dân tối cao; Toà án nhân dân tối cao; Kiểm toán Nhà nước; HĐND, UBND các tỉnh, thành phố trực thuộc Trung ương; Công báo; Website Chính phủ; Cục Kiểm tra Văn bản - Bộ Tư pháp; Các đơn vị thuộc Bộ Tài chính; Website Bộ Tài chính.",
                 "type": "string"
             },
             "signer_title": {
@@ -32,7 +34,7 @@
                 "type": "string"
             },
             "signer": {
-                "value": "Nguyễn Thanh Tịnh",
+                "value": "Trần Xuân Hà",
                 "type": "string"
             },
             "province": {
@@ -55,27 +57,27 @@
     ],
     "metadata": {
         "document_format": {
-            "value": "pdf_in" | "scan",
+            "value": "scan",
             "type": "string"
         },
         "has_handwriting": {
-            "value": true,
+            "value": false,
             "type": "boolean"
         },
         "field": {
-            "value": "Giao thông vận tải",
+            "value": "Chứng khoán",
             "type": "string"
         },
         "source_name": {
-            "value": "Cổng TTĐT Chính phủ",
+            "value": "Sở Giao dịch Chứng khoán TP.HCM (HSX)",
             "type": "string"
         },
         "source_url_detail": {
-            "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219340",
+            "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281210",
             "type": "string"
         },
         "source_url_pdf": {
-            "value": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/9/61_cd-ttg_31082026_1-signed.signed.pdf",
+            "value": "https://staticfile.hsx.vn/Uploads/LocalFiles/a7f519f78dc04324aacfbd8fca6ba1cd/20170912_thong tu 87 ban day du.pdf",
             "type": "string"
         }
     }

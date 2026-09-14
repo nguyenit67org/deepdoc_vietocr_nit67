@@ -1,0 +1,78 @@
+{
+    "information": {
+        "type": {
+            "value": "Kế hoạch",
+            "type": "string"
+        },
+        "title": {
+            "value": "Chuyển đổi số và phát triển đô thị thông minh Thành phố Hồ Chí Minh năm 2026",
+            "type": "string"
+        },
+        "code": {
+            "value": "97/KH-UBND",
+            "type": "string"
+        },
+        "documentDate": {
+            "value": "16/03/2026",
+            "type": "string"
+        },
+        "officeSender": {
+            "value": "ỦY BAN NHÂN DÂN/THÀNH PHỐ HỒ CHÍ MINH",
+            "type": "string"
+        },
+        "recipients": {
+            "value": "Bộ Khoa học và Công nghệ (b/c); Thường trực Thành ủy; Thường trực HĐND TP; TTUB: CT, các PCT; BCĐ về PTKHCN, ĐMST, CĐS và ĐA 06 TP; Các sở, ban, ngành; UBND các phường, xã, đặc khu; VPUB: CVP, các PCVP; Phòng VX;",
+            "type": "string"
+        },
+        "signer": {
+            "value": "Nguyễn Mạnh Cường",
+            "type": "string"
+        },
+        "priority_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+        },
+        "security_level": {
+            "value": "0_BÌNH THƯỜNG",
+            "type": "string"
+        },
+        "receiverDate": {
+            "value": null,
+            "type": "string"
+        },
+        "signer_title": {
+            "value": "TM. ỦY BAN NHÂN DÂN; KT. CHỦ TỊCH; PHÓ CHỦ TỊCH",
+            "type": "string"
+        },
+        "province": {
+            "value": "Thành phố Hồ Chí Minh",
+            "type": "string"
+        }
+    },
+    "metadata": {
+        "source_name": {
+            "value": "Cổng thông tin điện tử Thành phố Hồ Chí Minh",
+            "type": "string"
+        },
+        "source_url_detail": {
+            "value": "https://dxcenter.hochiminhcity.gov.vn/van-ban/van-ban-cua-thanh-pho-ho-chi-minh/ke-hoach-so-97kh-ubnd-ngay-1632026-cua-uy-ban-nhan-dan-thanh-pho-ho-chi-minh-ve-chuyen-doi-so-va-phat-trien-do-thi-thong-minh-thanh-pho-ho-chi-minh-nam-2026/",
+            "type": "string"
+        },
+        "source_url_pdf": {
+            "value": "https://dxcenter.hochiminhcity.gov.vn/media/nkbfwz0p/20_nmcuong_k%E1%BA%BF-ho%E1%BA%A1ch-97-kh-ubnd.pdf",
+            "type": "string"
+        },
+        "field": {
+            "value": "Chuyển đổi số",
+            "type": "string"
+        },
+        "document_format": {
+            "value": "print",
+            "type": "string"
+        },
+        "has_handwriting": {
+            "value": false,
+            "type": "boolean"
+        }
+    }
+}
