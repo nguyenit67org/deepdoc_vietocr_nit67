@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_2/label/32+CĐ-UBND_2024-08-28.json",
     "pdf_file": "benchmark_demo/raw/data_2/32+CĐ-UBND_2024-08-28.pdf",
+    "page_count": 5,
     "metadata": {
         "document_format": {
             "value": "scan",

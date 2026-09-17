@@ -11,6 +11,7 @@ import numpy as np
 from PIL import Image
 
 from ..corrector import CorrectorBackend, get_corrector_backend
+from ..extract import extract_vbhc
 from ..layout import LayoutBackend, LayoutBlock, get_layout_backend
 from ..ocr import OCREngine, get_ocr_engine
 from ..table import TableProcessor, get_table_processor
@@ -72,7 +73,7 @@ class DocumentPipeline:
         self,
         layout: LayoutBackend,
         ocr: OCREngine,
-        table_processor: TableProcessor,
+        table_processor: TableProcessor | None,
         config: PipelineConfig,
         corrector: CorrectorBackend | None = None,
     ):
@@ -83,6 +84,7 @@ class DocumentPipeline:
         self.corrector = corrector
 
     def process_pdf(self, pdf_path: str, source_filename: str | None = None) -> dict:
+        t_process = time.perf_counter()
         t_render = time.time()
         pages = load_pdf_pages(pdf_path, dpi=self.config.pdf_dpi)
         label = source_filename or os.path.basename(pdf_path)
@@ -123,9 +125,24 @@ class DocumentPipeline:
         json_out = build_json(label, pages_blocks, crop_offsets, page_image_urls)
         logger.info("Built JSON/markdown output in %.2fs", time.time() - t_build)
 
+        t_extract = time.time()
+        prediction, extraction_debug = extract_vbhc(
+            pages_blocks,
+            original_page_sizes=[page.size for page in pages],
+            processed_page_sizes=[image.size for image in prepped_imgs],
+            crop_offsets=crop_offsets,
+            geometry_reliable=(
+                not self.config.page_deskew_enabled
+                and not self.config.page_orientation_enabled
+            ),
+        )
+        logger.info("Extracted VBHC prediction in %.2fs", time.time() - t_extract)
+
         if debug_dir:
             with open(os.path.join(debug_dir, "output.md"), "w", encoding="utf-8") as f:
                 f.write(markdown)
+            with open(os.path.join(debug_dir, "extraction_debug.json"), "w", encoding="utf-8") as f:
+                json.dump(extraction_debug, f, ensure_ascii=False, indent=2)
 
         shutil.copyfile(pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf"))
         with open(os.path.join(out_dir, "output.json"), "w", encoding="utf-8") as f:
@@ -133,10 +150,10 @@ class DocumentPipeline:
         with open(os.path.join(out_dir, "output.md"), "w", encoding="utf-8") as f:
             f.write(markdown)
 
-        return {
-            "json": json_out,
-            "markdown": markdown,
-        }
+        prediction["processing_time"] = time.perf_counter() - t_process
+        with open(os.path.join(out_dir, "prediction.json"), "w", encoding="utf-8") as f:
+            json.dump(prediction, f, ensure_ascii=False, indent=2)
+        return prediction
 
     def process_pdf_group(self, items: list[tuple[str, str]]) -> list[dict]:
         """Batch-processes multiple PDFs' pages together as ONE combined
@@ -420,6 +437,11 @@ class DocumentPipeline:
             prep, crops = prepare_ocr_page(
                 prepped[pn].img, self.ocr, crop_debug_dir=page_crop_debug_dir,
                 dt_boxes=prepped[pn].dt_boxes_reuse, prerecognized=prepped[pn].prerecognized_reuse,
+                excluded_regions=[
+                    b["bbox"] for b in raw_blocks_per_page[pn]
+                    if b["type"].lower() in self.layout.label_schema.table_types
+                ] if not self.config.table_enabled else None,
+                exclusion_overlap_threshold=self.config.map_overlap_threshold,
             )
             ocr_preps.append(prep)
             all_ocr_crops.extend(crops)
@@ -612,6 +634,9 @@ class DocumentPipeline:
         for b in raw_blocks:
             btype = b["type"].lower()
             if btype in label_schema.table_types:
+                if not self.config.table_enabled:
+                    blocks.append({**b, "content_type": "skip", "content": None})
+                    continue
                 x0, y0, x1, y1 = map(int, b["bbox"])
                 crop = img.crop((max(0, x0 - 2), max(0, y0 - 2), min(w, x1 + 2), min(h, y1 + 2)))
                 crop, skew_angle = deskew_crop(crop)
@@ -749,7 +774,7 @@ def build_pipeline(conf: dict | None = None) -> DocumentPipeline:
     return DocumentPipeline(
         get_layout_backend(conf),
         ocr,
-        get_table_processor(conf, ocr),
+        get_table_processor(conf, ocr) if config.table_enabled else None,
         config,
         get_corrector_backend(conf),
     )

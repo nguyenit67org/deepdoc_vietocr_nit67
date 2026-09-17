@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/920+QĐ-NHNN_2020-05-12.json",
     "pdf_file": "benchmark_demo/raw/data_1/920+QĐ-NHNN_2020-05-12.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",

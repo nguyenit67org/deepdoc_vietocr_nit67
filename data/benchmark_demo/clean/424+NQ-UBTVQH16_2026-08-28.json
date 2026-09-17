@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/424+NQ-UBTVQH16_2026-08-28.json",
     "pdf_file": "benchmark_demo/raw/data_1/424+NQ-UBTVQH16_2026-08-28.pdf",
+    "page_count": 3,
     "metadata": {
         "document_format": {
             "value": "scan",

@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/341+2026+NĐ-CP_2026-09-01.json",
     "pdf_file": "benchmark_demo/raw/data_1/341+2026+NĐ-CP_2026-09-01.pdf",
+    "page_count": 35,
     "metadata": {
         "document_format": {
             "value": "scan",

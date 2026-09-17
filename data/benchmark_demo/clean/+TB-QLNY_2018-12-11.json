@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/+TB-QLNY_2018-12-11.json",
     "pdf_file": "benchmark_demo/raw/data_3/+TB-QLNY_2018-12-11.pdf",
+    "page_count": 1,
     "metadata": {
         "document_format": {
             "value": "print",

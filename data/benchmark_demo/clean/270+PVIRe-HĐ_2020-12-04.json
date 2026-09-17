@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/270+PVIRe-HĐ_2020-12-04.json",
     "pdf_file": "benchmark_demo/raw/data_3/270+PVIRe-HĐ_2020-12-04.pdf",
+    "page_count": 8,
     "metadata": {
         "document_format": {
             "value": "scan",

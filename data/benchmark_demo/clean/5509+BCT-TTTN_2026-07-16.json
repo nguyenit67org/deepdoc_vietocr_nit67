@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/5509+BCT-TTTN_2026-07-16.json",
     "pdf_file": "benchmark_demo/raw/data_1/5509+BCT-TTTN_2026-07-16.pdf",
+    "page_count": 6,
     "metadata": {
         "document_format": {
             "value": "scan",

@@ -24,8 +24,8 @@ from .schemas import (
     ExtractRequest,
     ExtractResponse,
     ExtractSchemaResponse,
-    OCRResponse,
     SchemaField,
+    VBHCPredictionResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -228,11 +228,11 @@ def _log_duplicate_functions(label: str, top_n: int = 20) -> None:
         logger.exception("parameter diagnostic failed")
 
 
-@router.post("/pdf", response_model=OCRResponse, response_model_by_alias=True)
+@router.post("/pdf", response_model=VBHCPredictionResponse)
 async def ocr_pdf(
     file: UploadFile = File(...),
     pipeline: DocumentPipeline = Depends(get_pipeline),
-) -> OCRResponse:
+) -> VBHCPredictionResponse:
     t_request = time.time()
     _log_rss("pdf: request start")
     _log_torch_tensor_stats("pdf: request start")
@@ -274,7 +274,7 @@ async def ocr_pdf(
                 os.remove(tmp_path)
 
         t_response = time.time()
-        response = OCRResponse(file=result["json"]["file"], json=result["json"], markdown=result["markdown"])
+        response = VBHCPredictionResponse(**result)
         logger.info(
             "Route %s done: total=%.2fs (upload_read included, build_response=%.2fs)",
             file.filename, time.time() - t_request, time.time() - t_response,

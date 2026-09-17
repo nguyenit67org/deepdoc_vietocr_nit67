@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/48+CV+TNG_2021-01-06.json",
     "pdf_file": "benchmark_demo/raw/data_3/48+CV+TNG_2021-01-06.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",

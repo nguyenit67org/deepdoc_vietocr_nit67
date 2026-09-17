@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_2/label/2472+QĐ-UBND_2025-08-01.json",
     "pdf_file": "benchmark_demo/raw/data_2/2472+QĐ-UBND_2025-08-01.pdf",
+    "page_count": 16,
     "metadata": {
         "document_format": {
             "value": "scan",

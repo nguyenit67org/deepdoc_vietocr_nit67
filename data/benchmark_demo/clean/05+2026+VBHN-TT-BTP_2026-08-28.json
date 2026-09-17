@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/05+2026+VBHN-TT-BTP_2026-08-28.json",
     "pdf_file": "benchmark_demo/raw/data_1/05+2026+VBHN-TT-BTP_2026-08-28.pdf",
+    "page_count": 5,
     "metadata": {
         "document_format": {
             "value": "print",

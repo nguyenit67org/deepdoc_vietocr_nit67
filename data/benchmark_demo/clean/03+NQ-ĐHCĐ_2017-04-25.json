@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/03+NQ-ĐHCĐ_2017-04-25.json",
     "pdf_file": "benchmark_demo/raw/data_3/03+NQ-ĐHCĐ_2017-04-25.pdf",
+    "page_count": 14,
     "metadata": {
         "document_format": {
             "value": "scan",

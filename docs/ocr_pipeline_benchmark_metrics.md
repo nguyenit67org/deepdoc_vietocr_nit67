@@ -42,6 +42,22 @@ Typical extracted fields include:
 
 Important: a field may be logically required by business or document conventions but still be absent from the actual PDF input. Evaluation ground truth must therefore reflect **what is observable in the PDF being evaluated**, not metadata available only from an external source page.
 
+### 1.2 Empty and default output contract
+
+- Text and date fields always use a JSON string. If the field is absent, not
+  detected, or not recognized, return the empty string `""`; do not return
+  `null`.
+- `receiverDate` is read from a visible receipt/arrival stamp such as a
+  `ĐẾN ... Ngày:` block. Do not substitute `documentDate`, posting time,
+  download time, or OCR execution time. If the stamp/date is not recognized,
+  return `""`.
+- `priority_level` and `security_level` always use their canonical enum. If
+  the corresponding urgency/security stamp is absent or unreadable, return
+  `0_BÌNH THƯỜNG`.
+
+In the metric definitions below, **empty** means exactly the empty string
+`""` after reading the prediction contract.
+
 ---
 
 ## 2. Business Objective
@@ -198,7 +214,17 @@ Parse equivalent formats such as:
 
 into the canonical representation `dd/mm/yyyy`, e.g. `02/03/2026`.
 
-Do not use CER for dates.
+Do not use CER for dates. A date is an atomic structured value: changing one
+digit can change the day, month, or year and must count as a semantic error.
+Conversely, surface variants such as `9/9/2026` and `09/09/2026` should be
+treated as equal after parsing rather than penalized by character distance.
+
+For a canonical date of roughly 10 characters, one wrong character also gives
+about 10% CER, so `CER <= 5%` mostly degenerates into exact matching while
+still failing to express date validity. NEM after date parsing would agree
+with exact match on GT-present samples, but it would not by itself capture
+missing and hallucinated values. Therefore use field-level F1 Exact as the
+primary metric.
 
 Use exact field-level matching:
 
@@ -218,6 +244,10 @@ Metrics:
 
 **Primary date KPI:** `F1 Exact`
 
+Parsed exact accuracy/NEM may be reported as a secondary diagnostic, but it is
+redundant with exact equality on GT-present canonical dates and must not
+replace Precision/Recall/F1 Exact.
+
 ---
 
 ### 5.3 Enum / categorical fields
@@ -233,6 +263,7 @@ Examples:
 
 - `KHẨN` -> canonical enum value
 - `khẩn` -> same canonical enum value
+- absent or unreadable urgency/security stamp -> `0_BÌNH THƯỜNG`
 
 Do not use CER because a class mismatch is a semantic error, not a character-distance problem.
 

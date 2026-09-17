@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/4977+BVHTTDL-VP_2026-08-07.json",
     "pdf_file": "benchmark_demo/raw/data_1/4977+BVHTTDL-VP_2026-08-07.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "print",

@@ -45,6 +45,7 @@ class PipelineConfig:
     page_orientation_max_pages_per_batch: int
     batch_api_max_pages_per_group: int
     batch_api_max_images_per_group: int
+    table_enabled: bool = True
 
     @classmethod
     def from_conf(cls, conf: dict) -> "PipelineConfig":
@@ -59,6 +60,7 @@ class PipelineConfig:
             pdf_dpi=conf.get("pdf", {}).get("dpi", 200),
             layout_threshold=conf.get("layout", {}).get("threshold", 0.2),
             tsr_threshold=conf.get("tsr", {}).get("threshold", 0.2),
+            table_enabled=conf.get("table", {}).get("enabled", True),
             map_overlap_threshold=mapping.get("overlap_threshold", 0.5),
             figure_drop_types=frozenset(mapping.get("figure_drop_types", ["image"])),
             figure_drop_ratio=mapping.get("figure_drop_ratio", 0.4),

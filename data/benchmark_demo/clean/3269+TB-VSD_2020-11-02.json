@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/3269+TB-VSD_2020-11-02.json",
     "pdf_file": "benchmark_demo/raw/data_3/3269+TB-VSD_2020-11-02.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",

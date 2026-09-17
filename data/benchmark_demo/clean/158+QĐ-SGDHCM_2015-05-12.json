@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/158+QĐ-SGDHCM_2015-05-12.json",
     "pdf_file": "benchmark_demo/raw/data_3/158+QĐ-SGDHCM_2015-05-12.pdf",
+    "page_count": 4,
     "metadata": {
         "document_format": {
             "value": "print",

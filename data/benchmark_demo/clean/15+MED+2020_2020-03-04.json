@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/15+MED+2020_2020-03-04.json",
     "pdf_file": "benchmark_demo/raw/data_3/15+MED+2020_2020-03-04.pdf",
+    "page_count": 3,
     "metadata": {
         "document_format": {
             "value": "scan",

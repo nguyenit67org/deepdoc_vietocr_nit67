@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/120+2020+TT-BTC_2020-12-31.json",
     "pdf_file": "benchmark_demo/raw/data_3/120+2020+TT-BTC_2020-12-31.pdf",
+    "page_count": 14,
     "metadata": {
         "document_format": {
             "value": "scan",

@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/12+NQ-PVIRe_2020-10-30.json",
     "pdf_file": "benchmark_demo/raw/data_3/12+NQ-PVIRe_2020-10-30.pdf",
+    "page_count": 3,
     "metadata": {
         "document_format": {
             "value": "scan",

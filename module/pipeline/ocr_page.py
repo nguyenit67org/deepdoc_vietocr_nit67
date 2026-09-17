@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 
 from ..ocr import OCREngine
+from .text_mapping import overlap_ratio
 from .types import OCRBox
 
 
@@ -27,6 +28,7 @@ class PageOcrPrep:
     # contributed to process_pdf()'s whole-document crop list, so
     # finish_ocr_page() can zip them back together 1:1.
     crop_indices: list[int] = field(default_factory=list)
+    excluded_indices: set[int] = field(default_factory=set)
 
 
 def prepare_ocr_page(
@@ -35,6 +37,8 @@ def prepare_ocr_page(
     crop_debug_dir: str | None = None,
     dt_boxes: np.ndarray | None = None,
     prerecognized: dict[int, tuple[str, float]] | None = None,
+    excluded_regions: list[list[float]] | None = None,
+    exclusion_overlap_threshold: float = 0.5,
 ) -> tuple[PageOcrPrep, list[np.ndarray]]:
     """Detects (or reuses) this page's boxes and crops every box that still
     needs fresh recognition -- does NOT call the recognizer itself.
@@ -43,6 +47,9 @@ def prepare_ocr_page(
     already detected (and, for a sampled subset, recognized) boxes on this EXACT
     image while scoring 0/90/270 candidates -- skips re-running the detector
     entirely, and only recognizes whichever boxes weren't in that sample.
+
+    Boxes overlapping excluded regions are omitted before cropping and from
+    final output, including reused recognition. Original indices stay intact.
 
     Returns (prep, crops) -- crops is a flat list of the boxes needing
     fresh recognition (same order as prep.crop_indices). Pass `crops` into
@@ -58,9 +65,16 @@ def prepare_ocr_page(
     prerecognized = prerecognized or {}
     crop_indices: list[int] = []
     crops: list[np.ndarray] = []
+    excluded_indices: set[int] = set()
     has_boxes = dt_boxes is not None and len(dt_boxes) > 0
     if has_boxes:
         for bno in range(len(dt_boxes)):
+            if excluded_regions:
+                quad = np.asarray(dt_boxes[bno])
+                bbox = [*quad.min(axis=0), *quad.max(axis=0)]
+                if any(overlap_ratio(bbox, region) > exclusion_overlap_threshold for region in excluded_regions):
+                    excluded_indices.add(bno)
+                    continue
             if bno in prerecognized:
                 continue
             tmp_box = copy.deepcopy(dt_boxes[bno])
@@ -77,7 +91,10 @@ def prepare_ocr_page(
             for bno, img_crop in zip(crop_indices, crops):
                 cv2.imwrite(os.path.join(crop_debug_dir, f"{bno}.png"), img_crop)
 
-    return PageOcrPrep(dt_boxes=dt_boxes, prerecognized=prerecognized, crop_indices=crop_indices), crops
+    return PageOcrPrep(
+        dt_boxes=dt_boxes, prerecognized=prerecognized,
+        crop_indices=crop_indices, excluded_indices=excluded_indices,
+    ), crops
 
 
 def finish_ocr_page(prep: PageOcrPrep, fresh_rec_res: list[tuple[str, float]], ocr: OCREngine) -> list[OCRBox]:
@@ -100,6 +117,15 @@ def finish_ocr_page(prep: PageOcrPrep, fresh_rec_res: list[tuple[str, float]], o
         rec_res[bno] = res
     for bno, res in zip(prep.crop_indices, fresh_rec_res):
         rec_res[bno] = res
+
+    # Filter only after restoring results by their original detection indices.
+    # Excluded boxes may have no result, or an orientation sample to discard.
+    if prep.excluded_indices:
+        retained = [i for i in range(len(dt_boxes)) if i not in prep.excluded_indices]
+        if not retained:
+            return []
+        dt_boxes = dt_boxes[retained]
+        rec_res = [rec_res[i] for i in retained]
 
     def _skew_of_quad(box, min_width=100):
         p0, p1, p2, p3 = box

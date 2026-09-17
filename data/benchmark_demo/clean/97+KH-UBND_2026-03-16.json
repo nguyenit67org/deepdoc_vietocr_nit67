@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_2/label/97+KH-UBND_2026-03-16.json",
     "pdf_file": "benchmark_demo/raw/data_2/97+KH-UBND_2026-03-16.pdf",
+    "page_count": 62,
     "metadata": {
         "document_format": {
             "value": "print",

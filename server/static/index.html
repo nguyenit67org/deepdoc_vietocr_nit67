@@ -765,7 +765,9 @@
             const H2_TYPES = new Set(['paragraph_title']);
 
             let selectedFile = null;
-            let lastOcrData = null; // { file, json, markdown } from the last successful OCR call
+            // Raw OCR artifacts are fetched from /pipeline_outputs after the
+            // prediction-only /ocr/pdf response succeeds.
+            let lastOcrData = null; // { file, json, markdown }
             let currentPreviewPage = 1;
             let hoveredBboxEl = null;
             let hoveredMdEl = null;
@@ -1279,21 +1281,41 @@
                     }
 
                     statusEl.className = 'status ok';
-                    statusEl.textContent = 'Xong: ' + data.file;
+                    statusEl.textContent = 'Xong: ' + selectedFile.name;
+                    jsonOut.textContent = JSON.stringify(data, null, 2);
 
-                    jsonOut.textContent = JSON.stringify(data.json, null, 2);
-
-                    lastOcrData = data;
-                    previewPlaceholder.textContent = 'Chưa có kết quả';
-                    if (
-                        document.querySelector('.tab.active').dataset.tab ===
-                        'preview'
-                    ) {
-                        renderPreviewPage(1);
+                    // /ocr/pdf intentionally returns only prediction_schema.
+                    // Keep the existing preview/Markdown tools usable by
+                    // loading the raw artifacts written by process_pdf().
+                    const stem = selectedFile.name.replace(/\.pdf$/i, '');
+                    const base = '/pipeline_outputs/' + encodeURIComponent(stem);
+                    const [rawResponse, markdownResponse] = await Promise.all([
+                        fetch(base + '/output.json'),
+                        fetch(base + '/output.md'),
+                    ]);
+                    if (rawResponse.ok && markdownResponse.ok) {
+                        lastOcrData = {
+                            file: selectedFile.name,
+                            json: await rawResponse.json(),
+                            markdown: await markdownResponse.text(),
+                        };
+                        previewPlaceholder.textContent = 'Chưa có kết quả';
+                        if (
+                            document.querySelector('.tab.active').dataset.tab ===
+                            'preview'
+                        ) {
+                            renderPreviewPage(1);
+                        }
+                        extractBtn.disabled = false;
+                        renderMarkdownPane(lastOcrData.json, lastEntityHighlight);
+                    } else {
+                        lastOcrData = null;
+                        extractBtn.disabled = true;
+                        mdOut.innerHTML =
+                            '<span class="placeholder">Không tải được raw OCR artifact.</span>';
+                        previewPlaceholder.textContent =
+                            'Không tải được raw OCR artifact.';
                     }
-
-                    extractBtn.disabled = false;
-                    renderMarkdownPane(data.json, lastEntityHighlight);
                 } catch (err) {
                     statusEl.className = 'status err';
                     statusEl.textContent = 'Lỗi: ' + err.message;

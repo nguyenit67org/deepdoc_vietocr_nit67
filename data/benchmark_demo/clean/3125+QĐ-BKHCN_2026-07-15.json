@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/3125+QĐ-BKHCN_2026-07-15.json",
     "pdf_file": "benchmark_demo/raw/data_1/3125+QĐ-BKHCN_2026-07-15.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "print",

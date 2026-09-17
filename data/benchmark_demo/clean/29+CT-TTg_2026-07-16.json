@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/29+CT-TTg_2026-07-16.json",
     "pdf_file": "benchmark_demo/raw/data_1/29+CT-TTg_2026-07-16.pdf",
+    "page_count": 4,
     "metadata": {
         "document_format": {
             "value": "scan",

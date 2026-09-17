@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/2125+TB-ĐLTKV_2020-12-21.json",
     "pdf_file": "benchmark_demo/raw/data_3/2125+TB-ĐLTKV_2020-12-21.pdf",
+    "page_count": 1,
     "metadata": {
         "document_format": {
             "value": "scan",

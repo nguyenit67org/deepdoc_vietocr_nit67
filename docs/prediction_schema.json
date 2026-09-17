@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "prediction_schema.json",
+  "title": "VBHC OCR/KIE Benchmark Prediction",
+  "description": "Schema for benchmark prediction values observable in the input document.",
+  "type": "object",
+  "required": [
+    "information",
+    "processing_time"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "information": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/definitions/information"
+      }
+    },
+    "processing_time": {
+      "description": "Thời gian xử lý tài liệu, tính bằng giây.",
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "definitions": {
+    "textField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Chuỗi rỗng khi không phát hiện hoặc không nhận diện được giá trị.",
+          "type": "string"
+        },
+        "type": {
+          "const": "string"
+        }
+      }
+    },
+    "dateField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Chuỗi rỗng khi không nhận diện được; nếu có giá trị thì dùng dd/mm/yyyy.",
+          "type": "string",
+          "pattern": "^(?:$|(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4})$"
+        },
+        "type": {
+          "const": "string"
+        }
+      }
+    },
+    "priorityField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Dùng 0_BÌNH THƯỜNG khi dấu độ khẩn không có hoặc không đọc được.",
+          "enum": [
+            "0_BÌNH THƯỜNG",
+            "1_HỎA TỐC",
+            "2_KHẨN",
+            "3_THƯỢNG KHẨN"
+          ]
+        },
+        "type": {
+          "const": "string"
+        }
+      }
+    },
+    "securityField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Dùng 0_BÌNH THƯỜNG khi dấu độ mật không có hoặc không đọc được.",
+          "enum": [
+            "0_BÌNH THƯỜNG",
+            "1_MẬT",
+            "2_TỐI MẬT",
+            "3_TUYỆT MẬT"
+          ]
+        },
+        "type": {
+          "const": "string"
+        }
+      }
+    },
+    "information": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "code",
+        "documentDate",
+        "officeSender",
+        "recipients",
+        "signer",
+        "priority_level",
+        "security_level",
+        "first_recipients",
+        "signer_title",
+        "province",
+        "receiverDate"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Hình thức/thể loại văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "title": {
+          "description": "Trích yếu nội dung văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "code": {
+          "description": "Số ký hiệu văn bản; giữ dấu cấu trúc /, - và .",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "documentDate": {
+          "description": "Ngày văn bản, chuẩn hóa theo dd/mm/yyyy.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/dateField"
+            }
+          ]
+        },
+        "officeSender": {
+          "description": "Cơ quan gửi/ban hành; giữ thứ tự đọc từ trên xuống dưới, trái sang phải và không đảo thành cơ quan con/cơ quan cha.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "recipients": {
+          "description": "Tên cơ quan, tổ chức, cá nhân trong phần Nơi nhận; nhiều giá trị theo thứ tự đọc và phân cách bằng dấu chấm phẩy (;).",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "signer": {
+          "description": "Họ tên người ký; nhiều giá trị theo thứ tự đọc và phân cách bằng dấu chấm phẩy (;).",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "priority_level": {
+          "description": "Độ khẩn của văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/priorityField"
+            }
+          ]
+        },
+        "security_level": {
+          "description": "Độ mật của văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/securityField"
+            }
+          ]
+        },
+        "first_recipients": {
+          "description": "Người/nơi nhận ở đầu văn bản, thường sau Kính gửi; cùng format với recipients.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "signer_title": {
+          "description": "Nội dung KT./TM./chức vụ/quyền hạn ký; cùng format nhiều giá trị với signer.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "province": {
+          "description": "Tỉnh/thành phố của cơ quan ban hành.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/textField"
+            }
+          ]
+        },
+        "receiverDate": {
+          "description": "Ngày nhận văn bản, chuẩn hóa theo dd/mm/yyyy.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/dateField"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

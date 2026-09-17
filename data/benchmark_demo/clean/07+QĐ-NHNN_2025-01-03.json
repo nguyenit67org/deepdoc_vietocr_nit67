@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/07+QĐ-NHNN_2025-01-03.json",
     "pdf_file": "benchmark_demo/raw/data_1/07+QĐ-NHNN_2025-01-03.pdf",
+    "page_count": 4,
     "metadata": {
         "document_format": {
             "value": "scan",

@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/95+2017+TT-BTC_2017-09-22.json",
     "pdf_file": "benchmark_demo/raw/data_3/95+2017+TT-BTC_2017-09-22.pdf",
+    "page_count": 40,
     "metadata": {
         "document_format": {
             "value": "print",

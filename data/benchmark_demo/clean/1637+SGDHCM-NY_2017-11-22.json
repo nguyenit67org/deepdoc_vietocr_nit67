@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/1637+SGDHCM-NY_2017-11-22.json",
     "pdf_file": "benchmark_demo/raw/data_3/1637+SGDHCM-NY_2017-11-22.pdf",
+    "page_count": 1,
     "metadata": {
         "document_format": {
             "value": "scan",

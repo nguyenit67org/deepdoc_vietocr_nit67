@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/2399+QĐ-BTC_2017-11-21.json",
     "pdf_file": "benchmark_demo/raw/data_3/2399+QĐ-BTC_2017-11-21.pdf",
+    "page_count": 28,
     "metadata": {
         "document_format": {
             "value": "scan",

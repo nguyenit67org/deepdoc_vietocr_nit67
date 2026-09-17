@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/03+BC.HĐQT_2020-02-20.json",
     "pdf_file": "benchmark_demo/raw/data_3/03+BC.HĐQT_2020-02-20.pdf",
+    "page_count": 3,
     "metadata": {
         "document_format": {
             "value": "scan",

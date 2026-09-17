@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/1432+QĐ-BXD_2026-08-14.json",
     "pdf_file": "benchmark_demo/raw/data_1/1432+QĐ-BXD_2026-08-14.pdf",
+    "page_count": 11,
     "metadata": {
         "document_format": {
             "value": "print",

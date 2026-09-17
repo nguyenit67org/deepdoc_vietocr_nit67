@@ -98,6 +98,8 @@ tsr:
   threshold: 0.2
 
 table:
+  # false discards detected table content, including page OCR text in tables.
+  enabled: true
   backend: tsr   # tsr | mineru
   # Caps how many table crops the mineru backend's process_batch() stacks
   # into one TableOrientationCls / Surya (TableRecPredictor+DetectionPredictor)

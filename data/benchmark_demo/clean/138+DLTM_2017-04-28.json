@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/138+DLTM_2017-04-28.json",
     "pdf_file": "benchmark_demo/raw/data_3/138+DLTM_2017-04-28.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",

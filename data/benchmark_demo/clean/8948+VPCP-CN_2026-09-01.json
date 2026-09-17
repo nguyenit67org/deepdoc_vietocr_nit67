@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/8948+VPCP-CN_2026-09-01.json",
     "pdf_file": "benchmark_demo/raw/data_1/8948+VPCP-CN_2026-09-01.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",

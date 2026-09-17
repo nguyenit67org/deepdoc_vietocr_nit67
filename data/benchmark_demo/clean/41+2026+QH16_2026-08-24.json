@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_1/label/41+2026+QH16_2026-08-24.json",
     "pdf_file": "benchmark_demo/raw/data_1/41+2026+QH16_2026-08-24.pdf",
+    "page_count": 12,
     "metadata": {
         "document_format": {
             "value": "scan",

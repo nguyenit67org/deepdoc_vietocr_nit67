@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/88+BVTVSG-TCKT_2022-01-21.json",
     "pdf_file": "benchmark_demo/raw/data_3/88+BVTVSG-TCKT_2022-01-21.pdf",
+    "page_count": 21,
     "metadata": {
         "document_format": {
             "value": "scan",

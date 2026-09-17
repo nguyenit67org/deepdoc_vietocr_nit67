@@ -1,4 +1,5 @@
 from .base import ExtractBackend
+from .vbhc_rules import extract_vbhc
 
 
 def get_extract_backend(conf: dict) -> ExtractBackend:
@@ -28,6 +29,7 @@ def get_default_schema(conf: dict) -> dict[str, str]:
 
 __all__ = [
     "ExtractBackend",
+    "extract_vbhc",
     "get_extract_backend",
     "get_default_schema",
 ]

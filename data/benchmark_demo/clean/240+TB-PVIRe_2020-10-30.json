@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/240+TB-PVIRe_2020-10-30.json",
     "pdf_file": "benchmark_demo/raw/data_3/240+TB-PVIRe_2020-10-30.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",

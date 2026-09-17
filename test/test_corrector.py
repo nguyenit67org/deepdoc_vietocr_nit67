@@ -9,6 +9,7 @@ from PIL import Image
 from module.corrector import get_corrector_backend
 from module.corrector.protonx import ProtonXCorrectorBackend
 from module.pipeline.document_pipeline import DocumentPipeline
+from module.pipeline.config import PipelineConfig
 
 
 class _Batch(dict):
@@ -113,7 +114,7 @@ class CorrectorTests(unittest.TestCase):
             layout=layout,
             ocr=Mock(),
             table_processor=Mock(),
-            config=SimpleNamespace(page_orientation_enabled=False, layout_threshold=0.2),
+            config=PipelineConfig.from_conf({}),
             corrector=_UpperCorrector(),
         )
         pre_page = SimpleNamespace(img=image, crop_offset=(0.0, 0.0), timings={})

@@ -1,6 +1,7 @@
 {
     "raw_file": "benchmark_demo/raw/data_3/label/1205+QĐ-UBCK_2017-12-27.json",
     "pdf_file": "benchmark_demo/raw/data_3/1205+QĐ-UBCK_2017-12-27.pdf",
+    "page_count": 2,
     "metadata": {
         "document_format": {
             "value": "scan",
