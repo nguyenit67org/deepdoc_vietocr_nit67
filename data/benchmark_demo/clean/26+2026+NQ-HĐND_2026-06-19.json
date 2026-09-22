@@ -42,7 +42,7 @@
             "type": "string"
         },
         "officeSender": {
-            "value": "THÀNH PHỐ HỒ CHÍ MINH HỘI ĐỒNG NHÂN DÂN",
+            "value": "HỘI ĐỒNG NHÂN DÂN THÀNH PHỐ HỒ CHÍ MINH",
             "type": "string"
         },
         "recipients": {
@@ -75,7 +75,7 @@
         },
         "first_recipients": {
             "value": null,
-            "type": null
+            "type": "string"
         }
     }
 }

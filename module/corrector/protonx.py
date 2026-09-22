@@ -133,7 +133,7 @@ class ProtonXCorrectorBackend:
             return original
         if self.preserve_numbers and _NUMBER_RE.findall(original) != _NUMBER_RE.findall(corrected):
             logger.warning("To be rejected correction that changed numeric content: %r -> %r", original, corrected)
-            # return original
+            return original
         return corrected
 
     def correct_batch(self, texts: list[str]) -> list[str]:

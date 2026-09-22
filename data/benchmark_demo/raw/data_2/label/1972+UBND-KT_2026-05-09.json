@@ -17,7 +17,11 @@
             "type": "string"
         },
         "officeSender": {
-            "value": "ỦY BAN NHÂN DÂN/THÀNH PHỐ HÀ NỘI",
+            "value": "ỦY BAN NHÂN DÂN THÀNH PHỐ HÀ NỘI",
+            "type": "string"
+        },
+        "first_recipients": {
+            "value": "- Sở Công Thương;\n- Ủy ban nhân dân các xã, phường;\n- Tổng công ty Điện lực Hà Nội.",
             "type": "string"
         },
         "recipients": {
@@ -41,7 +45,7 @@
             "type": "string"
         },
         "signer_title": {
-            "value": "TM. ỦY BAN NHÂN DÂN; KT. CHỦ TỊCH; PHÓ CHỦ TỊCH",
+            "value": "TM. ỦY BAN NHÂN DÂN KT. CHỦ TỊCH PHÓ CHỦ TỊCH",
             "type": "string"
         },
         "province": {

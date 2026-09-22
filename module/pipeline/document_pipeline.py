@@ -17,7 +17,14 @@ from ..ocr import OCREngine, get_ocr_engine
 from ..table import TableProcessor, get_table_processor
 from .config import PipelineConfig, load_pipeline_conf
 from .content import build_block_content, build_json, build_markdown
-from .debug import save_input_image, save_layout_debug, save_ocr_debug, save_table_crop
+from .debug import (
+    PipelineDebugTrace,
+    build_structured_debug,
+    save_input_image,
+    save_layout_debug,
+    save_ocr_debug,
+    save_table_crop,
+)
 from .loader import load_pdf_pages
 from .ocr_page import PageOcrPrep, finish_ocr_page, prepare_ocr_page
 from .page_orientation import batch_correct_page_orientation, deskew_page
@@ -91,11 +98,15 @@ class DocumentPipeline:
         logger.info("Processing %s (%d pages) | pdf_render=%.2fs", label, len(pages), time.time() - t_render)
 
         debug_dir = None
+        debug_trace = None
         if self.config.debug_enabled:
             debug_dir = os.path.join(self.config.debug_dir, Path(label).stem)
             os.makedirs(debug_dir, exist_ok=True)
+            debug_trace = PipelineDebugTrace()
 
-        pages_blocks, crop_offsets, prepped_imgs = self._process_pages_batch(pages, debug_dir)
+        pages_blocks, crop_offsets, prepped_imgs = self._process_pages_batch(
+            pages, debug_dir, debug_trace=debug_trace
+        )
 
         out_dir = os.path.join(self.config.output_dir, Path(label).stem)
         os.makedirs(out_dir, exist_ok=True)
@@ -153,7 +164,22 @@ class DocumentPipeline:
         prediction["processing_time"] = time.perf_counter() - t_process
         with open(os.path.join(out_dir, "prediction.json"), "w", encoding="utf-8") as f:
             json.dump(prediction, f, ensure_ascii=False, indent=2)
-        return prediction
+
+        response = dict(prediction)
+        if debug_trace is not None:
+            response["debug"] = build_structured_debug(
+                debug_trace,
+                pages_blocks,
+                prepped_imgs,
+                page_image_urls,
+                markdown,
+                prediction,
+                extraction_debug,
+                document_id=Path(label).stem,
+                source_filename=label if label.lower().endswith(".pdf") else f"{label}.pdf",
+                pdf_path=str(Path(pdf_path).resolve()),
+            )
+        return response
 
     def process_pdf_group(self, items: list[tuple[str, str]]) -> list[dict]:
         """Batch-processes multiple PDFs' pages together as ONE combined
@@ -267,7 +293,10 @@ class DocumentPipeline:
         return results
 
     def _process_pages_batch(
-        self, pages: list[Image.Image], debug_dir: str | None
+        self,
+        pages: list[Image.Image],
+        debug_dir: str | None,
+        debug_trace: PipelineDebugTrace | None = None,
     ) -> tuple[list[list[PageBlock]], list[tuple[float, float]], list[Image.Image]]:
         """Runs layout/OCR/table processing (batched across the whole
         `pages` list) and returns each page's assembled blocks, alongside
@@ -293,6 +322,11 @@ class DocumentPipeline:
         realign, only the (deskew/orientation-disabled) crop-only case is
         round-trippable via crop_offset. The saved-image approach above
         doesn't have this limitation.
+
+        When ``debug_trace`` is provided, this method also stores request-local
+        references to raw layout detections and OCR lines. The caller combines
+        those with the final blocks after extraction; nothing is stored on the
+        shared ``DocumentPipeline`` instance.
         """
         # Phase 1a: whitespace crop + deskew -- genuinely page-specific/
         # sequential, each one lightweight.
@@ -354,6 +388,8 @@ class DocumentPipeline:
         # call instead of one call per page -- see PPDocLayoutBackend.detect_batch.
         t_layout = time.time()
         raw_blocks_per_page = self.layout.detect_batch([p.img for p in prepped], self.config.layout_threshold)
+        if debug_trace is not None:
+            debug_trace.layout_blocks = raw_blocks_per_page
         logger.info("Layout-detected %d pages in one batch in %.2fs", len(pages), time.time() - t_layout)
 
         # Saved HERE, right after the batch call, rather than later per-page
@@ -475,6 +511,8 @@ class DocumentPipeline:
             finish_ocr_page(ocr_preps[pn], fresh_rec_res_by_page[pn], self.ocr)
             for pn in range(len(pages))
         ]
+        if debug_trace is not None:
+            debug_trace.ocr_lines = pages_ocr_boxes
 
         # Phase 3c: per-page reading-order/content assembly, now that every
         # page's blocks (table content) and ocr_boxes (recognized text) are
@@ -631,11 +669,12 @@ class DocumentPipeline:
         blocks: list[PageBlock] = []
         table_crops: list[tuple[int, Image.Image]] = []
         tno = 0
-        for b in raw_blocks:
+        for source_layout_id, b in enumerate(raw_blocks, 1):
+            traced_block = {**b, "source_layout_id": source_layout_id}
             btype = b["type"].lower()
             if btype in label_schema.table_types:
                 if not self.config.table_enabled:
-                    blocks.append({**b, "content_type": "skip", "content": None})
+                    blocks.append({**traced_block, "content_type": "skip", "content": None})
                     continue
                 x0, y0, x1, y1 = map(int, b["bbox"])
                 crop = img.crop((max(0, x0 - 2), max(0, y0 - 2), min(w, x1 + 2), min(h, y1 + 2)))
@@ -643,12 +682,12 @@ class DocumentPipeline:
                 if abs(skew_angle) > 0.1:
                     logger.debug("Page %d: table deskewed by %.2f°", pn + 1, skew_angle)
                 table_crops.append((tno, crop))
-                blocks.append({**b, "content_type": "table", "content": None})
+                blocks.append({**traced_block, "content_type": "table", "content": None})
                 tno += 1
             elif btype in label_schema.skip_types:
-                blocks.append({**b, "content_type": "skip", "content": None})
+                blocks.append({**traced_block, "content_type": "skip", "content": None})
             else:
-                blocks.append({**b, "content_type": "text", "content": None})
+                blocks.append({**traced_block, "content_type": "text", "content": None})
         return blocks, table_crops
 
     def _process_page_after_layout(

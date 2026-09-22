@@ -123,8 +123,35 @@ Response:
 
 ```json
 {
-  "file": "document.pdf",
-  "json": { "file": "...", "pages": [ { "page": 1, "blocks": [...] } ] },
-  "markdown": "# ...\n\n..."
+  "information": [
+    {
+      "type": { "value": "Công văn", "type": "string" },
+      "title": { "value": "V/v ...", "type": "string" }
+    }
+  ],
+  "processing_time": 12.34
 }
 ```
+
+### Bật debug visualization
+
+Server đọc `conf/pipeline_conf.yaml` rồi deep-merge
+`conf/local.pipeline_conf.yaml`. Để API và demo UI trả/hiển thị trace của các
+bước layout, OCR, page blocks và extraction, bật debug ở file local runtime:
+
+```yaml
+debug:
+    enabled: true
+    dir: './debug_outputs'
+```
+
+Sau khi đổi config cần restart server vì pipeline được khởi tạo một lần lúc
+startup. `test/local.pipeline_conf.yaml` chỉ là cấu hình phục vụ test, không
+điều khiển server đang chạy.
+
+Khi `debug.enabled: true`, cùng endpoint `/api/v1/ocr/pdf` tự động thêm trường
+`debug` vào response; client không cần và không thể bật bằng URL parameter.
+Trace gồm Markdown, ảnh từng trang, raw layout boxes, OCR lines, final page
+blocks và evidence bbox của từng extraction field. Server đồng thời tiếp tục
+ghi các ảnh/crop debug vào `debug.dir` như trước. Khi flag là `false`, response
+chỉ giữ prediction chuẩn và demo UI báo `Server đang tắt debug visualization`.

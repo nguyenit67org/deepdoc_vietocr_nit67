@@ -42,7 +42,7 @@
             "type": "string"
         },
         "officeSender": {
-            "value": "TỈNH NGHỆ AN ỦY BAN NHÂN DÂN",
+            "value": "ỦY BAN NHÂN DÂN TỈNH NGHỆ AN",
             "type": "string"
         },
         "recipients": {
@@ -50,7 +50,7 @@
             "type": "string"
         },
         "signer_title": {
-            "value": "TL. CHỦ TỊCH; CHÁNH VĂN PHÒNG",
+            "value": "TL. CHỦ TỊCH CHÁNH VĂN PHÒNG",
             "type": "string"
         },
         "signer": {
@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Các sở, ban, ngành thuộc UBND tỉnh.",
+            "type": "string"
         }
     }
 }

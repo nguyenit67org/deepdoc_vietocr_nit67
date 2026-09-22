@@ -12,6 +12,7 @@ class PageBlock(TypedDict, total=False):
     type: str
     bbox: list[float]
     score: float
+    source_layout_id: int
     content_type: str
     content: str | None
     text_items: list[OCRBox]

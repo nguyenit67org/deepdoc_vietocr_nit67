@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class OCRResponse(BaseModel):
@@ -58,9 +58,89 @@ class VBHCInformation(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class DebugLayoutBlock(BaseModel):
+    id: int
+    type: str
+    score: float | None = None
+    bbox: list[float]
+
+
+class DebugOCRLine(BaseModel):
+    id: int
+    text: str
+    bbox: list[float]
+    quad: list[list[float]]
+    block_id: int | None = None
+
+
+class DebugPageBlock(BaseModel):
+    id: int
+    type: str
+    score: float
+    content_type: str
+    content: str | None = None
+    bbox: list[float]
+    source_layout_id: int | None = None
+    ocr_line_ids: list[int]
+
+
+class DebugExtractionEvidence(BaseModel):
+    page: int
+    block_id: int
+    block_type: str
+    source_layout_id: int | None = None
+    rule: str
+    value: str
+    source_text: str
+    bbox: list[float]
+    bbox_normalized: list[float]
+    geometry_reliable: bool
+
+
+class DebugExtractionField(BaseModel):
+    value: str
+    status: Literal["matched", "default", "not_found"]
+    evidence: list[DebugExtractionEvidence]
+
+
+class DebugExtraction(BaseModel):
+    document_start_page: int | None = None
+    document_end_page: int | None = None
+    next_document_start_page: int | None = None
+    geometry_reliable: bool
+    fields: dict[str, DebugExtractionField]
+
+
+class DebugPage(BaseModel):
+    page: int
+    width: int
+    height: int
+    image_url: str
+    layout_blocks: list[DebugLayoutBlock]
+    ocr_lines: list[DebugOCRLine]
+    blocks: list[DebugPageBlock]
+
+
+class PipelineDebugResponse(BaseModel):
+    version: Literal[1, 2]
+    document_id: str | None = None
+    source_filename: str | None = None
+    pdf_path: str | None = None
+    markdown: str
+    pages: list[DebugPage]
+    extraction: DebugExtraction
+
+    @model_validator(mode="after")
+    def require_v2_identity(self):
+        if self.version == 2 and not all((self.document_id, self.source_filename, self.pdf_path)):
+            raise ValueError("Trace v2 requires document_id, source_filename and pdf_path")
+        return self
+
+
 class VBHCPredictionResponse(BaseModel):
     information: list[VBHCInformation] = Field(min_length=1, max_length=1)
     processing_time: float = Field(ge=0)
+    debug: PipelineDebugResponse | None = None
 
     model_config = ConfigDict(extra="forbid")
 

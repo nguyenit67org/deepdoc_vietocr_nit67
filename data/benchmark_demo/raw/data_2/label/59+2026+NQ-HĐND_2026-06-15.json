@@ -17,7 +17,11 @@
             "type": "string"
         },
         "officeSender": {
-            "value": "HỘI ĐỒNG NHÂN DÂN/THÀNH PHỐ HÀ NỘI",
+            "value": "HỘI ĐỒNG NHÂN DÂN THÀNH PHỐ HÀ NỘI",
+            "type": "string"
+        },
+        "first_recipients": {
+            "value": null,
             "type": "string"
         },
         "recipients": {

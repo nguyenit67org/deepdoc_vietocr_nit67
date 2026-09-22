@@ -228,7 +228,7 @@ def _log_duplicate_functions(label: str, top_n: int = 20) -> None:
         logger.exception("parameter diagnostic failed")
 
 
-@router.post("/pdf", response_model=VBHCPredictionResponse)
+@router.post("/pdf", response_model=VBHCPredictionResponse, response_model_exclude_none=True)
 async def ocr_pdf(
     file: UploadFile = File(...),
     pipeline: DocumentPipeline = Depends(get_pipeline),

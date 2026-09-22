@@ -141,6 +141,7 @@
         },
         "code": {
           "description": "Số ký hiệu văn bản; giữ dấu cấu trúc /, - và .",
+          "description": "Số ký hiệu văn bản; giữ dấu cấu trúc / và -, loại bỏ dấu chấm và chuẩn hóa khoảng trắng thành gạch nối.",
           "allOf": [
             {
               "$ref": "#/definitions/textField"
@@ -157,6 +158,7 @@
         },
         "officeSender": {
           "description": "Cơ quan gửi/ban hành; giữ thứ tự đọc từ trên xuống dưới, trái sang phải và không đảo thành cơ quan con/cơ quan cha.",
+          "description": "Cơ quan gửi/ban hành; giữ thứ tự đọc từ trên xuống dưới, trái sang phải, không đảo thành cơ quan con/cơ quan cha, nhiều dòng nối bằng một khoảng trắng.",
           "allOf": [
             {
               "$ref": "#/definitions/textField"
@@ -205,6 +207,7 @@
         },
         "signer_title": {
           "description": "Nội dung KT./TM./chức vụ/quyền hạn ký; cùng format nhiều giá trị với signer.",
+          "description": "Nội dung KT./TM./chức vụ/quyền hạn ký; nhiều dòng của một chức danh nối bằng một khoảng trắng (không chứa newline); nhiều chức danh độc lập phân cách bằng dấu chấm phẩy (;).",
           "allOf": [
             {
               "$ref": "#/definitions/textField"

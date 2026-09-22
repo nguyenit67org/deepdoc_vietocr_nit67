@@ -146,6 +146,9 @@ output:
   dir: "./pipeline_outputs"
 
 debug:
+  # When enabled, keep the annotated/cropped files under `dir` and include
+  # the structured layout/OCR/block/extraction trace in POST /ocr/pdf.
+  # Config is loaded at server startup; clients cannot enable this per request.
   enabled: false
   dir: "./debug_outputs"
 

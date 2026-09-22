@@ -1,6 +1,14 @@
 *.[pP][dD][fF]
 
+docs/ai/
+
 ocr-collab/
+
+# Local tooling/caches (per-machine, not shared)
+node_modules/
+.vscode/
+.matplotlib/
+.paddlex/
 
 # Local config overrides (per-machine/environment, not shared)
 conf/local.*.yaml

@@ -17,7 +17,11 @@
             "type": "string"
         },
         "officeSender": {
-            "value": "ỦY BAN NHÂN DÂN/TỈNH NGHỆ AN",
+            "value": "ỦY BAN NHÂN DÂN TỈNH NGHỆ AN",
+            "type": "string"
+        },
+        "first_recipients": {
+            "value": "- Giám đốc các sở, Thủ trưởng các ban, ngành cấp tỉnh;\n- Chủ tịch UBND các huyện, thành phố, thị xã.",
             "type": "string"
         },
         "recipients": {
@@ -41,7 +45,7 @@
             "type": "string"
         },
         "signer_title": {
-            "value": "TM. ỦY BAN NHÂN DÂN; KT. CHỦ TỊCH; PHÓ CHỦ TỊCH",
+            "value": "TM. ỦY BAN NHÂN DÂN KT. CHỦ TỊCH PHÓ CHỦ TỊCH",
             "type": "string"
         },
         "province": {

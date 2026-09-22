@@ -83,13 +83,13 @@ class VBHCRuleExtractionTests(unittest.TestCase):
 
         self.assertEqual(info["type"]["value"], "Công văn")
         self.assertEqual(info["title"]["value"], "V/v: Giữ nguyên /, - và dấu chấm.")
-        self.assertEqual(info["code"]["value"], "12/QĐ-BTC.01")
+        self.assertEqual(info["code"]["value"], "12/QĐ-BTC01")
         self.assertEqual(info["documentDate"]["value"], "29/02/2024")
         self.assertEqual(info["province"]["value"], "Hà Nội")
         self.assertEqual(info["officeSender"]["value"], "BỘ TÀI CHÍNH")
         self.assertEqual(info["first_recipients"]["value"], "Sở Tài chính; UBND tỉnh.")
         self.assertEqual(info["recipients"]["value"], "Bộ Nội vụ; UBND tỉnh")
-        self.assertEqual(info["signer_title"]["value"], "KT. CHỦ TỊCH\nPHÓ CHỦ TỊCH")
+        self.assertEqual(info["signer_title"]["value"], "KT. CHỦ TỊCH PHÓ CHỦ TỊCH")
         self.assertEqual(info["signer"]["value"], "Nguyễn Văn An")
         self.assertEqual(info["security_level"]["value"], "1_MẬT")
         self.assertEqual(info["priority_level"]["value"], "1_HỎA TỐC")
@@ -158,6 +158,76 @@ class VBHCRuleExtractionTests(unittest.TestCase):
 
         self.assertEqual(info["signer_title"]["value"], "GIÁM ĐỐC; PHÓ GIÁM ĐỐC")
         self.assertEqual(info["signer"]["value"], "Nguyễn Văn An; Trần Thị Bình")
+
+    def test_multiblock_values_report_every_contributing_evidence_region(self):
+        pages = [[
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số: 01/QĐ-TEST", [100, 140, 460, 185]),
+            block("Hà Nội, ngày 01 tháng 01 năm 2026", [510, 140, 920, 185]),
+            block("QUYẾT ĐỊNH", [300, 215, 700, 260], "doc_title"),
+            block("Về việc thử nghiệm", [280, 270, 720, 310], "doc_title"),
+            block("Kính gửi: Sở Tài chính", [260, 340, 760, 380]),
+            block("ỦY BAN NHÂN DÂN TỈNH A", [260, 385, 760, 425]),
+            block("ĐẾN", [20, 440, 150, 485]),
+            block("Ngày: 02/03/2024", [20, 490, 230, 535]),
+        ]]
+
+        prediction, debug = extract(pages)
+
+        self.assertEqual(prediction["information"][0]["title"]["value"], "Về việc thử nghiệm")
+        self.assertEqual([item["block_id"] for item in debug["evidence"]["title"]], [5])
+        self.assertEqual([item["block_id"] for item in debug["evidence"]["first_recipients"]], [6, 7])
+        self.assertEqual([item["block_id"] for item in debug["evidence"]["receiverDate"]], [8, 9])
+        for field in ("title", "first_recipients", "receiverDate"):
+            for item in debug["evidence"][field]:
+                self.assertEqual(len(item["bbox"]), 4)
+                self.assertIn("block_type", item)
+
+    def test_office_sender_multiline_joined_with_space(self):
+        pages = [[
+            block("BỘ VĂN HÓA, THỂ THAO\nVÀ DU LỊCH", [100, 40, 460, 110]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số: 4977/BVHTTDL VP", [100, 140, 460, 185]),
+            block("Hà Nội, ngày 07 tháng 08 năm 2026", [510, 140, 920, 185]),
+            block("V/v tổ chức hội nghị", [250, 220, 800, 270]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["officeSender"]["value"], "BỘ VĂN HÓA, THỂ THAO VÀ DU LỊCH")
+        self.assertEqual(info["code"]["value"], "4977/BVHTTDL-VP")
+
+    def test_office_sender_stops_before_merged_first_recipient(self):
+        pages = [[
+            block("TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI\nKính gửi: ỦY BAN CHỨNG KHOÁN NHÀ NƯỚC", [80, 40, 480, 130]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 90]),
+            block("Số: 262/PVIRe-HĐ", [100, 145, 460, 185]),
+            block("Hà Nội, ngày 23 tháng 11 năm 2020", [510, 145, 920, 185]),
+            block("HỢP ĐỒNG", [300, 230, 700, 280]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"],
+            "TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI",
+        )
+
+    def test_closing_page_adoption_date_not_used_as_document_date(self):
+        pages = [
+            [
+                block("BỘ TÀI CHÍNH", [100, 40, 460, 110]),
+                block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+                block("Số: 10/QĐ-BTC", [100, 140, 460, 185]),
+                block("QUYẾT ĐỊNH\nVề việc ban hành quy chế", [250, 220, 800, 300]),
+            ],
+            [
+                block("Hai bên thông qua ngày 15 tháng 05 năm 2020.", [150, 500, 850, 550]),
+                block("Nơi nhận:\n- Như trên;\n- Lưu: VT.", [100, 620, 470, 800]),
+                block("GIÁM ĐỐC", [600, 620, 850, 680]),
+                block("Nguyễn Văn An", [600, 750, 850, 800]),
+            ],
+        ]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["documentDate"]["value"], "")
 
     def test_empty_document_obeys_prediction_schema(self):
         prediction, debug = extract_vbhc([], [], [], [])

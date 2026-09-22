@@ -1,469 +1,192 @@
-# OCR/KIE Pipeline Benchmark Metrics
-
-## 1. Context
-
-This benchmark evaluates an end-to-end OCR/KIE pipeline that extracts structured metadata from Vietnamese administrative documents (VBHC).
-
-The pipeline may use OCR, layout analysis, rules, NLP/KIE, VLMs, or a hybrid approach. The benchmark is intended for demo/baseline comparison first, while remaining simple enough to reuse for later R&D.
-
-Typical extracted fields include:
-
-- `type`
-- `title`
-- `code`
-- `documentDate`
-- `officeSender`
-- `recipients`
-- `signer`
-- `priority_level`
-- `security_level`
-- `first_recipients`
-- `signer_title`
-- `province`
-- `receiverDate`
+# Chuẩn OCR/KIE và benchmark văn bản hành chính
 
-### 1.1 Field Specification / Mô tả trường
+Tài liệu này là nguồn chuẩn hiện hành cho API 13 trường VBHC, quy tắc trích xuất, bằng chứng và benchmark. Các quy tắc còn hiệu lực từ đặc tả API cũ đã được tổng hợp trực tiếp tại đây; implementation và test không cần tham chiếu ngược đặc tả cũ.
 
-| Field              | Evaluation type | Mô tả / format                                                                                                                                                                        |
-| ------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`             | Text            | Hình thức/thể loại văn bản.                                                                                                                                                           |
-| `title`            | Text            | Trích yếu nội dung văn bản.                                                                                                                                                           |
-| `code`             | Text            | Số ký hiệu văn bản; so sánh không phân biệt hoa/thường và giữ `/`, `-`.                                                                                                               |
-| `documentDate`     | Date            | Ngày văn bản; parse và chuẩn hóa về `dd/mm/yyyy`.                                                                                                                                     |
-| `officeSender`     | Text            | Cơ quan gửi/ban hành; giữ thứ tự hiển thị/đọc từ trên xuống dưới, trái sang phải; không sắp xếp lại thành `[cơ quan con]/[cơ quan cha]`.                                              |
-| `recipients`       | Text            | Nơi nhận — tên cơ quan, tổ chức, cá nhân trong phần `Nơi nhận`; nhiều giá trị theo thứ tự trên xuống dưới, trái sang phải, phân cách bằng `;` và đánh giá toàn bộ text sau chuẩn hóa. |
-| `signer`           | Text            | Họ tên người ký; nhiều giá trị theo thứ tự trên xuống dưới, trái sang phải, phân cách bằng `;` và đánh giá toàn bộ text sau chuẩn hóa.                                                |
-| `priority_level`   | Enum            | Độ khẩn: `0_BÌNH THƯỜNG`, `1_HỎA TỐC`, `2_KHẨN`, `3_THƯỢNG KHẨN`.                                                                                                                     |
-| `security_level`   | Enum            | Độ mật: `0_BÌNH THƯỜNG`, `1_MẬT`, `2_TỐI MẬT`, `3_TUYỆT MẬT`.                                                                                                                         |
-| `first_recipients` | Text            | Người/nơi nhận ở đầu văn bản, thường sau `Kính gửi`; cùng format với `recipients`.                                                                                                    |
-| `signer_title`     | Text            | Nội dung `KT./TM./chức vụ/quyền hạn ký`; cùng format nhiều giá trị với `signer`.                                                                                                      |
-| `province`         | Text            | Tỉnh/thành phố của cơ quan ban hành.                                                                                                                                                  |
-| `receiverDate`     | Date            | Ngày nhận văn bản; parse và chuẩn hóa về `dd/mm/yyyy`.                                                                                                                                |
+## 1. Hợp đồng đầu ra
 
-Important: a field may be logically required by business or document conventions but still be absent from the actual PDF input. Evaluation ground truth must therefore reflect **what is observable in the PDF being evaluated**, not metadata available only from an external source page.
+Pipeline trả đúng một phần tử trong `information`, gồm 13 trường sau. Mỗi trường có `type: "string"` và `value` là chuỗi.
 
-### 1.2 Empty and default output contract
+| Field | Nhóm | Metric chính |
+| --- | --- | --- |
+| `type` | Critical + required | F1 Exact |
+| `title` | Critical + required | F1@5% |
+| `code` | Critical + required | F1 Exact |
+| `documentDate` | Critical + required | F1 Exact |
+| `officeSender` | Critical + required | F1@5% |
+| `priority_level` | Critical + required | F1 Exact |
+| `security_level` | Critical + required | F1 Exact |
+| `recipients` | Critical + optional | F1@5% |
+| `signer` | Critical + optional | F1 Exact |
+| `first_recipients` | Critical + optional | F1@5% |
+| `signer_title` | Critical + optional | F1@5% |
+| `province` | Non-critical + optional | F1 Exact |
+| `receiverDate` | Non-critical + optional | F1 Exact |
 
-- Text and date fields always use a JSON string. If the field is absent, not
-  detected, or not recognized, return the empty string `""`; do not return
-  `null`.
-- `receiverDate` is read from a visible receipt/arrival stamp such as a
-  `ĐẾN ... Ngày:` block. Do not substitute `documentDate`, posting time,
-  download time, or OCR execution time. If the stamp/date is not recognized,
-  return `""`.
-- `priority_level` and `security_level` always use their canonical enum. If
-  the corresponding urgency/security stamp is absent or unreadable, return
-  `0_BÌNH THƯỜNG`.
+Trường text hoặc ngày không tìm thấy trả `""`, không trả `null`. `priority_level` và `security_level` mặc định là `0_BÌNH THƯỜNG` khi tài liệu không có dấu hoặc không đọc được dấu.
 
-In the metric definitions below, **empty** means exactly the empty string
-`""` after reading the prediction contract.
+Các enum hợp lệ:
 
----
+- `priority_level`: `0_BÌNH THƯỜNG`, `1_HỎA TỐC`, `2_KHẨN`, `3_THƯỢNG KHẨN`.
+- `security_level`: `0_BÌNH THƯỜNG`, `1_MẬT`, `2_TỐI MẬT`, `3_TUYỆT MẬT`.
 
-## 2. Business Objective
+Không có `article_one` trong hợp đồng mới. Không suy đoán giá trị từ tên file, metadata ngoài PDF hoặc GT.
 
-The system should:
+## 2. Ranh giới văn bản thứ nhất
 
-1. Extract field values as accurately as possible.
-2. Treat a text prediction as business-acceptable when character error is at most 5%.
-3. Avoid both:
-    - returning incorrect/hallucinated values;
-    - missing values that actually exist.
-4. Preserve a simple and explainable benchmark that BA, engineering, and management can understand.
-5. Support error analysis that helps identify whether failures come from:
-    - wrong text;
-    - missing fields;
-    - hallucinated fields;
-    - substitution, deletion, or insertion errors.
-6. Measure practical deployment cost through processing time, RAM, and VRAM.
+Pipeline trích xuất văn bản chính đầu tiên trong PDF.
 
-Precision and Recall are considered equally important.
+- `document_start_page` dựa trên header hành chính: Quốc hiệu/Tiêu ngữ, cơ quan ban hành, số ký hiệu hoặc trích yếu. Bìa hay trang rác trước văn bản có thể bị bỏ qua.
+- `document_end_page` dựa trên phần kết thúc: Nơi nhận, thẩm quyền ký, chữ ký hoặc con dấu.
+- Khi phát hiện header độc lập của văn bản kế tiếp, `next_document_start_page` đánh dấu điểm dừng; không lấy trường của phụ lục hay văn bản đính kèm làm trường của văn bản thứ nhất.
+- Người ký và chức danh lấy tại trang đầu tiên có vùng ký hợp lệ trong phạm vi văn bản thứ nhất.
 
----
+## 3. Quy tắc giá trị đầu ra
 
-## 3. Text Normalization
+### 3.1. Ghép dòng và nhiều giá trị
 
-**Context:** This benchmark evaluates semantic VBHC metadata extraction, not glyph-perfect OCR transcription.
+- Một giá trị bị xuống dòng, gồm `title`, `officeSender` và một chức danh trong `signer_title`, được nối bằng đúng một dấu cách.
+- Nhiều giá trị độc lập của `recipients`, `first_recipients`, `signer` và nhiều chức danh độc lập trong `signer_title` được phân cách bằng `; `, giữ thứ tự đọc.
+- `officeSender` là một giá trị cơ quan ban hành; nhiều dòng được nối bằng dấu cách. Không áp dụng quy tắc cũ `[Cơ quan con]/[Cơ quan cha]`.
+- Raw OCR và xuống dòng gốc vẫn được giữ trong trace evidence.
 
-**Objective:** Compare values in a practical, canonical form used by the business while preserving `raw_value` for audit/debug.
+### 3.2. Chuẩn hóa `code` ở đầu ra API
 
-**Unicode normalization:** Apply **NFKC** to canonicalize compatibility-equivalent Unicode characters into a common form before evaluation.
+Theo đúng thứ tự:
 
-Default evaluation normalization:
+1. Bỏ khoảng trắng đầu và cuối.
+2. Xóa toàn bộ dấu `.`.
+3. Rút nhiều whitespace liên tiếp thành một dấu cách.
+4. Xóa whitespace quanh `/` và `-`.
+5. Đổi các dấu cách còn lại thành `-`.
+6. Rút nhiều dấu `-` liên tiếp thành một dấu `-`.
+7. Bỏ `;`, `,`, `:` thừa ở cuối.
 
-1. `unicodedata.normalize("NFKC", text)`
-2. Trim + collapse whitespace.
-3. Case-insensitive comparison.
-4. Apply field-specific punctuation rules.
+Ví dụ ` 4977 / BVHTTDL  VP: ` thành `4977/BVHTTDL-VP`.
 
-Notes:
+### 3.3. Xác định vùng `code`
 
-- Always preserve the original `raw_value`; normalize only the value used for evaluation/business matching.
-- Do not strip Vietnamese diacritics.
-- Preserve `/` and `-` in all text fields because embedded document codes are structurally meaningful.
-- Except for the canonical `;` separator in multi-value fields, ordinary text may ignore `, . : '"` when punctuation is non-semantic.
-- `code` keeps structural punctuation such as `/`, `-`.
-- Multi-value fields preserve reading order from top to bottom, left to right, use `;` as the separator, and are compared as whole text after normalization.
-- Dates are parsed and normalized to canonical `dd/mm/yyyy`; enums are mapped to canonical classes.
+Ưu tiên hình học trước, regex sau:
 
----
+1. Xác định Quốc hiệu/Tiêu ngữ ở vùng trên bên phải.
+2. Xác định `officeSender` ở vùng trên bên trái tương đối với Quốc hiệu/Tiêu ngữ.
+3. Xác định vùng địa danh và ngày ban hành ngay dưới Quốc hiệu/Tiêu ngữ.
+4. Giới hạn vùng tìm `code` ở bên trái vùng địa danh/ngày và dưới `officeSender`.
+5. Trong vùng đó, ưu tiên anchor `Số:` hoặc `Số` rồi kiểm tra cấu trúc số/ký hiệu theo văn bản hành chính và các dạng hợp lệ đã quan sát trong tập benchmark.
+6. Loại khối Công báo, căn cứ/thân văn bản, địa chỉ/liên hệ, số trang và số điều.
 
-## 4. Core Text Error Metric
+Không thêm quy tắc theo tên file hoặc đáp án GT. Dạng không bắt đầu bằng chữ số chỉ được nhận khi anchor và vị trí đủ mạnh; không nới regex toàn cục.
 
-For non-empty text GT, use traditional Character Error Rate (CER):
+### 3.4. Ngày và địa danh
 
-$$
-CER = \frac{S + D + I}{|GT|}
-$$
+- `documentDate` và `province` được tìm trong vùng header mặc định.
+- Khi không tìm được `documentDate`, hiện tại trả `""`. Fallback lấy câu “thông qua ngày...” ở trang ký cuối đang tạm bỏ; chỉ được thử lại trong một thí nghiệm riêng và phải chứng minh cải thiện không hồi quy.
+- Fallback ngày, nếu được thử sau này, chỉ có quyền trả `documentDate`; không được xóa hoặc ghi đè `province`.
+- `receiverDate` chỉ lấy từ dấu đến/văn bản đến, không thay bằng ngày ban hành hay ngày chạy pipeline.
 
-Where:
+### 3.5. Các trường còn lại
 
-- `S`: substitutions
-- `D`: deletions
-- `I`: insertions
-- `|GT|`: normalized ground-truth character length
+- `type` lấy hình thức văn bản chính, không lấy từ câu nhắc trong thân văn bản.
+- `title` giữ nội dung có nghĩa và dấu câu nguồn; phần tiếp dòng được nối theo mục 3.1.
+- `recipients` lấy vùng Nơi nhận ở phần kết thúc.
+- `first_recipients` lấy Kính gửi ở đầu văn bản.
+- `signer` giữ họ tên người ký theo nguồn.
+- `signer_title` giữ chức danh/thẩm quyền ký, nối dòng bằng dấu cách.
+- `priority_level` và `security_level` chỉ trả lớp khác mặc định khi có bằng chứng trong tài liệu.
 
-Traditional CER is intentionally kept unbounded because large insertions/hallucinations should receive a large penalty.
+## 4. Ba tầng dữ liệu
 
-A prediction is **acceptable at 5%** when:
+1. **Raw evidence:** `source_text`, OCR lines, bbox pixel và bbox chuẩn hóa được giữ nguyên để audit.
+2. **API output:** áp dụng quy tắc nghiệp vụ ở mục 3.
+3. **Benchmark normalization:** chỉ tạo bản chuẩn hóa để so sánh; không sửa raw evidence hay GT trên đĩa.
 
-$$
-CER \le 0.05
-$$
+Chuẩn hóa benchmark chung: Unicode NFKC, `casefold`, trim và rút whitespace, giữ dấu tiếng Việt, bỏ dấu câu không mang nghĩa theo implementation. Riêng `code`, bỏ dấu `.` và toàn bộ whitespace nhưng giữ `/` và `-`. Ngày được parse về `dd/mm/yyyy`; enum được map về lớp chuẩn.
 
-`@5%` means that the metric uses the 5% CER tolerance as the correctness threshold.
+## 5. Metric, bucket và target
 
----
+Với trường text có GT, `CER = (S + D + I) / len(normalized_GT)`. CER không bị giới hạn ở 1. Ngày và enum không dùng CER.
 
-## 5. End-to-End Metrics by Field Type
+| Trường hợp | Bucket | Đóng góp |
+| --- | --- | --- |
+| GT có, prediction đúng | Exact | TP |
+| GT có, text F1@5% có `0 < CER <= 0.05` | Acceptable | TP |
+| GT có, prediction sai | Wrong | FP + FN |
+| GT có, prediction rỗng | Missing | FN |
+| GT rỗng, prediction có | Hallucination | FP |
+| GT rỗng, prediction rỗng | Correct Absent | TN |
 
-### 5.1 Text fields
+Nhóm Exact không có bucket Acceptable. `NEM` là tỷ lệ Exact trên các mẫu GT có giá trị. F1, precision, recall và hallucination rate được tính từ TP/FP/FN/TN ở trên.
 
-Examples:
+Target hiện tại cho mọi field là F1, NEM và recall `>=0.95`, precision `>=0.97`, hallucination `<=0.01`, ngoại trừ:
 
-- Single-value: `type`, `title`, `code`, `officeSender`, `province`
-- Multi-value serialized as whole text: `recipients`, `signer`, `first_recipients`, `signer_title`
+- `province`: precision `>=0.90`, hallucination `<=0.02`.
+- `receiverDate`: F1/NEM/recall `>=0.75` hiện tại, `>=0.85` ở mốc kế tiếp; precision `>=0.90`, hallucination `<=0.02`.
 
-For multi-value fields, preserve reading order from top to bottom, left to right, then serialize using `;` before whole-text comparison.
+Thiếu mẫu số hoặc thiếu lớp enum phải báo `Chưa đánh giá đầy đủ`, không tính là đạt.
 
-#### NEM — Normalized Exact Match
+## 6. Các chế độ chạy
 
-Measures perfect normalized text equality.
+| Chế độ | Thực hiện | Có thể chứng minh |
+| --- | --- | --- |
+| Full inference | PDF → layout → OCR → hậu xử lý → extraction | Chất lượng end-to-end, ảnh/trace mới, thời gian và tài nguyên của lượt chạy |
+| Extraction replay | Chạy extraction mới trên OCR/layout đã lưu | Tác động riêng của luật extraction; không đại diện thay đổi OCR/layout |
+| Rescore | Chấm lại prediction đã lưu | Tác động của metric/GT hiện tại; không phải cải thiện mô hình |
 
-$$
-NEM =
-\frac{\#\text{GT-present samples with normalized Pred = normalized GT}}
-{\#\text{GT-present samples}}
-$$
+So sánh trước/sau phải dùng cùng tập document, cùng 13 field, cùng metric version và cùng snapshot GT. Công cụ so sánh phải nạp GT hiện tại cho cả hai phía; tuyệt đối không so trực tiếp hai `summary.json` được tạo từ hai phiên bản GT khác nhau.
 
-Use NEM to answer:
+## 7. Artifact và trace
 
-> How often is the extracted value completely correct?
+Mỗi bundle tối thiểu có `manifest.json`, `predictions.jsonl`, `summary.json`, `metrics.csv`, `field_errors.csv`, `enum_metrics.csv`, `pipeline_config.json` nếu có, `source_snapshot/` và `evidence/`.
 
-For fields that may be absent, NEM is calculated only on GT-present samples so that `GT empty + Pred empty` does not inflate the score.
+Mỗi tài liệu có thư mục dễ tìm theo tên PDF:
 
-#### Precision@5%, Recall@5%, F1@5%
-
-A text prediction is considered correct only when `CER <= 0.05`.
-
-Classification:
-
-| Case                                    | Count   |
-| --------------------------------------- | ------- |
-| GT present, Pred present, `CER <= 0.05` | TP      |
-| GT present, Pred present, `CER > 0.05`  | FP + FN |
-| GT present, Pred empty                  | FN      |
-| GT empty, Pred present                  | FP      |
-| GT empty, Pred empty                    | TN      |
-
-$$
-Precision@5\% = \frac{TP}{TP+FP}
-$$
-
-$$
-Recall@5\% = \frac{TP}{TP+FN}
-$$
-
-$$
-F1@5\% =
-2 \times
-\frac{Precision@5\% \times Recall@5\%}
-{Precision@5\% + Recall@5\%}
-$$
-
-**Primary text KPI:** `F1@5%`
-
-**Secondary text KPI:** `NEM`
-
-Precision and Recall are retained as drill-down metrics.
-
----
-
-### 5.2 Date fields
-
-Examples:
-
-- `documentDate`
-- `receiverDate`
-
-Parse equivalent formats such as:
-
-- `9/9/2026`
-- `03/7/2026`
-- `6/07/2026`
-
-into the canonical representation `dd/mm/yyyy`, e.g. `02/03/2026`.
-
-Do not use CER for dates. A date is an atomic structured value: changing one
-digit can change the day, month, or year and must count as a semantic error.
-Conversely, surface variants such as `9/9/2026` and `09/09/2026` should be
-treated as equal after parsing rather than penalized by character distance.
-
-For a canonical date of roughly 10 characters, one wrong character also gives
-about 10% CER, so `CER <= 5%` mostly degenerates into exact matching while
-still failing to express date validity. NEM after date parsing would agree
-with exact match on GT-present samples, but it would not by itself capture
-missing and hallucinated values. Therefore use field-level F1 Exact as the
-primary metric.
-
-Use exact field-level matching:
-
-| Case                                 | Count   |
-| ------------------------------------ | ------- |
-| GT present, parsed Pred = parsed GT  | TP      |
-| GT present, parsed Pred != parsed GT | FP + FN |
-| GT present, Pred empty/unparseable   | FN      |
-| GT empty, Pred present               | FP      |
-| GT empty, Pred empty                 | TN      |
-
-Metrics:
-
-- `Precision Exact`
-- `Recall Exact`
-- `F1 Exact`
-
-**Primary date KPI:** `F1 Exact`
-
-Parsed exact accuracy/NEM may be reported as a secondary diagnostic, but it is
-redundant with exact equality on GT-present canonical dates and must not
-replace Precision/Recall/F1 Exact.
-
----
-
-### 5.3 Enum / categorical fields
-
-Examples:
-
-- `priority_level`
-- `security_level`
-
-Map output to a canonical class before evaluation.
-
-Examples:
-
-- `KHẨN` -> canonical enum value
-- `khẩn` -> same canonical enum value
-- absent or unreadable urgency/security stamp -> `0_BÌNH THƯỜNG`
-
-Do not use CER because a class mismatch is a semantic error, not a character-distance problem.
-
-Use:
-
-- `Precision Exact`
-- `Recall Exact`
-- `F1 Exact`
-
-**Primary categorical KPI:** `F1 Exact`
-
----
-
-## 6. Debug / Error Analysis Buckets
-
-Each sample-field should belong to exactly one debug bucket.
-
-### Text fields
-
-| Bucket           | Condition                                   |
-| ---------------- | ------------------------------------------- |
-| `Exact`          | GT present, Pred present, `CER = 0`         |
-| `Acceptable`     | GT present, Pred present, `0 < CER <= 0.05` |
-| `Wrong`          | GT present, Pred present, `CER > 0.05`      |
-| `Missing`        | GT present, Pred empty                      |
-| `Hallucination`  | GT empty, Pred present                      |
-| `Correct Absent` | GT empty, Pred empty                        |
-
-Derived counts:
-
-$$
-TP = Exact + Acceptable
-$$
-
-$$
-FP = Wrong + Hallucination
-$$
-
-$$
-FN = Wrong + Missing
-$$
-
-### Date / enum fields
-
-Use the same buckets except there is no `Acceptable` bucket:
-
-- `Exact`
-- `Wrong`
-- `Missing`
-- `Hallucination`
-- `Correct Absent`
-
----
-
-## 7. Character-Level Error Analysis
-
-For text fields with non-empty GT, log:
-
-$$
-CER = \frac{S+D+I}{|GT|}
-$$
-
-$$
-S_{rate} = \frac{S}{|GT|}
-$$
-
-$$
-D_{rate} = \frac{D}{|GT|}
-$$
-
-$$
-I_{rate} = \frac{I}{|GT|}
-$$
-
-Recommended visualizations:
-
-- Raw CER histogram
-- Substitution-rate histogram
-- Deletion-rate histogram
-- Insertion-rate histogram
-
-Raw CER must not be clipped. Large CER values are useful for identifying severe insertion/hallucination failures.
-
-A custom correction-effort metric such as:
-
-$$
-\frac{2S + D + I}{|GT|}
-$$
-
-is intentionally **not part of benchmark v1**. It may be added later if real user correction effort becomes a business KPI.
-
----
-
-## 8. Performance / Resource Utilization
-
-Benchmark the following five headline metrics:
-
-| Metric                       | Meaning                                               |
-| ---------------------------- | ----------------------------------------------------- |
-| `Avg Processing Time / File` | Average end-to-end processing time for one input file |
-| `Avg RAM / File`             | Average RAM usage while processing a file             |
-| `Peak RAM / File`            | Maximum RAM usage while processing a file             |
-| `Avg VRAM / File`            | Average GPU memory usage while processing a file      |
-| `Peak VRAM / File`           | Maximum GPU memory usage while processing a file      |
-
-GPU utilization percentage is not required for the current baseline.
-
-Processing time must also be logged per file so it can be analyzed against document characteristics.
-
-Recommended per-file metadata:
-
-- `document_id`
-- `num_pages`
-- `document_format` — digital / scanned / image / mixed
-- `has_handwriting`
-- `layout_type`
-- `processing_time_s`
-- `avg_ram_mb`
-- `peak_ram_mb`
-- `avg_vram_mb`
-- `peak_vram_mb`
-
-This enables analysis such as:
-
-- processing time vs. page count;
-- digital vs. scanned documents;
-- printed vs. handwriting-containing documents;
-- simple vs. complex layouts.
-
----
-
-## 9. Recommended Per-Sample Evaluation Log
-
-```json
-{
-    "document_id": "...",
-    "field_name": "title",
-    "field_type": "text",
-
-    "gt_raw": "...",
-    "pred_raw": "...",
-    "gt_normalized": "...",
-    "pred_normalized": "...",
-
-    "gt_present": true,
-    "pred_present": true,
-
-    "substitutions": 0,
-    "deletions": 1,
-    "insertions": 0,
-    "cer": 0.02,
-
-    "exact_match": false,
-    "acceptable_at_5": true,
-    "error_bucket": "Acceptable"
-}
+```text
+evidence/<pdf_stem>/trace.json
+evidence/<pdf_stem>/page_1.png
+evidence/<pdf_stem>/page_2.png
 ```
 
-Date and enum fields do not need `CER`, `S`, `D`, or `I`.
+Phải có `unique(trace_path) == document_count`. Mỗi record trỏ tới trace cùng `document_id`; trace v2 thiếu identity hoặc sai identity không được dùng làm bằng chứng. `trace.json` chỉ có một nguồn kết quả extraction là `extraction.fields`; không giữ đồng thời kết quả baseline ở `fields` và kết quả mới ở nhánh khác.
 
----
+Trace v2 có tối thiểu `version`, `document_id`, `source_filename`, `pdf_path`, `pages`, `markdown` và `extraction.fields`. Mỗi page trỏ tới ảnh đã copy trong cùng artifact. Mỗi evidence có page, rule, source text, bbox/bbox chuẩn hóa và cờ độ tin cậy hình học khi có.
 
-## 10. Benchmark Report Structure
+Trang do người review chọn khi field không có evidence chỉ là trang kiểm tra, chưa phải vị trí GT xác nhận.
 
-### Business / overall quality
+## 8. Đo tài nguyên
 
-Per field:
+Mỗi PDF full inference ghi:
 
-- `NEM`
-- `F1@5%` for text
-- `F1 Exact` for date / categorical fields
+- thời gian wall-clock và thời gian pipeline;
+- RAM trung bình/đỉnh của tiến trình;
+- process VRAM trung bình/đỉnh;
+- device VRAM trung bình/đỉnh;
+- số mẫu, nguồn đo, GPU UUID/tên và trạng thái GPU dùng chung khi xác định được.
 
-### Technical drill-down
+Process VRAM ưu tiên `nvidia-smi` theo PID, rồi mới dùng allocator của Torch/Paddle. Device VRAM ưu tiên NVML, sau đó `nvidia-smi`. Hai phạm vi không được trộn. Nếu mọi cách thất bại, giá trị là `null` kèm nguồn/ghi chú; không thay bằng 0.
 
-- `Precision@5%`, `Recall@5%` for text
-- `Precision Exact`, `Recall Exact` for date / enum
-- Error-bucket counts/rates
+Resource của extraction replay là `null` vì replay không chạy model. Không báo delta tài nguyên giữa các lượt không cùng giao thức đo và điều kiện phần cứng; vẫn có thể báo số tuyệt đối cùng provenance.
 
-### Error analysis
+## 9. Phân tích lỗi
 
-- Raw CER distribution
-- `S_rate`, `D_rate`, `I_rate` distributions
-- Inspect `Wrong`, `Missing`, and `Hallucination` samples
+Notebook và báo cáo phải hiển thị lỗi đại diện của từng field dưới target: ảnh trang, crop/bbox đúng hệ tọa độ, GT, prediction, OCR trung gian và trace tương ứng.
 
-### Performance
+Taxonomy nguyên nhân chính:
 
-- Avg Processing Time / File
-- Avg RAM / File
-- Peak RAM / File
-- Avg VRAM / File
-- Peak VRAM / File
+- `OCR/chính tả`
+- `Dấu mộc`
+- `Vùng layout trộn nội dung`
+- `Crop/bbox sai`
+- `Extraction / Heuristics`
+- `Nghi vấn GT`
+- `Chưa xác định`
 
----
+`Chữ viết tay` là yếu tố góp phần dưới `OCR/chính tả`, chỉ xét cho `code`, `documentDate`, `receiverDate`. `has_handwriting=true` chỉ cho phép ghi “Lỗi OCR (khả năng cao do chữ viết tay)”; chỉ ghi đã xác nhận khi evidence vùng field chứng minh trực tiếp.
 
-## 11. Benchmark v1 Design Principle
+Báo cáo so sánh tối thiểu gồm:
 
-Keep the benchmark focused on three questions:
+- `experiment_log.csv`: F1/NEM, target, số cải thiện/hồi quy và quyết định giữ/bỏ/chờ review.
+- `sample_regressions.csv` và `sample_improvements.csv`: document, field, GT, prediction hai phía, trace/evidence và trạng thái review.
+- Hồi quy mẫu là chuyển từ `Exact`/`Acceptable`/`Correct Absent` sang bucket lỗi; cải thiện là chiều ngược lại. Chuyển giữa `Wrong`, `Missing` và `Hallucination` được báo riêng để review, không tự gọi là hồi quy hay cải thiện.
+- ma trận chuyển bucket đầy đủ 6×6 cho từng split và từng loại lượt chạy.
+- `resource_comparison.csv`: dòng từng tài liệu và tổng hợp, kèm phạm vi/nguồn đo và cờ có thể so sánh delta hay không.
 
-1. **How correct is the final extracted information?**
-2. **When it fails, what kind of failure occurred?**
-3. **How much time and compute resource does the pipeline require?**
-
-Any additional metric should only be added when it answers a concrete business or engineering decision that the current benchmark cannot answer.
+Các split cộng dồn là `<=2` trang, `<=5` trang và `<=14` trang. Baseline phải được bảo tồn; output mới dùng thư mục mới. Chỉ giữ thay đổi khi có lợi ích đo được và không làm giảm chất lượng tổng thể hoặc field quan trọng; thử nghiệm không hiệu quả cũng phải ghi lại.
