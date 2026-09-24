@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Các Bộ: Công an, Xây dựng, Tài chính, Ngoại giao, Văn hóa, Thể thao và Du lịch, Nông nghiệp và Môi trường; Ủy ban nhân dân các thành phố: Hồ Chí Minh, Đồng Nai; Tổng công ty Cảng hàng không Việt Nam; Tổng công ty Hàng không Việt Nam; Tổng công ty Đầu tư phát triển đường cao tốc Việt Nam.",
+            "type": "string"
         }
     }
 }

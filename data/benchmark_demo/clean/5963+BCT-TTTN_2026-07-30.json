@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Các thương nhân đầu mối kinh doanh xăng dầu; Các thương nhân phân phối xăng dầu.",
+            "type": "string"
         }
     }
 }

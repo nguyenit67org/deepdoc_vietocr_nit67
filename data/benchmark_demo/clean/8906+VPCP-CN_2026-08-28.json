@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Các Bộ: Quốc phòng, Công an, Xây dựng, Tài chính, Tư pháp, Nông nghiệp và Môi trường; UBND các tỉnh, thành phố: Thành phố Hồ Chí Minh, Đồng Nai, Tây Ninh.",
+            "type": "string"
         }
     }
 }

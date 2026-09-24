@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Bộ Xây dựng.",
+            "type": "string"
         }
     }
 }

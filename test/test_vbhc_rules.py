@@ -234,6 +234,254 @@ class VBHCRuleExtractionTests(unittest.TestCase):
         validate_prediction(prediction)
         self.assertIsNone(debug["document_start_page"])
 
+    def test_header_typed_office_accepted_but_signature_annotation_rejected(self):
+        pages = [[
+            block("BỘ TÀI CHÍNH", [100, 40, 460, 110], "header"),
+            block("Người ký Cục Thông tin", [510, 10, 920, 35], "header"),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số: 10/QĐ-BTC", [100, 140, 460, 185]),
+            block("QUYẾT ĐỊNH\nVề việc ban hành quy chế", [250, 220, 800, 300]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"], "BỘ TÀI CHÍNH"
+        )
+
+    def test_merged_office_country_block_keeps_office_part(self):
+        pages = [[
+            block("THỦ TƯỚNG CHÍNH PHỦ CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [150, 70, 850, 120], "doc_title"),
+            block("Số 27/CT-TTg", [200, 140, 450, 185]),
+            block("Hà Nội, ngày 25 tháng 6 năm 2026", [510, 140, 920, 185]),
+            block("CHỈ THỊ\nVề việc thử nghiệm", [250, 220, 800, 300]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"], "THỦ TƯỚNG CHÍNH PHỦ"
+        )
+
+    def test_consolidated_heading_code_without_so_anchor(self):
+        pages = [[
+            block("VĂN BẢN HỢP NHẤT 05/2026/VBHN-TT-BTP", [210, 90, 790, 130]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Hà Nội, ngày 28 tháng 8 năm 2026", [510, 140, 920, 185]),
+            block("THÔNG TƯ\nQuy định thử nghiệm", [250, 220, 800, 300]),
+            block("Thông tư số 07/2022/TT-BTP ngày 01 tháng 11 năm 2022.", [140, 330, 900, 380]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["code"]["value"], "05/2026/VBHN-TT-BTP")
+        self.assertEqual(info["documentDate"]["value"], "28/08/2026")
+
+    def test_diacritic_damaged_type_heading_resolves_canonical(self):
+        pages = [[
+            block("THỦ TƯỚNG CHÍNH PHỦ", [150, 70, 480, 120]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số 29/CT-TTg", [200, 140, 450, 185]),
+            block("CHÌ THỊ Về đẩy nhanh tiến độ", [250, 220, 800, 300]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["type"]["value"], "CHỈ THỊ")
+        self.assertEqual(info["title"]["value"], "Về đẩy nhanh tiến độ")
+
+    def test_place_prefixed_date_wins_over_bare_stamp_date(self):
+        pages = [[
+            block("CÔNG TY THỬ NGHIỆM", [150, 60, 460, 110]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số 12/QĐ-TN/2017", [150, 120, 460, 160]),
+            block("Hà Nam, ngày 29 tháng 06 năm 2017", [510, 120, 900, 160]),
+            block("Ngày: 03-07-2017", [700, 170, 920, 210]),
+            block("NGHỊ QUYẾT\nVề việc thử nghiệm", [250, 230, 800, 310]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["documentDate"]["value"], "29/06/2017"
+        )
+
+    def test_recipient_anchor_without_lower_zone_still_closes_document(self):
+        pages = [
+            [block("BỘ THỬ NGHIỆM", [100, 40, 460, 110])],
+            [block("Nơi nhận:\n- Như trên;\n- Lưu: VT.", [60, 300, 400, 450])],
+            [block("Phụ lục thống kê.", [100, 100, 900, 200])],
+        ]
+        prediction, debug = extract(pages)
+        self.assertEqual(debug["document_end_page"], 2)
+        self.assertEqual(
+            prediction["information"][0]["recipients"]["value"], "Như trên"
+        )
+
+    def test_urgency_stamp_with_dropped_h_still_detected(self):
+        pages = [[
+            block("BỘ THỬ NGHIỆM", [100, 40, 460, 110]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("OA TỐC", [20, 160, 150, 200], "image"),
+            block("Số 60/CĐ-TN", [200, 140, 450, 185]),
+            block("CÔNG ĐIỆN\nVề việc thử nghiệm", [250, 230, 800, 310]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["priority_level"]["value"], "1_HỎA TỐC"
+        )
+
+    def test_inline_filing_suffix_stripped_from_recipients(self):
+        pages = [
+            [
+                block("BỘ THỬ NGHIỆM", [100, 40, 460, 110]),
+                block("QUYẾT ĐỊNH\nVề việc thử nghiệm", [250, 220, 800, 300]),
+            ],
+            [block("Nơi nhận:\n- Như Điều 5;\n- HĐQT, Ban TGĐ Lưu VT, TK HĐCS 10.", [100, 500, 470, 750])],
+        ]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["recipients"]["value"],
+            "Như Điều 5; HĐQT, Ban TGĐ",
+        )
+
+    def test_wrapped_arrival_stamp_den_prefix_links_date(self):
+        pages = [[
+            block("CÔNG TY THỬ NGHIỆM", [150, 60, 460, 110]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số 12/QĐ-TN/2017", [150, 120, 460, 160]),
+            block("Hà Nam, ngày 29 tháng 06 năm 2017 Đến", [510, 120, 900, 165]),
+            block("Ngày: 03-07-2017", [700, 175, 920, 210]),
+            block("NGHỊ QUYẾT\nVề việc thử nghiệm", [250, 230, 800, 310]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["receiverDate"]["value"], "03/07/2017"
+        )
+
+    def test_vv_wrapped_type_word_is_not_a_heading(self):
+        pages = [[
+            block("CÔNG TY THỬ NGHIỆM", [150, 60, 460, 110]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số: 270/TN-HĐ", [150, 120, 460, 160]),
+            block("V/v: Công bố thông tin\nNghị quyết Đại hội đồng cổ đông", [150, 200, 850, 280]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["type"]["value"], "Công văn")
+        self.assertTrue(info["title"]["value"].startswith("V/v:"))
+
+    def test_top_strip_signature_portal_is_not_office(self):
+        pages = [[
+            block("VG PHI Công Tháng Lin điên từ Chính phủ", [160, 5, 600, 35], "header"),
+            block("THỦ TƯỚNG CHÍNH PHỦ", [250, 125, 700, 170]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số 27/CT-TTg", [200, 140, 450, 185]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"], "THỦ TƯỚNG CHÍNH PHỦ"
+        )
+
+    def test_first_recipient_continuation_ignores_stamp_serial(self):
+        pages = [[
+            block("Kính gửi: Ủy ban Chứng khoán Nhà nước", [490, 450, 1190, 500]),
+            block("Số: 10608", [1200, 400, 1450, 480]),
+            block("Số: 138/DLTM", [150, 120, 460, 160]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["first_recipients"]["value"],
+            "Ủy ban Chứng khoán Nhà nước",
+        )
+
+    def test_consolidated_document_type_recognized(self):
+        pages = [[
+            block("VĂN BẢN HỢP NHẤT", [250, 100, 750, 150]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số 27/2026/VBHN-NĐ-BTC", [200, 160, 500, 200]),
+            block("NGHỊ ĐỊNH\nQuy định thử nghiệm", [250, 230, 800, 310]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["type"]["value"], "VĂN BẢN HỢP NHẤT"
+        )
+
+    def test_title_continuation_stops_at_citation_lines(self):
+        pages = [[
+            block("BỘ THỬ NGHIỆM", [100, 40, 460, 110]),
+            block("QUYẾT ĐỊNH", [300, 215, 700, 260]),
+            block("Hướng dẫn thử nghiệm", [280, 270, 720, 310]),
+            block("Căn cứ Luật thử nghiệm", [140, 330, 900, 370]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["title"]["value"], "Hướng dẫn thử nghiệm"
+        )
+
+    def test_form_template_block_is_not_office(self):
+        pages = [[
+            block("Mẫu 08 CBTT/SGDHN Ban hành kèm theo", [100, 40, 900, 90]),
+            block("TỔNG CÔNG TY THỬ NGHIỆM", [100, 110, 460, 160]),
+            block("Số: 01/TN-2020", [100, 180, 460, 220]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"], "TỔNG CÔNG TY THỬ NGHIỆM"
+        )
+
+    def test_allcaps_authority_phrase_is_title_not_signer(self):
+        pages = [
+            [block("BỘ THỬ NGHIỆM", [100, 40, 460, 110])],
+            [
+                block("Nơi nhận:\n- Như trên.", [100, 500, 470, 600]),
+                block("TM. CHÍNH PHỦ THỦ TƯỚNG", [550, 500, 950, 580]),
+                block("Nguyễn Xuân Phúc", [550, 620, 950, 670]),
+            ],
+        ]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["signer_title"]["value"], "TM. CHÍNH PHỦ THỦ TƯỚNG")
+        self.assertEqual(info["signer"]["value"], "Nguyễn Xuân Phúc")
+
+    def test_cong_dien_recipients_after_dispatch_line(self):
+        pages = [[
+            block("THỦ TƯỚNG CHÍNH PHỦ", [150, 70, 480, 120]),
+            block("Số 32/CĐ-TN", [200, 140, 450, 185]),
+            block("CÔNG ĐIỆN Về việc thử nghiệm", [250, 200, 800, 260]),
+            block("THỦ TƯỚNG CHÍNH PHỦ ĐIỆN:", [300, 290, 700, 330]),
+            block("- Giám đốc các sở; - Chủ tịch UBND các tỉnh.", [250, 340, 800, 420]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["type"]["value"], "CÔNG ĐIỆN")
+        self.assertEqual(
+            info["first_recipients"]["value"],
+            "Giám đốc các sở; Chủ tịch UBND các tỉnh.",
+        )
+
+    def test_mid_sentence_authority_mention_is_not_signature(self):
+        pages = [
+            [block("BỘ THỬ NGHIỆM", [100, 40, 460, 110])],
+            [
+                block("Điều 3. Đại hội giao cho Hội đồng quản trị, Ban Tổng Giám đốc Công ty thực hiện đúng theo nội dung Nghị quyết đã ban hành.", [100, 200, 900, 320]),
+                block("Nơi nhận:\n- Như trên.", [100, 500, 470, 600]),
+                block("TM. ĐOÀN CHỦ TỊCH", [550, 500, 950, 560]),
+                block("- Cổ đông", [550, 570, 950, 610]),
+                block("CHỦ TỌA", [550, 620, 950, 660]),
+            ],
+        ]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["signer_title"]["value"], "TM. ĐOÀN CHỦ TỊCH CHỦ TỌA")
+
+    def test_office_left_of_country_wins_over_full_width_form_header(self):
+        pages = [[
+            block("Mẫu 08 CBTT/SGDHN Ban hành kèm theo Quyết định số 600", [140, 70, 930, 110], "header"),
+            block("TỔNG CÔNG TY THỬ NGHIỆM", [120, 100, 470, 150]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM Độc lập - Tự do - Hạnh phúc", [530, 100, 910, 180]),
+            block("Số: 88/TN-2022", [120, 190, 400, 230]),
+            block("Thành phố Hồ Chí Minh, ngày 21 tháng 01 năm 2022", [530, 180, 910, 220]),
+            block("CÔNG BỐ THÔNG TIN BẤT THƯỜNG", [330, 230, 740, 280]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["officeSender"]["value"], "TỔNG CÔNG TY THỬ NGHIỆM")
+        self.assertEqual(info["code"]["value"], "88/TN-2022")
+        self.assertEqual(info["documentDate"]["value"], "21/01/2022")
+
 
 class LoaderAndPipelineIntegrationTests(unittest.TestCase):
     @patch("module.pipeline.loader.convert_from_path")
@@ -275,7 +523,8 @@ class LoaderAndPipelineIntegrationTests(unittest.TestCase):
             pdf_path = Path(tmpdir) / "source.pdf"
             pdf_path.write_bytes(b"test")
             with (
-                patch("module.pipeline.document_pipeline.load_pdf_pages", return_value=[image]),
+                patch("module.pipeline.document_pipeline.load_pdf_page_count", return_value=1),
+                patch("module.pipeline.document_pipeline.load_pdf_page_window", return_value=[image]),
                 patch.object(
                     pipeline,
                     "_process_pages_batch",

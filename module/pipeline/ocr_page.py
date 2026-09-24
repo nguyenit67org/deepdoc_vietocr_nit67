@@ -21,7 +21,7 @@ class PageOcrPrep:
     of one call per page (see DocumentPipeline.process_pdf()'s Phase 3a/3b).
     """
 
-    dt_boxes: np.ndarray | None
+    dt_boxes: np.ndarray | list | None
     prerecognized: dict[int, tuple[str, float]] = field(default_factory=dict)
     # Which positions in dt_boxes still need FRESH recognition (i.e. were
     # NOT already in `prerecognized`) -- same order as the crops this page
@@ -124,7 +124,12 @@ def finish_ocr_page(prep: PageOcrPrep, fresh_rec_res: list[tuple[str, float]], o
         retained = [i for i in range(len(dt_boxes)) if i not in prep.excluded_indices]
         if not retained:
             return []
-        dt_boxes = dt_boxes[retained]
+        if isinstance(dt_boxes, np.ndarray):
+            dt_boxes = dt_boxes[retained]
+        else:
+            # sorted_boxes() returns a plain list, which does not support
+            # fancy indexing -- select explicitly instead.
+            dt_boxes = [dt_boxes[i] for i in retained]
         rec_res = [rec_res[i] for i in retained]
 
     def _skew_of_quad(box, min_width=100):

@@ -62,11 +62,19 @@ _VV_RE = re.compile(r"(?<!\w)V\s*/\s*v\s*:?")
 _FIRST_RECIPIENT_RE = re.compile(r"K[ií]nh\s+g[uử]i\s*[:：]?", re.IGNORECASE)
 _RECIPIENT_RE = re.compile(r"N[oơ]i\s+nh[aậ]n\s*[:：]?", re.IGNORECASE)
 _SAVE_RE = re.compile(r"(?:^|[;\n])\s*(?:[-–—•]\s*)?L[uư]u\b\s*[:：]?", re.IGNORECASE)
+# Inline filing suffix ("... Ban TGĐ Lưu VT, TK..."): "Lưu" followed by a
+# records-office token can only be the filing line, never a recipient surname
+# (surnames are followed by a given name, not VT/VP/HS/...).
+_SAVE_SUFFIX_RE = re.compile(
+    r"[\s,;]\(?(?:[-–—•]\s*)?L[uư]u\s*[:：]?\s*(?:VT|VP|HS|HĐ|HD|TK|HC|QT)\b.*$",
+    re.IGNORECASE,
+)
 
 # Longest values first so QUYẾT ĐỊNH LIÊN TỊCH wins over QUYẾT ĐỊNH.
 _DOCUMENT_TYPES = (
     "QUYẾT ĐỊNH LIÊN TỊCH",
     "CÔNG BỐ THÔNG TIN BẤT THƯỜNG",
+    "VĂN BẢN HỢP NHẤT",
     "NGHỊ QUYẾT LIÊN TỊCH",
     "NGHỊ ĐỊNH",
     "NGHỊ QUYẾT",
@@ -84,6 +92,10 @@ _TYPE_RE = re.compile(
     r"(?:^|\n)\s*(" + "|".join(re.escape(v) for v in _DOCUMENT_TYPES) + r")\b",
     re.IGNORECASE,
 )
+# Folded (accent-insensitive) document-type match; the concrete map/regex are
+# built right after _fold() is defined below.
+_TYPE_FOLDED_TO_CANONICAL: dict[str, str] = {}
+_TYPE_FOLDED_RE: re.Pattern[str] | None = None
 _AUTHORITY_RE = re.compile(
     r"\b(?:TM\.|KT\.|TL\.|TUQ\.|Q\.|CHỦ\s+TỊCH|PHÓ\s+CHỦ\s+TỊCH|"
     r"GIÁM\s+ĐỐC|PHÓ\s+GIÁM\s+ĐỐC|BỘ\s+TRƯỞNG|THỨ\s+TRƯỞNG|"
@@ -95,9 +107,30 @@ _AUTHORITY_RE = re.compile(
 )
 _ORG_RE = re.compile(
     r"\b(?:ỦY\s+BAN|UỶ\s+BAN|BỘ|SỞ|CỤC|VỤ|BAN|PHÒNG|VĂN\s+PHÒNG|CHÍNH\s+PHỦ|"
-    r"QUỐC\s+HỘI|HỘI\s+ĐỒNG|TÒA\s+ÁN|VIỆN\s+KIỂM\s+SÁT|TRUNG\s+TÂM|"
+    r"THỦ\s+TƯỚNG|QUỐC\s+HỘI|HỘI\s+ĐỒNG|TÒA\s+ÁN|VIỆN\s+KIỂM\s+SÁT|TRUNG\s+TÂM|"
     r"NGÂN\s+HÀNG|CÔNG\s+TY|TỔNG\s+CÔNG\s+TY)\b",
     re.IGNORECASE,
+)
+# Folded (accent-insensitive) counterpart of _ORG_RE.  OCR frequently damages a
+# single diacritic (e.g. "BỌ TÀI CHÍNH" for "BỘ TÀI CHÍNH"); folding both sides
+# recovers those anchors without touching output spelling.  Word boundaries are
+# required: bare-substring matching would fire on "Số:" prefixes.  "ban" must
+# not match the promulgation verb "ban hành", only committee nouns ("Ban").
+_ORG_FOLDED_RE = re.compile(
+    r"\b(?:uy ban|bo|so|cuc|vu|ban(?! hanh)|phong|van phong|chinh phu|"
+    r"thu tuong|quoc hoi|hoi dong|toa an|vien kiem sat|trung tam|"
+    r"ngan hang|cong ty|tong cong ty)\b"
+)
+# Digital-signature / PDF annotations that must never be mistaken for the
+# statutory issuing authority, matched on folded text.
+_ANNOTATION_FOLDED_MARKERS = (
+    "nguoi ky",
+    "nguoi ki",
+    "thoi gian ky",
+    "co quan phat hanh",
+    "cong bao",
+    "ky boi",
+    "chu ky so",
 )
 _TITLE_WORDS_FOLDED = {
     "tm",
@@ -129,7 +162,23 @@ _TITLE_WORDS_FOLDED = {
     "cuc",
     "chanh",
     "nhiem",
+    "toa",
 }
+
+
+def _has_org_keyword(text: str, folded: str | None = None) -> bool:
+    """Match issuing-authority keywords on raw or folded (accent-insensitive) text."""
+    if _ORG_RE.search(text):
+        return True
+    return bool(_ORG_FOLDED_RE.search(folded if folded is not None else _fold(text)))
+
+
+def _is_annotation_header(text: str, folded: str | None = None) -> bool:
+    """Detect digital-signature / PDF annotation blocks, never an officeSender."""
+    folded_text = folded if folded is not None else _fold(text)
+    if any(marker in folded_text for marker in _ANNOTATION_FOLDED_MARKERS):
+        return True
+    return "@" in text or "mail:" in folded_text
 
 
 @dataclass(frozen=True)
@@ -202,6 +251,43 @@ def _find_date(text: str) -> str:
     return ""
 
 
+def _build_folded_type_matcher() -> None:
+    """Build the accent-insensitive document-type matcher (needs _fold)."""
+    global _TYPE_FOLDED_TO_CANONICAL, _TYPE_FOLDED_RE
+    _TYPE_FOLDED_TO_CANONICAL = {_fold(v): v for v in _DOCUMENT_TYPES}
+    _TYPE_FOLDED_RE = re.compile(
+        r"(?:^|\n)\s*(" + "|".join(sorted(_TYPE_FOLDED_TO_CANONICAL, key=len, reverse=True)) + r")\b"
+    )
+
+
+_build_folded_type_matcher()
+
+
+def _match_document_type(block: _Block) -> tuple[str, str, int] | None:
+    """Match a line-start document-type heading; return (canonical, tail, line).
+
+    Matching runs on folded text so a single damaged diacritic in the heading
+    (e.g. "CHÌ THỊ") still resolves to the canonical label ("CHỈ THỊ").
+    ``tail`` is the remainder of the same original line after the heading.
+    """
+    assert _TYPE_FOLDED_RE is not None
+    match = _TYPE_FOLDED_RE.search(block.folded)
+    if not match:
+        return None
+    canonical = _TYPE_FOLDED_TO_CANONICAL[match.group(1)]
+    # Group 1 starts at the heading itself (the leading (?:^|\n)\s* may span
+    # lines), so its line index maps back to the original line 1:1.
+    line_index = block.folded.count("\n", 0, match.start(1))
+    original_lines = block.text.splitlines()
+    if line_index >= len(original_lines):
+        return canonical, "", line_index
+    words = original_lines[line_index].split()
+    drop = len(canonical.split())
+    tail_first = " ".join(words[drop:])
+    remaining = "\n".join([tail_first, *original_lines[line_index + 1 :]]).strip(" \n:-–—")
+    return canonical, remaining, line_index
+
+
 def _normalise_code(value: str) -> str:
     # 1. Bỏ whitespace đầu/cuối.
     val = value.strip()
@@ -210,7 +296,7 @@ def _normalise_code(value: str) -> str:
     # 3. Rút nhiều whitespace thành một dấu cách.
     val = re.sub(r"\s+", " ", val)
     # 4. Xóa whitespace quanh `/` và `-`.
-    val = re.sub(r"\s*([/\-])\s*", r"\1", val)
+    val = re.sub(r"\s*([/\-])+\s*", r"\1", val)
     # 5. Đổi whitespace còn lại thành `-`.
     val = val.replace(" ", "-")
     # 6. Rút nhiều dấu `-` liên tiếp thành một dấu `-`.
@@ -359,12 +445,53 @@ def _has_authority_anchor(value: str) -> bool:
     return bool(re.search(r"nguoi\s+thu\w*\s+cong\s+bo\s+thong\s+tin", folded))
 
 
+# Adjacent word pairs that only occur inside authority/government phrases, never
+# inside a Vietnamese personal name.  Used to reject all-uppercase authority
+# text ("CHÍNH PHỦ THỦ TƯỚNG") that _looks_like_person_name would accept.
+_AUTHORITY_COMPOUNDS_FOLDED = (
+    ("chinh", "phu"),
+    ("thu", "tuong"),
+    ("bo", "truong"),
+    ("thu", "truong"),
+    ("pho", "thu"),
+    ("uy", "ban"),
+    ("quoc", "hoi"),
+    ("tong", "giam"),
+    ("chanh", "van"),
+    ("chu", "tich"),
+)
+
+
+def _contains_authority_compound(folded_words: list[str]) -> bool:
+    for first, second in _AUTHORITY_COMPOUNDS_FOLDED:
+        for index in range(len(folded_words) - 1):
+            if folded_words[index] == first and folded_words[index + 1] == second:
+                return True
+    return False
+
+
+def _looks_like_signature_name(value: str) -> bool:
+    """Person-name check hardened against all-uppercase authority phrases.
+
+    Title-case names always use the base check.  All-uppercase candidates
+    additionally must not contain an authority compound ("CHÍNH PHỦ",
+    "THỦ TƯỚNG", ...): those are titles, never signers.
+    """
+    if not _looks_like_person_name(value):
+        return False
+    # Note: [a-zà-ỹ] also matches UPPERCASE Vietnamese (U+1E00 block mixes
+    # cases inside à-ỹ), so case must be tested with islower() instead.
+    if any(ch.islower() for ch in value):
+        return True
+    return not _contains_authority_compound(_fold(value).split())
+
+
 def _split_signature(text: str) -> tuple[str, str]:
     """Return (title, signer) while keeping the OCR spelling/punctuation."""
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if len(lines) > 1:
         for index in range(len(lines) - 1, -1, -1):
-            if _looks_like_person_name(lines[index]):
+            if _looks_like_signature_name(lines[index]):
                 return " ".join(lines[:index]).strip(), lines[index].strip()
 
     if _has_authority_anchor(text):
@@ -380,7 +507,7 @@ def _split_signature(text: str) -> tuple[str, str]:
     words = text.strip().split()
     for width in range(min(6, len(words)), 1, -1):
         suffix = " ".join(words[-width:]).strip(" ,.;:-")
-        if _looks_like_person_name(suffix):
+        if _looks_like_signature_name(suffix):
             title = " ".join(words[:-width]).strip()
             return title, suffix
     return (" ".join(text.split()).strip(), "") if _has_authority_anchor(text) else ("", "")
@@ -403,6 +530,14 @@ def _signature_candidates(blocks: Iterable[_Block]) -> list[tuple[_Block, str, s
             continue
         title, signer = _split_signature(block.text)
         has_authority = _has_authority_anchor(block.text)
+        if has_authority and len(block.text) > 120:
+            # A body paragraph can mention an authority mid-sentence
+            # ("... giao cho Hội đồng ... Ban Tổng Giám đốc Công ty thực
+            # hiện ..."): only a block LED by the anchor is a signature.
+            anchor_pos = min([match.start() for match in _AUTHORITY_RE.finditer(block.text)] or [0])
+            if anchor_pos > 40:
+                has_authority = False
+                title, signer = "", ""
         visual_signature = (
             block.type in {"image", "seal"}
             and signer
@@ -411,6 +546,10 @@ def _signature_candidates(blocks: Iterable[_Block]) -> list[tuple[_Block, str, s
             # All-uppercase suffixes cut out of a company seal are commonly
             # organization-name fragments, not the signer's printed name.
             and not (_ORG_RE.search(block.text) and signer.isupper())
+            # Seal-stamp remnants ("ONG HOA VII" clipped from "CỘNG HÒA...") are
+            # all-caps fragments built from seal vocabulary; a printed signer
+            # name either keeps Title case or avoids that vocabulary.
+            and not _is_seal_name_fragment(signer)
         )
         # A person-like suffix in an ordinary body paragraph is not enough:
         # require an authority/title anchor, or visual signature/seal layout.
@@ -419,10 +558,39 @@ def _signature_candidates(blocks: Iterable[_Block]) -> list[tuple[_Block, str, s
     return candidates
 
 
+# Seal-vocabulary fragments clipped out of a round seal ("ONG HOA VII" from
+# "CỘNG HÒA...") are all-caps and built from seal vocabulary; a printed signer
+# name either keeps Title case or avoids that vocabulary.  Bare "hoa" alone is
+# NOT enough (it is also a Vietnamese given name): it only counts with a
+# co-occurring seal token or a serial/roman-numeral fragment ("VII", "001").
+_SEAL_NAME_TOKENS = ("doc lap", "xa hoi", "viet nam", "chung thuc", "sao y")
+_SEAL_ROMAN_TOKENS = {"i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"}
+
+
+def _is_seal_name_fragment(value: str) -> bool:
+    if any(ch.islower() for ch in value):
+        return False
+    folded_words = _fold(value).split()
+    folded = " ".join(folded_words)
+    if any(token in folded for token in _SEAL_NAME_TOKENS):
+        return True
+    if "hoa" in folded_words and (
+        any(word in _SEAL_ROMAN_TOKENS or any(ch.isdigit() for ch in word) for word in folded_words)
+        or "cong" in folded_words
+    ):
+        return True
+    return False
+
+
 def _closing_page(pages: list[list[_Block]], start: int, limit: int) -> int:
     for page_index in range(start, limit + 1):
         blocks = pages[page_index]
-        recipients = [block for block in blocks if _RECIPIENT_RE.search(block.text) and _zone(block, x1=0.62, y0=0.45)]
+        # The "Nơi nhận" anchor itself is a strong closing signal.  No lower
+        # vertical bound: crop-normalized coordinates shift with the detected
+        # margins (e.g. a stamp-strip crop maps the closing block above 0.45
+        # in original-page space).  The left-column bound stays to avoid
+        # right-column quotations.
+        recipients = [block for block in blocks if _RECIPIENT_RE.search(block.text) and _zone(block, x1=0.62)]
         signatures = _signature_candidates(blocks)
         right_seal = any(block.type in {"seal", "image"} and _zone(block, x0=0.40, y0=0.40) for block in blocks)
         strong_signature = any(
@@ -432,7 +600,7 @@ def _closing_page(pages: list[list[_Block]], start: int, limit: int) -> int:
         if (recipients and (signatures or right_seal)) or strong_signature:
             return page_index
         # ``Nơi nhận`` is itself a strong closing anchor when it is in the
-        # lower-left zone; many scans do not OCR the signature reliably.
+        # left column; many scans do not OCR the signature reliably.
         if recipients:
             return page_index
     return limit
@@ -483,37 +651,113 @@ def _is_valid_code_value(raw: str) -> bool:
     return has_alpha and has_digit
 
 
-def _extract_code(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]) -> tuple[str, _Block | None]:
-    # Relative layout anchors in header
-    country_blocks = [
-        b for b in blocks
-        if _zone(b, y1=0.35) and (
-            "cong hoa xa hoi chu nghia viet nam" in b.folded
-            or "doc lap - tu do - hanh phuc" in b.folded
-            or "doc lap tu do hanh phuc" in b.folded
-        )
-    ]
-    country_block = country_blocks[0] if country_blocks else None
+@dataclass(frozen=True)
+class _HeaderFrame:
+    """Default header geometry anchored on the Quốc hiệu/Tiêu ngữ block.
 
-    # Resolve the upper-left issuing authority relative to the country/header
-    # before testing code text. This keeps body references and Công báo numbers
-    # out of the candidate region even when their strings match the regex.
-    office_blocks = [
+    The country header (top-right) is the reference milestone: the issuing
+    authority sits to its LEFT, the code sits BELOW the authority (still left
+    of the country), and the place/date line sits to the RIGHT under the
+    country.  All relations are relative overlaps, never absolute cutoffs, so
+    crops and narrow/wide layouts keep working.
+
+    This is the DEFAULT flow.  Documents without a country header (corporate
+    letterheads, foreign forms) get ``country=None`` and callers fall back to
+    the absolute-zone behavior — that is the edge-case path, not a failure.
+    """
+
+    country: _Block | None
+    office: _Block | None
+
+
+def _find_country_block(blocks: list[_Block]) -> _Block | None:
+    candidates = [
         block
         for block in blocks
-        if _zone(block, y1=0.30)
-        and _ORG_RE.search(block.text)
-        and (not block.geometry_reliable or block.cx <= 0.52)
-        and (not block.geometry_reliable or country_block is None or block.cx < country_block.cx)
-        and "cong bao" not in block.folded
+        if _zone(block, y1=0.22)
+        and (
+            "cong hoa xa hoi chu nghia viet nam" in block.folded
+            or "doc lap - tu do - hanh phuc" in block.folded
+            or "doc lap tu do hanh phuc" in block.folded
+        )
     ]
-    office_block = min(office_blocks, key=lambda block: (block.y0, block.x0)) if office_blocks else None
+    if not candidates:
+        return None
+    # Rightmost country block is the true right column; a merged
+    # "office + country" block further left is handled by the office fallback.
+    return max(candidates, key=lambda block: (block.x0, block.y0))
 
-    date_blocks = [
-        b for b in blocks
-        if _zone(b, x0=0.40, y1=0.40) and "ngay" in b.folded
-    ]
-    date_block = date_blocks[0] if date_blocks else None
+
+def _header_frame(blocks: list[_Block]) -> _HeaderFrame:
+    country = _find_country_block(blocks)
+    office: _Block | None = None
+    if country is not None:
+        left_orgs = [
+            block
+            for block in blocks
+            if _zone(block, y1=0.30)
+            and _has_org_keyword(block.text, block.folded)
+            and (not block.geometry_reliable or block.x1 <= country.x0 + 0.05)
+            and (not block.geometry_reliable or block.y1 >= 0.04)
+            and not _is_annotation_header(block.text, block.folded)
+            and "cong bao" not in block.folded
+            and re.match(r"^\s*mau\s+\d+", block.folded) is None
+        ]
+        if left_orgs:
+            office = min(left_orgs, key=lambda block: (block.y0, block.x0))
+        elif _has_org_keyword(country.text, country.folded):
+            # Merged "office + country" single block: the authority is the
+            # country block's left part (split later by _clean_office_sender_text).
+            office = country
+    return _HeaderFrame(country=country, office=office)
+
+
+def _code_match_reaches_line_end(block_text: str, match_end: int) -> bool:
+    """True when nothing but whitespace/punctuation follows the code value.
+
+    Statutory codes close their line ("Số: 8871/VPCP-CN" and nothing after);
+    body citations ("... số 81/2013/NĐ-CP ngày 19 tháng 7 ...") continue.
+    """
+    return re.match(r"[\s;:,.]*(\n|$)", block_text[match_end:]) is not None
+
+
+def _extract_code(
+    blocks: list[_Block],
+    evidence: dict[str, list[dict[str, Any]]],
+    *,
+    office_block: _Block | None = None,
+    date_block_hint: _Block | None = None,
+    country_block: _Block | None = None,
+) -> tuple[str, _Block | None]:
+    # QH-anchored flow: the caller resolves the header frame ONCE
+    # (country -> office -> date/province -> code) and passes the anchors in.
+    # Direct calls without anchors (unit tests) fall back to local resolution.
+    if office_block is None or country_block is None:
+        frame = _header_frame(blocks)
+        if country_block is None:
+            country_block = frame.country
+        if office_block is None:
+            office_block = frame.office
+    country_block = country_block
+    if office_block is None:
+        # Edge-case path: legacy absolute-zone office resolution.
+        office_blocks = [
+            block
+            for block in blocks
+            if _zone(block, y1=0.30)
+            and _has_org_keyword(block.text, block.folded)
+            and (not block.geometry_reliable or block.cx <= 0.52)
+            and (not block.geometry_reliable or country_block is None or block.cx < country_block.cx)
+            and "cong bao" not in block.folded
+            and re.match(r"^\s*mau\s+\d+", block.folded) is None
+            and not _is_annotation_header(block.text, block.folded)
+        ]
+        office_block = min(office_blocks, key=lambda block: (block.y0, block.x0)) if office_blocks else None
+
+    date_block = date_block_hint
+    if date_block is None:
+        date_blocks = [b for b in blocks if _zone(b, x0=0.40, y1=0.40) and "ngay" in b.folded]
+        date_block = date_blocks[0] if date_blocks else None
 
     # Filter candidate blocks by relative region and exclusion rules
     candidates: list[_Block] = []
@@ -526,10 +770,18 @@ def _extract_code(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]
                 continue
             if date_block and block.x0 >= date_block.x0 + 0.15:
                 continue
-        # Exclusion rules: ignore citations, body articles, cong bao, addresses
+        # Exclusion rules: ignore form templates, citations, body articles,
+        # cong bao, addresses.  A "Mẫu 08/..." template block carries a cited
+        # decision serial ("... số 600190-SGDHN ..."), never the document code.
         if "cong bao" in block.folded or block.folded.startswith("can cu") or "căn cứ" in block.text.lower():
             continue
-        if block.folded.startswith("xet ") or block.folded.startswith("dieu ") or re.search(r"\bdieu\s+\d+", block.folded):
+        if re.match(r"^\s*mau\s+\d+", block.folded):
+            continue
+        if (
+            block.folded.startswith("xet ")
+            or block.folded.startswith("dieu ")
+            or re.search(r"\bdieu\s+\d+", block.folded)
+        ):
             continue
         match = _CODE_RE.search(block.text)
         if _is_address_or_noise(block.text):
@@ -541,36 +793,71 @@ def _extract_code(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]
     # vertically overlap the authority and code blocks.
     candidates.sort(
         key=lambda block: (
-            0
-            if office_block is None
-            or block.index == office_block.index
-            or block.y0 >= office_block.y1 - 0.04
-            else 1,
+            (
+                0
+                if office_block is None or block.index == office_block.index or block.y0 >= office_block.y1 - 0.04
+                else 1
+            ),
             block.y0,
             block.x0,
         )
     )
 
-    # Pass 1: Primary regex: Line starts with Số / Số: (highest priority)
-    line_start_code_re = re.compile(
-        r"(?:^|\n)\s*S[oố]\s*[:：.]?\s*([0-9A-Za-zÀ-ỹĐđ./\-]+(?:(?!\s*(?:ng[aà]y|v/v|k[ií]nh|n[oơ]i|c[oộ]ng))\s+[0-9A-Za-zÀ-ỹĐđ./\-]+)*)",
+    # Pass 0: Consolidated-heading code without a "Số" anchor
+    # (e.g. "VĂN BẢN HỢP NHẤT 05/2026/VBHN-TT-BTP" at the very top of the
+    # header).  This must run before the generic "Số" passes: body citations
+    # such as "Thông tư số 07/2022/..." would otherwise win and cascade into
+    # wrong date/province skips.  Restricted to the top header strip so body
+    # references can never match.
+    consolidated_re = re.compile(
+        r"VĂN\s+BẢN\s+HỢP\s+NHẤT\s*:?\s*" r"([0-9][0-9A-Za-zÀ-ỹĐđ./\-]*(?:\s*[0-9A-Za-zÀ-ỹĐđ./\-]+)*)",
         re.IGNORECASE,
     )
-    for block in candidates:
-        match = line_start_code_re.search(block.text)
+    for block in blocks:
+        if block.geometry_reliable and (block.y0 > 0.20 or block.cx > 0.60):
+            continue
+        if "cong bao" in block.folded:
+            continue
+        if re.match(r"^\s*mau\s+\d+", block.folded):
+            continue
+        match = consolidated_re.search(block.text)
         if match:
             raw_val = match.group(1).strip()
             if _is_valid_code_value(raw_val):
                 value = _normalise_code(raw_val)
-                evidence["code"].append(_evidence(block, "number-anchor", value))
+                evidence["code"].append(_evidence(block, "consolidated-heading-code", value))
                 return value, block
 
+    # Pass 1: Primary regex: Line starts with Số / Số:
+    # Collect every match, then prefer the value that closes its line:
+    # statutory codes end their line while body citations continue.
+    line_start_code_re = re.compile(
+        r"(?:^|\n)\s*S[oố]\s*[:：.]?\s*([0-9A-Za-zÀ-ỹĐđ./\-]+(?:(?!\s*(?:ng[aà]y|v/v|k[ií]nh|n[oơ]i|c[oộ]ng))\s+[0-9A-Za-zÀ-ỹĐđ./\-]+)*)",
+        re.IGNORECASE,
+    )
+    pass1: list[tuple[int, int, _Block, str]] = []
+    for order, block in enumerate(candidates):
+        match = line_start_code_re.search(block.text)
+        if match:
+            raw_val = match.group(1).strip()
+            if _is_valid_code_value(raw_val):
+                eol = 0 if _code_match_reaches_line_end(block.text, match.end()) else 1
+                pass1.append((eol, order, block, raw_val))
+    if pass1:
+        pass1.sort(key=lambda item: (item[0], item[1]))
+        _, _, block, raw_val = pass1[0]
+        value = _normalise_code(raw_val)
+        evidence["code"].append(_evidence(block, "number-anchor", value))
+        return value, block
+
     # Pass 2: Inline document type code (e.g. QUỐC HỘI Nghị quyết số: 36/2026/QH16)
+    pass2: list[tuple[int, int, _Block, str]] = []
     for block in blocks:
         if block.geometry_reliable and block.y0 > 0.42:
             continue
         if (
             "cong bao" in block.folded
+            or re.match(r"^\s*mau\s+\d+", block.folded)
             or block.folded.startswith("can cu")
             or block.folded.startswith("xet ")
             or block.folded.startswith("v/v")
@@ -581,26 +868,39 @@ def _extract_code(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]
         if match:
             raw_val = match.group(1).strip()
             if _is_valid_code_value(raw_val):
-                value = _normalise_code(raw_val)
-                evidence["code"].append(_evidence(block, "document-type-number-anchor", value))
-                return value, block
+                eol = 0 if _code_match_reaches_line_end(block.text, match.end()) else 1
+                pass2.append((eol, block.y0, block, raw_val))
+    if pass2:
+        pass2.sort(key=lambda item: (item[0], item[1]))
+        _, _, block, raw_val = pass2[0]
+        value = _normalise_code(raw_val)
+        evidence["code"].append(_evidence(block, "document-type-number-anchor", value))
+        return value, block
 
     # Pass 3: General Số regex inside candidates (not preceded by address/noise)
-    for block in candidates:
+    pass3: list[tuple[int, int, _Block, str]] = []
+    for order, block in enumerate(candidates):
         match = _CODE_RE.search(block.text)
         if match:
             prefix = block.text[: match.start()]
             if not _is_address_or_noise(prefix):
                 raw_val = match.group(1).strip()
                 if _is_valid_code_value(raw_val):
-                    value = _normalise_code(raw_val)
-                    evidence["code"].append(_evidence(block, "number-anchor", value))
-                    return value, block
+                    eol = 0 if _code_match_reaches_line_end(block.text, match.end()) else 1
+                    pass3.append((eol, order, block, raw_val))
+    if pass3:
+        pass3.sort(key=lambda item: (item[0], item[1]))
+        _, _, block, raw_val = pass3[0]
+        value = _normalise_code(raw_val)
+        evidence["code"].append(_evidence(block, "number-anchor", value))
+        return value, block
 
     # Pass 4: Fallback for geometry_reliable=False
     if any(not b.geometry_reliable for b in blocks[:10]):
         for block in blocks[:10]:
             if "cong bao" in block.folded or block.folded.startswith("can cu") or block.folded.startswith("xet "):
+                continue
+            if re.match(r"^\s*mau\s+\d+", block.folded):
                 continue
             if _is_address_or_noise(block.text):
                 continue
@@ -619,11 +919,35 @@ def _extract_date_province(
     blocks: list[_Block],
     code_block: _Block | None,
     evidence: dict[str, list[dict[str, Any]]],
+    *,
+    country_block: _Block | None = None,
 ) -> tuple[str, str]:
+    # QH-anchored flow: province + documentDate live RIGHT of / UNDER the
+    # country header.  Without a country anchor (edge case) the absolute
+    # right-column zone applies.  Province is resolved INDEPENDENTLY of the
+    # date parse: a place prefix ("Hà Nam, ngày ...") yields province even
+    # when OCR destroys the date itself.
+    # documentDate only accepts the long "ngày ... tháng ... năm ..." form
+    # (accented or not); a bare slash/dot date belongs to an arrival stamp,
+    # never to the issuance line.
+    scored: list[tuple[int, float, _Block, str, str]] = []
+    place_hits: list[tuple[float, _Block, str]] = []
     for block in blocks:
-        if block.geometry_reliable and (block.cx < 0.56 or block.y0 > 0.24):
-            continue
+        if block.geometry_reliable:
+            if country_block is not None:
+                if block.x1 < country_block.x0 - 0.10:
+                    continue
+                if block.y0 < country_block.y0 - 0.05 or block.y0 > country_block.y1 + 0.14:
+                    continue
+            elif block.cx < 0.56 or block.y0 > 0.24:
+                continue
         if code_block and block.geometry_reliable and block.y0 < code_block.y0 - 0.04:
+            continue
+        # Body citations ("Căn cứ Luật ... ngày ...", "Xét ...", "Điều N")
+        # carry calendar dates but are never the issuance line.
+        if block.folded.startswith("can cu") or block.folded.startswith("xet "):
+            continue
+        if re.search(r"\bdieu\s+\d+", block.folded):
             continue
         if "ngay" not in block.folded:
             continue
@@ -633,42 +957,100 @@ def _extract_date_province(
             maxsplit=1,
             flags=re.IGNORECASE,
         )[0]
-        value = _find_date(issuance_text)
-        if not value:
-            continue
-        evidence["documentDate"].append(_evidence(block, "issuance-date", value))
-        match = re.search(r"^\s*(.+?)\s*,\s*ng[aà]y\b", issuance_text, re.IGNORECASE)
-        province = match.group(1).strip() if match else ""
-        if province:
-            evidence["province"].append(_evidence(block, "place-before-date", province))
-        return value, province
+        place_match = re.search(r"^\s*(.+?)\s*,\s*ng[aà]y\b", issuance_text, re.IGNORECASE)
+        place = place_match.group(1).strip() if place_match else ""
+        place_valid = bool(place and 1 <= len(place.split()) <= 6 and not _has_org_keyword(place, _fold(place)))
+        value = ""
+        for long_match in _LONG_DATE_RE.finditer(unicodedata.normalize("NFKC", issuance_text)):
+            value = _canonical_date(*long_match.groups())
+            if value:
+                break
+        if value:
+            scored.append((0 if place_valid else 1, block.y0, block, value, place if place_valid else ""))
+        if place_valid:
+            place_hits.append((block.y0, block, place))
+    value = ""
+    date_block: _Block | None = None
+    if scored:
+        scored.sort(key=lambda item: (item[0], item[1]))
+        _, _, date_block, value, _ = scored[0]
+        evidence["documentDate"].append(_evidence(date_block, "issuance-date", value))
+    province = ""
+    province_block: _Block | None = None
+    if place_hits:
+        # Prefer the place on the chosen date line; otherwise earliest place.
+        same_line = [hit for hit in place_hits if date_block is not None and hit[1].index == date_block.index]
+        candidates = same_line or sorted(place_hits, key=lambda item: item[0])
+        _, province_block, province = candidates[0]
+        evidence["province"].append(_evidence(province_block, "place-before-date", province))
     # OCR can damage every digit/keyword in the issuance date while leaving
     # the leading place intact.  Keep province independently when a short
     # place-like prefix remains at the start of a top metadata block.
-    for block in blocks:
-        if block.geometry_reliable and block.y0 > 0.32:
-            continue
-        if code_block and block.geometry_reliable and block.y0 < code_block.y0 - 0.04:
-            continue
-        match = re.match(r"^\s*([A-ZÀ-ỸĐ][^,\n]{1,40})\s*,", block.text)
-        if not match:
-            continue
-        province = match.group(1).strip()
-        if any(token in _fold(province) for token in ("dia chi", "website", "fax", "dien thoai", "dt:")):
-            continue
-        if 1 <= len(province.split()) <= 6 and not _ORG_RE.search(province):
-            evidence["province"].append(_evidence(block, "place-prefix-date-unreadable", province))
-            return "", province
-    return "", ""
+    if not province:
+        for block in blocks:
+            if block.geometry_reliable:
+                if country_block is not None:
+                    if block.x1 < country_block.x0 - 0.10:
+                        continue
+                    if block.y0 < country_block.y0 - 0.05 or block.y0 > country_block.y1 + 0.30:
+                        continue
+                elif block.y0 > 0.32:
+                    continue
+            if code_block and block.geometry_reliable and block.y0 < code_block.y0 - 0.04:
+                continue
+            # Postal-address lines ("Thành phố Sa Đéc, Tỉnh Đồng Tháp") also
+            # match the "Place," shape but are addresses, never the province:
+            # the issuance line always keeps its "ngày" keyword even when the
+            # digits are unreadable.
+            if _is_address_or_noise(block.text):
+                continue
+            if "ngay" not in block.folded:
+                continue
+            match = re.match(r"^\s*([A-ZÀ-ỸĐ][^,\n]{1,40})\s*,", block.text)
+            if not match:
+                continue
+            candidate_place = match.group(1).strip()
+            if any(token in _fold(candidate_place) for token in ("dia chi", "website", "fax", "dien thoai", "dt:")):
+                continue
+            if 1 <= len(candidate_place.split()) <= 6 and not _ORG_RE.search(candidate_place):
+                province = candidate_place
+                evidence["province"].append(_evidence(block, "place-prefix-date-unreadable", province))
+                break
+    return value, province
+
+
+def _split_country_office(text: str) -> str:
+    """Keep the part before the country header in a merged office block.
+
+    Matched on folded text so OCR variants ("CỘNG HOÀ", "CỘNG HÒA") split the
+    same way; the cut maps back by word position, preserving original spelling.
+    """
+    folded_words = _fold(text).split()
+    for index in range(len(folded_words) - 3):
+        if folded_words[index : index + 4] == ["cong", "hoa", "xa", "hoi"]:
+            original_words = text.split()
+            return " ".join(original_words[: min(index, len(original_words))])
+    return text
 
 
 def _clean_office_sender_text(text: str) -> str:
+    # Layout may merge the issuing authority and the country header in one
+    # block (e.g. "THỦ TƯỚNG CHÍNH PHỦ CỘNG HÒA XÃ HỘI..."); keep the part
+    # before the country anchor.
+    text = _split_country_office(text)
+    # A single layout line can merge the authority with its postal address
+    # ("CÔNG TY ... TN Số 1253, CMT8, ..."): cut the address tail.  A comma
+    # after "Số <digits>" never occurs in a statutory code.
+    text = re.split(r"\bS[oố]\s+\d+\s*,", text, maxsplit=1, flags=re.IGNORECASE)[0].strip()
     # Strip any inline code anchor if merged in same block
     code_m = _CODE_RE.search(text)
     if code_m:
         text = text[: code_m.start()].strip()
     # Layout may merge the issuing authority with the first-recipient block.
     text = _FIRST_RECIPIENT_RE.split(text, maxsplit=1)[0].strip()
+    # A subject line ("V/v: ...") riding in the same block is body content,
+    # never part of the issuing authority.
+    text = _VV_RE.split(text, maxsplit=1)[0].strip()
     # Strip any document type
     text = re.sub(
         r"\b(?:" + "|".join(re.escape(v) for v in _DOCUMENT_TYPES) + r")\b.*$",
@@ -682,26 +1064,80 @@ def _clean_office_sender_text(text: str) -> str:
         if _is_address_or_noise(line):
             break
         lines.append(line)
-    return " ".join(" ".join(lines).split())
+    cleaned = " ".join(" ".join(lines).split())
+    # Certified-copy headers embed the authority between a "SAO Y" prefix and a
+    # signing-time suffix; drop those wrappers while keeping the authority.
+    cleaned = re.sub(
+        r"^(?:sao\s+y[\s,.:;]*)+",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    cleaned = re.split(
+        r"[,;]?\s*thời\s+gian\s+k[ýy]\s*[:：]?.*$",
+        cleaned,
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0].strip()
+    return cleaned
 
 
 def _extract_office_sender(
     blocks: list[_Block],
     code_block: _Block | None,
     evidence: dict[str, list[dict[str, Any]]],
-) -> str:
-    max_y = (code_block.y0 + 0.03) if code_block and code_block.geometry_reliable else 0.25
+    *,
+    country_block: _Block | None = None,
+) -> tuple[str, _Block | None]:
+    # QH-anchored flow: the office lives LEFT of the country header and its
+    # vertical band is anchored on the country (not on the code — the code is
+    # resolved AFTER the office, so a wrong code must never mask the office).
+    # ``code_block`` is kept for backward compatibility and ignored.
+    if country_block is None:
+        country_block = _header_frame(blocks).country
+    country = country_block
+    if country is not None and country.geometry_reliable:
+        max_y = max(0.25, country.y1 + 0.10)
+    else:
+        max_y = 0.25
+
+    def _left_of_country(block: _Block) -> bool:
+        if not block.geometry_reliable or country is None:
+            return True
+        return block.x1 <= country.x0 + 0.05
+
     candidates = []
     for block in blocks:
-        if block.geometry_reliable and (block.cx > 0.52 or block.y1 > max_y):
+        if block.geometry_reliable and block.y1 > max_y:
             continue
-        if "cong hoa xa hoi chu nghia viet nam" in block.folded:
+        if block.geometry_reliable:
+            if country is None:
+                # Edge case (no country header): absolute left-column bound.
+                if block.cx > 0.52:
+                    continue
+            elif not _left_of_country(block):
+                continue
+        # Top-strip digital-signature annotations (portal name, signer, time)
+        # sit entirely above the statutory letterhead; their mangled OCR can
+        # still contain an "org keyword" (e.g. "... điện tử Chính phủ").
+        if block.geometry_reliable and block.y1 < 0.04:
             continue
-        if any(token in block.folded for token in ("ky boi", "thoi gian ky", "sao y", "cong bao")):
+        # Form-template headers ("Mẫu 08/CBTT-SGDHN...") describe the paper
+        # form, never the issuing authority.
+        if re.match(r"^\s*mau\s+\d+", block.folded):
             continue
-        if block.type == "header":
+        # Country text is stripped inside _clean_office_sender_text, so merged
+        # "office + country" blocks still contribute their office part while
+        # pure country blocks clean to "" and are dropped below.
+        if _is_annotation_header(block.text, block.folded):
             continue
-        if _ORG_RE.search(block.text):
+        # Arrival-stamp blocks ("SỞ GIAO DỊCH ... HÌNH ĐẾN", "VĂN BẢN ĐẾN
+        # Ngày: ...") name another institution, never the issuing authority.
+        if "van ban den" in block.folded or "cong van den" in block.folded:
+            continue
+        if any(token in block.folded for token in ("ky boi", "cong bao")):
+            continue
+        if _has_org_keyword(block.text, block.folded):
             candidates.append(block)
 
     if candidates:
@@ -724,110 +1160,206 @@ def _extract_office_sender(
             val = " ".join(p[0] for p in parts)
             for _, b in parts:
                 evidence["officeSender"].append(_evidence(b, "upper-left-organization", val))
-            return val
+            return val, parts[-1][1]
 
-    # Corporate letterheads commonly center the issuing company rather than using statutory left column
-    for block in blocks:
-        if block.geometry_reliable and block.y1 > max_y:
-            continue
-        if block.type == "header":
-            continue
-        if "cong hoa xa hoi chu nghia viet nam" in block.folded:
-            continue
-        if any(token in block.folded for token in ("ky boi", "thoi gian ky", "sao y", "dia chi", "cong bao")):
-            continue
-        if _ORG_RE.search(block.text):
-            cleaned = _clean_office_sender_text(block.text)
-            if cleaned:
-                evidence["officeSender"].append(_evidence(block, "upper-left-organization", cleaned))
-                return cleaned
-
+    # "Tên công ty:" is the authoritative corporate letterhead anchor: prefer
+    # it over a loose centered-org guess (arrival stamps name other
+    # institutions, e.g. "SỞ GIAO DỊCH ... (HNX)", and would otherwise win by
+    # reading order).
     for block in blocks:
         match = re.search(r"\bT[eê]n\s+c[oô]ng\s+ty\s*[:：]\s*(.+)$", block.text, re.IGNORECASE)
         if match:
             raw_val = match.group(1).strip()
             clean_val = " ".join(raw_val.split())
             evidence["officeSender"].append(_evidence(block, "company-name-anchor", clean_val))
-            return clean_val
+            return clean_val, block
 
-    if code_block:
-        match = _CODE_RE.search(code_block.text) or _INLINE_TYPE_CODE_RE.search(code_block.text)
-        if match:
-            prefix = code_block.text[: match.start()].strip()
-            prefix = re.sub(
-                r"\b(?:" + "|".join(re.escape(v) for v in _DOCUMENT_TYPES) + r")\b.*$",
-                "",
-                prefix,
-                flags=re.IGNORECASE,
-            ).strip()
-            if prefix and _ORG_RE.search(prefix):
-                clean_val = " ".join(prefix.split())
-                evidence["officeSender"].append(
-                    _evidence(code_block, "organization-above-code-in-same-block", clean_val)
-                )
-                return clean_val
+    # Corporate letterheads commonly center the issuing company rather than using statutory left column
+    for block in blocks:
+        if block.geometry_reliable and block.y1 > max_y:
+            continue
+        if block.geometry_reliable and block.y1 < 0.04:
+            continue
+        if re.match(r"^\s*mau\s+\d+", block.folded):
+            continue
+        if _is_annotation_header(block.text, block.folded):
+            continue
+        if any(token in block.folded for token in ("ky boi", "dia chi", "cong bao", "van ban den", "cong van den")):
+            continue
+        if re.search(r"(?:^|\W)den(?:$|\W)", block.folded):
+            continue
+        if _has_org_keyword(block.text, block.folded):
+            cleaned = _clean_office_sender_text(block.text)
+            if cleaned:
+                evidence["officeSender"].append(_evidence(block, "upper-left-organization", cleaned))
+                return cleaned, block
+
+    return "", None
+
+
+def _first_content_heading(
+    blocks: list[_Block],
+    after_index: int,
+    evidence: dict[str, list[dict[str, Any]]],
+) -> str:
+    """Title of a consolidated (VBHN) document from its instrument heading.
+
+    Returns the tail (or continuation) of the first non-VBHN named heading
+    below the VBHN label, e.g. "Quy định ..." after "NGHỊ ĐỊNH".
+    """
+    for block_index in range(after_index + 1, len(blocks)):
+        block = blocks[block_index]
+        if not _zone(block, y0=0.08, y1=0.60):
+            continue
+        matched = _match_document_type(block)
+        if not matched:
+            continue
+        _, tail, _ = matched
+        if re.fullmatch(r"s[oố]\s*[:.]?\s*[0-9A-Za-zÀ-ỹĐđ./\-\s]+", tail, re.IGNORECASE):
+            tail = ""
+        title = " ".join(tail.split())
+        if title:
+            evidence["title"].append(_evidence(block, "content-heading-title", title))
+            return title
+        following: list[str] = []
+        for candidate in blocks[block_index + 1 : block_index + 5]:
+            if _FIRST_RECIPIENT_RE.search(candidate.text):
+                break
+            if candidate.y0 - block.y1 > 0.14:
+                break
+            if re.fullmatch(r"\d+", candidate.text.strip()):
+                continue
+            if any(anchor in candidate.folded for anchor in ("van ban den", "cong van den")):
+                continue
+            if "cong hoa xa hoi chu nghia viet nam" in candidate.folded:
+                continue
+            if re.match(r"^\s*S[oố]\s*[:：.]", candidate.text):
+                continue
+            if len(candidate.text) < 80 and _find_date(candidate.text):
+                continue
+            if candidate.folded.startswith("can cu"):
+                break
+            if candidate.type in {"doc_title", "paragraph_title", "text"} and _zone(
+                candidate, x0=0.16, x1=0.88, y1=0.62
+            ):
+                following.append(candidate.text)
+                evidence["title"].append(_evidence(candidate, "content-heading-continuation", candidate.text))
+        if following:
+            return " ".join(" ".join(following).split())
+        return ""
     return ""
 
 
-def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]) -> tuple[str, str]:
-    # Use the earliest structural cue: a named heading wins when it precedes
-    # ``V/v``; otherwise ``V/v`` identifies a Công văn and remains in title.
-    first_vv: tuple[int, re.Match[str]] | None = None
-    for block_index, block in enumerate(blocks):
-        if _zone(block, y0=0.14, y1=0.52):
-            vv_match = _VV_RE.search(block.text)
-            if vv_match:
-                first_vv = (block_index, vv_match)
-                break
+def _clean_type_tail(tail: str) -> str:
+    """Strip arrival-stamp fragments from the same-line title tail.
 
-    for block_index, block in enumerate(blocks):
-        if not _zone(block, y0=0.14, y1=0.52):
-            continue
-        match = _TYPE_RE.search(block.text)
-        if not match:
-            continue
-        if first_vv and (
-            first_vv[0] < block_index or (first_vv[0] == block_index and first_vv[1].start() < match.start())
-        ):
-            break
-        document_type = match.group(1).strip()
-        tail = block.text[match.end() :].strip(" \n:-–—")
-        if re.fullmatch(r"s[oố]\s*[:.]?\s*[0-9A-Za-zÀ-ỹĐđ./\-\s]+", tail, re.IGNORECASE):
-            tail = ""
-        title = tail
-        title_evidence: list[tuple[_Block, str, str]] = []
-        if title:
-            title_evidence.append((block, "text-after-document-type", title))
-        if not title:
-            following: list[str] = []
-            for candidate in blocks[max(0, block_index - 2) : block_index]:
-                vv_match = _VV_RE.search(candidate.text)
-                if vv_match:
-                    candidate_value = candidate.text[vv_match.start() :].strip()
-                    following.append(candidate_value)
-                    title_evidence.append((candidate, "v-v-title-before-document-type", candidate_value))
-            for candidate in blocks[block_index + 1 : block_index + 5]:
-                if _FIRST_RECIPIENT_RE.search(candidate.text):
-                    break
-                if candidate.y0 - block.y1 > 0.14:
-                    break
-                if re.fullmatch(r"\d+", candidate.text.strip()):
-                    continue
-                if any(anchor in candidate.folded for anchor in ("van ban den", "cong van den")):
-                    continue
-                if candidate.type in {"doc_title", "paragraph_title", "text"} and _zone(
-                    candidate, x0=0.16, x1=0.88, y1=0.58
-                ):
-                    following.append(candidate.text)
-                    title_evidence.append((candidate, "title-continuation", candidate.text))
-            title = "\n".join(following).strip()
-        evidence["type"].append(_evidence(block, "named-document-type", document_type))
-        for title_block, rule, matched_value in title_evidence:
-            evidence["title"].append(_evidence(title_block, rule, matched_value))
-        return document_type, title
+    Layout merges the heading with stamp lines ("NGHỊ QUYẾT Ngày: 27 04-
+    2017 ĐẠI HỘI... 2017 10247 Số:"): a colon-led "Ngày:" stamp prefix, a
+    serial glued to a trailing "Số:" stub, and a letter-less "Số:" stub are
+    stamp noise, never title text.  The colon requirement keeps legitimate
+    prose dates ("... ngày 30/4 ...") intact.
+    """
+    cleaned = re.sub(r"\bNg[aà]y\s*[:：]\s*[\d\s/\-.]+", " ", tail, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\b\d+\s+S[oố]\s*[:：]?\s*$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\bS[oố]\s*[:：]?\s*[^A-Za-zÀ-ỹĐđ]*$", "", cleaned, flags=re.IGNORECASE)
+    return " ".join(cleaned.split())
+
+
+def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]) -> tuple[str, str]:
+    # A named heading in the header zone is the authoritative document type,
+    # even when a "V/v" subject line appears earlier on the page (corporate
+    # letterheads put the subject above the heading).  ``V/v`` only identifies
+    # a Công văn when no named heading exists.
+    # Exception: when the subject rides inside the code line itself
+    # ("Số: 270/HĐ V/v: ..."), the document is a Công văn whose body may quote
+    # a named instrument ("Nghị quyết Đại hội..."); a later line-start type
+    # word is then quoted content, not the heading.
+    subject_in_code_line = any(
+        _CODE_RE.search(block.text) and _VV_RE.search(block.text) for block in blocks if _zone(block, y0=0.08, y1=0.52)
+    )
+    if not subject_in_code_line:
+        for block_index, block in enumerate(blocks):
+            if not _zone(block, y0=0.08, y1=0.52):
+                continue
+            matched = _match_document_type(block)
+            if not matched:
+                continue
+            document_type, tail, line_index = matched
+            # A "type word" starting a wrapped line of a V/v subject sentence
+            # (e.g. "V/v: ... thông tin\nNghị quyết Đại hội...") is a subject
+            # continuation, not the document heading: the heading never shares
+            # its block with an earlier V/v anchor.
+            if _VV_RE.search("\n".join(block.text.splitlines()[:line_index])):
+                continue
+            if _fold(document_type) == "van ban hop nhat":
+                # Edge case: the VBHN label is the container, not the subject.
+                # The title belongs to the consolidated instrument's own
+                # heading (the first non-VBHN named heading below).
+                content = _first_content_heading(blocks, block_index, evidence)
+                evidence["type"].append(_evidence(block, "named-document-type", document_type))
+                return document_type, content
+            if re.fullmatch(r"s[oố]\s*[:.]?\s*[0-9A-Za-zÀ-ỹĐđ./\-\s]+", tail, re.IGNORECASE):
+                tail = ""
+            title = _clean_type_tail(tail)
+            title_evidence: list[tuple[_Block, str, str]] = []
+            if title:
+                title = " ".join(title.split())
+                title_evidence.append((block, "text-after-document-type", title))
+            if not title:
+                following: list[str] = []
+                for candidate in blocks[max(0, block_index - 2) : block_index]:
+                    vv_match = _VV_RE.search(candidate.text)
+                    if vv_match:
+                        candidate_value = candidate.text[vv_match.start() :].strip()
+                        following.append(candidate_value)
+                        title_evidence.append((candidate, "v-v-title-before-document-type", candidate_value))
+                for candidate in blocks[block_index + 1 : block_index + 5]:
+                    if _FIRST_RECIPIENT_RE.search(candidate.text):
+                        break
+                    if candidate.y0 - block.y1 > 0.14:
+                        break
+                    if re.fullmatch(r"\d+", candidate.text.strip()):
+                        continue
+                    if any(anchor in candidate.folded for anchor in ("van ban den", "cong van den")):
+                        continue
+                    # The country header, the code line and the place/date line
+                    # sit between the heading and the body; none of them is a
+                    # title continuation.
+                    if "cong hoa xa hoi chu nghia viet nam" in candidate.folded:
+                        continue
+                    if re.match(r"^\s*S[oố]\s*[:：.]", candidate.text):
+                        continue
+                    # A date-led line ("Ngày: 27 04- 2017 ...") is stamp/header
+                    # metadata, never a title continuation — even when OCR
+                    # damage makes the date itself unparseable.
+                    if re.match(r"^\s*Ng[aà]y\s*[:：]", candidate.text, re.IGNORECASE):
+                        continue
+                    # Short date lines ("Hà Nội, ngày ...") are metadata, never
+                    # title text; long sentences merely mentioning a date keep
+                    # flowing into the title.
+                    if len(candidate.text) < 80 and _find_date(candidate.text):
+                        continue
+                    # Citation lines ("Căn cứ Luật...") follow the heading in
+                    # statutory documents and mark the start of the body;
+                    # they are never the title, and neither is anything below.
+                    if candidate.folded.startswith("can cu"):
+                        break
+                    if candidate.type in {"doc_title", "paragraph_title", "text"} and _zone(
+                        candidate, x0=0.16, x1=0.88, y1=0.58
+                    ):
+                        following.append(candidate.text)
+                        title_evidence.append((candidate, "title-continuation", candidate.text))
+                title = "\n".join(following).strip()
+            # API output joins a wrapped title with a single space (contract
+            # 3.1), whichever path produced it; raw breaks stay in evidence.
+            title = " ".join(title.split())
+            evidence["type"].append(_evidence(block, "named-document-type", document_type))
+            for title_block, rule, matched_value in title_evidence:
+                evidence["title"].append(_evidence(title_block, rule, matched_value))
+            return document_type, title
 
     for block in blocks:
-        if not _zone(block, y0=0.14, y1=0.52):
+        if not _zone(block, y0=0.08, y1=0.52):
             continue
         match = _VV_RE.search(block.text)
         if match:
@@ -840,7 +1372,12 @@ def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str,
 
 def _clean_recipient_value(value: str) -> str:
     value = _SAVE_RE.split(value, maxsplit=1)[0]
+    value = _SAVE_SUFFIX_RE.sub("", value)
     value = value.replace("\n", "; ")
+    # OCR turns quotation marks into "?" and joins wrapped values with "/":
+    # neither is ever a meaningful recipient character.
+    value = re.sub(r"\s+/\s+", "; ", value)
+    value = re.sub(r"[?\"'“”‘’«»`]", "", value)
     value = _BULLET_RE.sub("; ", value)
     value = re.sub(r"\s*;\s*", "; ", value)
     value = re.sub(r"(?:;\s*)+", "; ", value)
@@ -860,6 +1397,16 @@ def _extract_anchor_value(
         match = regex.search(block.text)
         if not match:
             continue
+        if field_name == "first_recipients" and any(
+            anchor in block.folded for anchor in ("van ban den", "cong van den")
+        ):
+            # A "Kính ..." fragment inside an arrival-stamp paragraph is stamp
+            # noise — UNLESS the anchor is immediately followed by a real
+            # addressee on the same block (the stamp overlaps the Kính gửi
+            # line instead of replacing it).
+            remainder = block.text[match.end() :].strip()
+            if not remainder or re.match(r"^(ngay|so)\s*[:：]", remainder, re.IGNORECASE):
+                continue
         value = block.text[match.end() :]
         if field_name == "first_recipients":
             value = re.sub(
@@ -868,7 +1415,15 @@ def _extract_anchor_value(
                 value,
                 flags=re.IGNORECASE,
             )
-            value = re.sub(r"\bS[oố]\s*[:：]\s*[0-9][0-9 .\-/]*$", "", value, flags=re.IGNORECASE)
+            # A trailing arrival-stamp stub ("Số:................ A03/",
+            # "Số: 10608") is stamp noise, never an addressee: cut at "Số:"
+            # when no real word (3+ letters) follows it.  A genuine reference
+            # ("... Số: 123/BQP") keeps its code and survives.
+            stub = re.search(r"\bS[oố]\s*[:：]", value, flags=re.IGNORECASE)
+            if stub and not any(
+                sum(ch.isalpha() for ch in word) >= 3 for word in value[stub.end() :].split()
+            ):
+                value = value[: stub.start()]
         if field_name == "recipients" and (not value.strip() or value.strip().isdigit()) and block.geometry_reliable:
             # Layout can split the label and each bullet into independent blocks.
             # Follow the same column by geometry, not layout reading-order indices.
@@ -906,7 +1461,11 @@ def _extract_anchor_value(
                     candidate.folded,
                 ):
                     break
-                if _ORG_RE.search(candidate.text):
+                # Stamp serial fragments ("Số: 10608") are not organizations,
+                # even though folded "số" collides with the "sở" keyword.
+                if re.match(r"^\s*S[oố]\s*[:：]", candidate.text, re.IGNORECASE):
+                    break
+                if _has_org_keyword(candidate.text, candidate.folded):
                     continuation = _clean_recipient_value(candidate.text)
                     if continuation:
                         value = f"{value}; {continuation}"
@@ -941,7 +1500,10 @@ def _extract_levels(blocks: list[_Block], evidence: dict[str, list[dict[str, Any
             security = "1_MẬT"
         if "thuong khan" in folded:
             priority = "3_THƯỢNG KHẨN"
-        elif "hoa toc" in folded:
+        elif "hoa toc" in folded or re.search(r"(?:^|\W)(?:oa|ha)\s+toc\b", folded):
+            # OCR routinely drops or corrupts the leading H of the urgency
+            # stamp ("OA TỐC" for "HỎA TỐC"); the stamp zone plus the intact
+            # "TỐC" syllable keep this precise.
             priority = "1_HỎA TỐC"
         elif re.search(r"(?:^|\W)khan(?:$|\W)", folded):
             priority = "2_KHẨN"
@@ -990,6 +1552,22 @@ def _extract_receiver_date(blocks: list[_Block], evidence: dict[str, list[dict[s
                 for candidate in nearby_blocks:
                     evidence["receiverDate"].append(_evidence(candidate, "split-arrival-stamp-date-part", value))
                 return value
+    # Arrival stamps often wrap across two layout blocks: the previous block
+    # ends with "Đến" and the next block holds "Ngày: <date>" (the issuance
+    # line and the stamp share the header strip, so reading order links them).
+    for index, block in enumerate(blocks):
+        if index == 0 or "ngay" not in block.folded:
+            continue
+        if block.geometry_reliable and (block.y0 > 0.35 or block.x0 < 0.40):
+            continue
+        value = _find_date(block.text)
+        if not value:
+            continue
+        previous = blocks[index - 1]
+        if previous.folded.rstrip(" :.-").endswith("den"):
+            evidence["receiverDate"].append(_evidence(block, "wrapped-arrival-stamp-date", value))
+            evidence["receiverDate"].append(_evidence(previous, "wrapped-arrival-stamp-den-part", value))
+            return value
     return ""
 
 
@@ -999,6 +1577,49 @@ def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, 
     candidates = sorted(_signature_candidates(blocks), key=lambda item: (item[0].y0, item[0].x0))
     for block, title, signer in candidates:
         clean_title = " ".join(title.split()).strip() if title else ""
+        if clean_title and not signer:
+            # Authority wrapped onto a second block ("TM. ĐOÀN CHỦ TỊCH" /
+            # "CHỦ TỌA"): the following, column-aligned short block continues
+            # the SAME title with a space (contract 3.1), unless it is a
+            # person name, another anchor, or list content.  Recipient bullets
+            # interleaved between the two lines are stepped over.
+            follower = None
+            try:
+                position = blocks.index(block) + 1
+            except ValueError:
+                position = None
+            if position is not None:
+                for candidate_block in blocks[position : position + 4]:
+                    candidate_text = " ".join(candidate_block.text.split()).strip()
+                    if re.match(r"^\s*[-–—•]", candidate_text) or re.match(r"^\s*l[uư]u\b", candidate_block.folded):
+                        continue
+                    follower = candidate_block
+                    break
+            if follower is not None and follower is not block:
+                follower_text = " ".join(follower.text.split()).strip()
+                follower_words = set(follower.folded.split())
+                if (
+                    follower_text
+                    and len(follower_text) <= 60
+                    # A wrapped title line still speaks the authority's
+                    # language: stamp serials ("0010843") and OCR crumbs
+                    # ("SK") carry no title word and must not join.
+                    and (follower_words & _TITLE_WORDS_FOLDED)
+                    and not _has_authority_anchor(follower_text)
+                    and not _has_org_keyword(follower_text, follower.folded)
+                    and not _looks_like_signature_name(follower_text)
+                    and not _RECIPIENT_RE.search(follower_text)
+                    and not re.match(r"^\s*[-–—•]", follower_text)
+                    and not re.match(r"^\s*(?:luu|dieu\s+\d+)\b", follower.folded)
+                    and (
+                        not follower.geometry_reliable
+                        or (follower.y0 <= block.y1 + 0.06 and abs(follower.cx - block.cx) <= 0.24)
+                    )
+                ):
+                    clean_title = f"{clean_title} {follower_text}"
+                    evidence["signer_title"].append(
+                        _evidence(follower, "signature-authority-continuation", clean_title)
+                    )
         if clean_title and clean_title not in titles:
             titles.append(clean_title)
             evidence["signer_title"].append(_evidence(block, "signature-authority", clean_title))
@@ -1012,7 +1633,11 @@ def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, 
                 if name_block.geometry_reliable:
                     if name_block.y0 > block.y1 + 0.22 or abs(name_block.cx - block.cx) > 0.24:
                         continue
-                if _looks_like_person_name(name_block.text) and name_block.text not in signers:
+                if (
+                    _looks_like_signature_name(name_block.text)
+                    and not _is_seal_name_fragment(name_block.text.strip())
+                    and name_block.text not in signers
+                ):
                     signers.append(name_block.text)
                     evidence["signer"].append(_evidence(name_block, "name-below-signature-authority", name_block.text))
                     break
@@ -1025,13 +1650,53 @@ def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, 
             cleaned = block.text.strip()
             lines = [l.strip() for l in cleaned.splitlines() if l.strip()]
             for candidate_line in reversed(lines):
-                if _looks_like_person_name(candidate_line) and candidate_line not in signers:
+                if (
+                    _looks_like_signature_name(candidate_line)
+                    and not _is_seal_name_fragment(candidate_line)
+                    and candidate_line not in signers
+                ):
                     signers.append(candidate_line)
                     evidence["signer"].append(_evidence(block, "fallback-signature-zone-name", candidate_line))
                     break
             if signers:
                 break
     return "; ".join(titles), "; ".join(signers)
+
+
+def _extract_cong_dien_recipients(
+    blocks: list[_Block],
+    evidence: dict[str, list[dict[str, Any]]],
+) -> str:
+    """Addressees of a CÔNG ĐIỆN: the distribution list after "[...] ĐIỆN:".
+
+    Điện dispatches carry no "Kính gửi"; the addressee list follows the
+    dispatch line ("THỦ TƯỚNG CHÍNH PHỦ ĐIỆN:") as bullet/continuation blocks.
+    """
+    for block_index, block in enumerate(blocks):
+        if block.geometry_reliable and block.y0 > 0.55:
+            continue
+        dispatch = re.search(r"ĐIỆN\s*:\s*(.*)$", block.text, re.IGNORECASE)
+        if not dispatch:
+            continue
+        parts = [dispatch.group(1).strip()] if dispatch.group(1).strip() else []
+        anchor_block = block
+        for candidate in blocks[block_index + 1 : block_index + 8]:
+            if candidate.geometry_reliable and candidate.y0 > anchor_block.y1 + 0.20:
+                break
+            text = " ".join(candidate.text.split()).strip()
+            if not text or len(text) > 220:
+                break
+            if _RECIPIENT_RE.search(text) or _FIRST_RECIPIENT_RE.search(text):
+                break
+            if re.search(r"\b(?:can cu|dieu\s+\d+|thuc hien)\b", candidate.folded):
+                break
+            parts.append(text)
+            evidence["first_recipients"].append(_evidence(candidate, "dien-dispatch-continuation", text))
+        value = _clean_recipient_value("; ".join(part for part in parts if part))
+        if value:
+            evidence["first_recipients"].append(_evidence(block, "dien-dispatch-anchor", value))
+            return value
+    return ""
 
 
 def extract_vbhc(
@@ -1079,13 +1744,35 @@ def extract_vbhc(
 
     header_blocks = pages[start]
     closing_blocks = pages[end]
-    code, code_block = _extract_code(header_blocks, evidence)
-    document_date, province = _extract_date_province(header_blocks, code_block, evidence)
-    office_sender = _extract_office_sender(header_blocks, code_block, evidence)
+    # QH-anchored header flow (contract 3.3): resolve the frame once, then
+    # office LEFT of country -> province+date RIGHT/UNDER country ->
+    # code BELOW office and LEFT of the date.  A wrong code must never mask
+    # the office, so the office no longer depends on the code.
+    frame = _header_frame(header_blocks)
+    office_sender, office_block = _extract_office_sender(header_blocks, None, evidence, country_block=frame.country)
+    document_date, province = _extract_date_province(header_blocks, None, evidence, country_block=frame.country)
+    date_hint = None
+    # Re-resolve the issuance block as a code anchor when present.
+    if evidence["documentDate"]:
+        date_page = evidence["documentDate"][0]["page"]
+        date_bid = evidence["documentDate"][0]["block"]
+        for block in header_blocks:
+            if block.page + 1 == date_page and block.index + 1 == date_bid:
+                date_hint = block
+                break
+    code, code_block = _extract_code(
+        header_blocks,
+        evidence,
+        office_block=office_block,
+        date_block_hint=date_hint,
+        country_block=frame.country,
+    )
     document_type, title = _extract_type_title(header_blocks, evidence)
     first_recipients = _extract_anchor_value(
         header_blocks, _FIRST_RECIPIENT_RE, "first_recipients", "kinh-gui-anchor", evidence
     )
+    if not first_recipients and _fold(document_type) == "cong dien":
+        first_recipients = _extract_cong_dien_recipients(header_blocks, evidence)
     recipients = _extract_anchor_value(closing_blocks, _RECIPIENT_RE, "recipients", "noi-nhan-anchor", evidence)
     signer_title, signer = _extract_signature(closing_blocks, evidence)
     priority, security = _extract_levels(header_blocks, evidence)

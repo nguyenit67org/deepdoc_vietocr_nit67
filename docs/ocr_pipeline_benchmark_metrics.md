@@ -116,6 +116,19 @@ Với trường text có GT, `CER = (S + D + I) / len(normalized_GT)`. CER khôn
 
 Nhóm Exact không có bucket Acceptable. `NEM` là tỷ lệ Exact trên các mẫu GT có giá trị. F1, precision, recall và hallucination rate được tính từ TP/FP/FN/TN ở trên.
 
+### 5.1. Document Success@5%
+
+**Document Success@5%** = tỷ lệ văn bản mà **tất cả required fields có trong Ground Truth đều đạt NCER ≤ 5% sau normalization** (metric version 2.1 trở lên).
+
+- Required fields: `type`, `title`, `code`, `documentDate`, `officeSender`, `priority_level`, `security_level`.
+- Một required field được tính là đạt khi bucket của nó (tái dùng `evaluate_field`, không implementation riêng) là `Exact` hoặc `Acceptable`. Với field nhóm Exact, `Acceptable` không tồn tại nên đạt đồng nghĩa khớp tuyệt đối; với ngày/enum, CER không áp dụng nên đạt đồng nghĩa parse/map đúng.
+- Chỉ cần 1 required field fail → document fail (`document_success_at_5=false`, liệt kê trong `failed_required_fields`).
+- Required field mà GT trống hoặc GT ghi `N/A` là không applicable: không đánh giá, không làm document fail. Document không có required field applicable nào được tính PASS rỗng (`evaluated_required_fields=0`).
+- GT có value nhưng prediction thiếu (`Missing`) → document fail.
+- Toàn dataset: `Document Success@5% = số document PASS / tổng số document được đánh giá` (mọi record trong artifact, kể cả document lỗi inference với prediction rỗng, đều nằm ở mẫu số).
+- Target PoC/demo: `≥ 0.80`; stretch target: `≥ 0.90` (`DOCUMENT_SUCCESS_TARGET_POC/STRETCH` trong code, không hard-code ở notebook/report).
+- Lưu trữ mỗi bundle: `document_success.csv` (`document_id`, `document_success_at_5`, `evaluated_required_fields`, `failed_required_fields`) và `summary.json → document_success_at_5` (`rate`, `passed_documents`, `evaluated_documents`, targets, `meets_poc`, `meets_stretch`).
+
 Target hiện tại cho mọi field là F1, NEM và recall `>=0.95`, precision `>=0.97`, hallucination `<=0.01`, ngoại trừ:
 
 - `province`: precision `>=0.90`, hallucination `<=0.02`.
@@ -135,7 +148,7 @@ So sánh trước/sau phải dùng cùng tập document, cùng 13 field, cùng m
 
 ## 7. Artifact và trace
 
-Mỗi bundle tối thiểu có `manifest.json`, `predictions.jsonl`, `summary.json`, `metrics.csv`, `field_errors.csv`, `enum_metrics.csv`, `pipeline_config.json` nếu có, `source_snapshot/` và `evidence/`.
+Mỗi bundle tối thiểu có `manifest.json`, `predictions.jsonl`, `summary.json`, `metrics.csv`, `field_errors.csv`, `document_success.csv`, `enum_metrics.csv`, `pipeline_config.json` nếu có, `source_snapshot/` và `evidence/`.
 
 Mỗi tài liệu có thư mục dễ tìm theo tên PDF:
 
@@ -157,11 +170,18 @@ Mỗi PDF full inference ghi:
 
 - thời gian wall-clock và thời gian pipeline;
 - RAM trung bình/đỉnh của tiến trình;
-- process VRAM trung bình/đỉnh;
-- device VRAM trung bình/đỉnh;
+- process VRAM trung bình/đỉnh (`avg_vram_mb`, `peak_vram_mb`);
+- framework allocator trung bình/đỉnh (`avg_torch_allocated_mb`, `peak_torch_allocated_mb`, `avg_paddle_allocated_mb`, `peak_paddle_allocated_mb`, `avg_framework_allocated_mb`, `peak_framework_allocated_mb`);
+- device VRAM trung bình/đỉnh (`avg_device_vram_mb`, `peak_device_vram_mb`);
+- chênh lệch device so với nền sau nạp model (`device_vram_delta_from_preload_mb`);
 - số mẫu, nguồn đo, GPU UUID/tên và trạng thái GPU dùng chung khi xác định được.
 
-Process VRAM ưu tiên `nvidia-smi` theo PID, rồi mới dùng allocator của Torch/Paddle. Device VRAM ưu tiên NVML, sau đó `nvidia-smi`. Hai phạm vi không được trộn. Nếu mọi cách thất bại, giá trị là `null` kèm nguồn/ghi chú; không thay bằng 0.
+Phạm vi và nguồn đo (mọi field phải ghi cả hai, không suy diễn chéo):
+
+- **Process VRAM** (`avg_vram_mb`, `peak_vram_mb`): bộ nhớ GPU của đúng tiến trình benchmark, chỉ đo bằng NVML per-process (`pynvml.compute-process.usedGpuMemory`, ưu tiên) hoặc `nvidia-smi --query-compute-apps=pid,used_gpu_memory` khớp PID (`nvidia-smi.compute-apps.pid`). Khớp PID phải bao gồm mọi alias host/container qua `NSpid` trong `/proc/self/status`. Hàng `[N/A]` (ví dụ WSL/WDDM) bị bỏ qua, không quy về 0. Nếu không có nguồn OS nào quy được byte về đúng PID thì giá trị là `null` kèm nguồn/ghi chú; không bao giờ thay bằng 0 hay bằng số allocator.
+- **Framework allocation** (`torch_allocated_mb`, `paddle_allocated_mb`, `framework_allocated_mb`): chỉ số chẩn đoán bổ sung từ `torch.cuda.memory_allocated` và `paddle.device.cuda.memory_allocated`. Hai counter được đọc liền nhau trong cùng một mẫu và tổng `framework_allocated_mb` chỉ cộng các counter của cùng thời điểm đó. Chúng chỉ đếm tensor do allocator quản lý, không gồm CUDA context, reserved pool, fragmentation hay thư viện khác, nên luôn nhỏ hơn process VRAM thực và không được gán nhãn process VRAM.
+- **Device VRAM** (`avg_device_vram_mb`, `peak_device_vram_mb`): toàn bộ GPU, mọi tiến trình. Nguồn ưu tiên NVML (`pynvml.device_memory_used`), sau đó `nvidia-smi memory.used`. Không bao giờ trộn với process VRAM.
+- **Chênh lệch so với nền** (`device_vram_delta_from_preload_mb` = device đỉnh trong file trừ nền device sau nạp model; model-load delta tương tự ở `summary.performance`): chỉ là ước lượng có điều kiện, chỉ được diễn giải khi `shared_device is False` và `resource_delta_comparable is True` (GPU đã xác nhận không có tiến trình cạnh tranh trong suốt lượt đo). Nền thay đổi theo tiến trình khác trên GPU nên số tuyệt đối vẫn được báo kèm provenance, nhưng delta không được dùng làm process VRAM.
 
 Resource của extraction replay là `null` vì replay không chạy model. Không báo delta tài nguyên giữa các lượt không cùng giao thức đo và điều kiện phần cứng; vẫn có thể báo số tuyệt đối cùng provenance.
 

@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Bộ trưởng các Bộ: Công an, Xây dựng; Chủ tịch UBND các tỉnh, thành phố trực thuộc Trung ương.",
+            "type": "string"
         }
     }
 }

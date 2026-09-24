@@ -74,8 +74,8 @@
             "type": "string"
         },
         "first_recipients": {
-            "value": null,
-            "type": null
+            "value": "Bộ trưởng các Bộ: Xây dựng, Tài chính; Chủ tịch Ủy ban nhân dân các tỉnh, thành phố: Hà Nội, Bắc Ninh, Ninh Bình, Hưng Yên, Lạng Sơn, Cao Bằng, Phú Thọ, Sơn La, Thái Nguyên, Tuyên Quang.",
+            "type": "string"
         }
     }
 }

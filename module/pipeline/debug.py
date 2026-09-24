@@ -39,7 +39,7 @@ def _rounded_bbox(values: list[float] | tuple[float, ...]) -> list[float]:
 def build_structured_debug(
     trace: PipelineDebugTrace,
     pages_blocks: list[list[PageBlock]],
-    page_images: list[Image.Image],
+    page_image_sizes: list[tuple[int, int]],
     page_image_urls: list[str],
     markdown: str,
     prediction: dict[str, Any],
@@ -49,12 +49,17 @@ def build_structured_debug(
     source_filename: str | None = None,
     pdf_path: str | None = None,
 ) -> dict[str, Any]:
-    """Build a JSON-safe trace linking layout, OCR, blocks and extraction."""
+    """Build a JSON-safe trace linking layout, OCR, blocks and extraction.
+
+    ``page_image_sizes`` are (width, height) tuples -- only dimensions are
+    reported, so callers need not retain page pixels after saving them.
+    """
 
     pages = []
     for page_index, blocks in enumerate(pages_blocks):
         raw_layout = trace.layout_blocks[page_index]
         raw_ocr = trace.ocr_lines[page_index]
+        page_width, page_height = page_image_sizes[page_index]
 
         line_id_by_object = {id(line): line_id for line_id, line in enumerate(raw_ocr, 1)}
         block_id_by_line_object: dict[int, int] = {}
@@ -81,8 +86,8 @@ def build_structured_debug(
 
         pages.append({
             "page": page_index + 1,
-            "width": page_images[page_index].width,
-            "height": page_images[page_index].height,
+            "width": page_width,
+            "height": page_height,
             "image_url": page_image_urls[page_index],
             "layout_blocks": [
                 {

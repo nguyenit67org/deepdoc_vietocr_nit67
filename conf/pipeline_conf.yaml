@@ -131,8 +131,18 @@ reading_order:
   anchor_min_width: 100
   anchor_band_mult: 1.0
 
-batch_api:
-  # /api/v1/ocr/pdfs: caps how many total PAGES across multiple uploaded
+pipeline:
+  # Caps how many PAGES _process_pages_batch() holds in RAM at once (page
+  # images, layout blocks, table/OCR crops, recognition outputs, debug
+  # pages). Longer documents are processed in consecutive page chunks whose
+  # per-page results are concatenated back in order -- every model call is
+  # page-independent given identical inputs, so chunking only bounds peak
+  # RAM (a 300+ page PDF otherwise OOMs an 11 GB machine) without changing
+  # outputs. Documents with fewer pages than this take the exact same single
+  # code path as before.
+  max_pages_per_batch: 64
+
+batch_api:  # /api/v1/ocr/pdfs: caps how many total PAGES across multiple uploaded
   # PDFs get grouped into one combined batch (DocumentPipeline.process_pdf_group)
   # before results are split back per-source-PDF and written to pipeline_outputs.
   # A single PDF with more pages than this becomes its own group on its own

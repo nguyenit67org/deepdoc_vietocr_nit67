@@ -79,7 +79,7 @@ class StructuredDebugTests(unittest.TestCase):
         }
 
         result = build_structured_debug(
-            trace, [[block]], [Image.new("RGB", (100, 200))], ["/page.png"],
+            trace, [[block]], [(100, 200)], ["/page.png"],
             "# V/v thử nghiệm", prediction(), extract_debug,
             document_id="sample_doc",
             source_filename="sample_doc.pdf",
@@ -155,7 +155,8 @@ class StructuredDebugTests(unittest.TestCase):
                     return pages_blocks, [(0.0, 0.0)], [image]
 
                 with (
-                    patch("module.pipeline.document_pipeline.load_pdf_pages", return_value=[image]),
+                    patch("module.pipeline.document_pipeline.load_pdf_page_count", return_value=1),
+                    patch("module.pipeline.document_pipeline.load_pdf_page_window", return_value=[image]),
                     patch.object(pipeline, "_process_pages_batch", side_effect=fake_process),
                 ):
                     result = pipeline.process_pdf(str(pdf_path), source_filename="sample.pdf")

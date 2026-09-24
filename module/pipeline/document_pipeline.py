@@ -25,7 +25,7 @@ from .debug import (
     save_ocr_debug,
     save_table_crop,
 )
-from .loader import load_pdf_pages
+from .loader import load_pdf_page_count, load_pdf_page_window, load_pdf_pages
 from .ocr_page import PageOcrPrep, finish_ocr_page, prepare_ocr_page
 from .page_orientation import batch_correct_page_orientation, deskew_page
 from .reading_order import sort_reading_order, tb_rows
@@ -93,9 +93,9 @@ class DocumentPipeline:
     def process_pdf(self, pdf_path: str, source_filename: str | None = None) -> dict:
         t_process = time.perf_counter()
         t_render = time.time()
-        pages = load_pdf_pages(pdf_path, dpi=self.config.pdf_dpi)
         label = source_filename or os.path.basename(pdf_path)
-        logger.info("Processing %s (%d pages) | pdf_render=%.2fs", label, len(pages), time.time() - t_render)
+        total_pages = load_pdf_page_count(pdf_path)
+        logger.info("Processing %s (%d pages)", label, total_pages)
 
         debug_dir = None
         debug_trace = None
@@ -104,32 +104,62 @@ class DocumentPipeline:
             os.makedirs(debug_dir, exist_ok=True)
             debug_trace = PipelineDebugTrace()
 
-        pages_blocks, crop_offsets, prepped_imgs = self._process_pages_batch(
-            pages, debug_dir, debug_trace=debug_trace
-        )
-
+        # Stream the document in consecutive page windows so peak RAM stays
+        # bounded: only one window's rendered + processed page images is
+        # ever held at once (a 300+ page PDF otherwise holds ~8 GB of page
+        # pixels alone). Windows concatenated cover the full ordered
+        # document exactly once, and per-page results are accumulated in
+        # order, so extraction still sees the complete document -- outputs
+        # match the render-everything path.
+        window_size = self.config.pipeline_max_pages_per_batch
+        if not window_size or window_size <= 0:
+            window_size = total_pages
         out_dir = os.path.join(self.config.output_dir, Path(label).stem)
         os.makedirs(out_dir, exist_ok=True)
-
-        # Saves the EXACT image layout/OCR ran on for each page (post
-        # whitespace-crop/deskew/orientation) -- only wired up for this
-        # single-PDF route (not process_pdf_group/process_image_group, i.e.
-        # not /pdfs or /images), since it's meant for the test UI's Preview
-        # tab (see server/static/index.html), not the bulk/production paths.
-        # Returning the real image sidesteps needing a client to reproduce
-        # crop/deskew/orientation itself (crop_offset alone, as used
-        # elsewhere in this JSON, only corrects crop_whitespace's
-        # TRANSLATION -- it can't correct page_deskew/page_orientation's
-        # ROTATION if either of those is ever enabled).
         pages_dir = os.path.join(out_dir, "pages")
         os.makedirs(pages_dir, exist_ok=True)
-        page_image_urls = []
-        for pn, img in enumerate(prepped_imgs):
-            img_path = os.path.join(pages_dir, f"page_{pn + 1}.png")
-            img.convert("RGB").save(img_path, "PNG")
-            # Matches the "/pipeline_outputs" static mount in server/main.py,
-            # which serves self.config.output_dir at that fixed URL prefix.
-            page_image_urls.append(f"/pipeline_outputs/{Path(label).stem}/pages/page_{pn + 1}.png")
+
+        pages_blocks_all: list[list[PageBlock]] = []
+        crop_offsets_all: list[tuple[float, float]] = []
+        original_sizes_all: list[tuple[int, int]] = []
+        processed_sizes_all: list[tuple[int, int]] = []
+        page_image_urls: list[str] = []
+        for start in range(0, total_pages, window_size):
+            pages = load_pdf_page_window(
+                pdf_path, dpi=self.config.pdf_dpi, start=start, limit=window_size
+            )
+            if not pages:
+                raise ValueError(f"Rendered 0 pages for window starting at page {start + 1}")
+            logger.info(
+                "Processing %s (pages %d-%d/%d) | pdf_render=%.2fs",
+                label, start + 1, start + len(pages), total_pages, time.time() - t_render,
+            )
+            original_sizes_all.extend([page.size for page in pages])
+            pages_blocks, crop_offsets, prepped_imgs = self._process_pages_batch(
+                pages, debug_dir, debug_trace=debug_trace
+            )
+            pages_blocks_all.extend(pages_blocks)
+            crop_offsets_all.extend(crop_offsets)
+            processed_sizes_all.extend([image.size for image in prepped_imgs])
+            # Saves the EXACT image layout/OCR ran on for each page (post
+            # whitespace-crop/deskew/orientation) -- only wired up for this
+            # single-PDF route (not process_pdf_group/process_image_group,
+            # i.e. not /pdfs or /images), since it's meant for the test UI's
+            # Preview tab (see server/static/index.html), not the
+            # bulk/production paths.
+            for index, img in enumerate(prepped_imgs):
+                page_number = start + index + 1
+                img_path = os.path.join(pages_dir, f"page_{page_number}.png")
+                img.convert("RGB").save(img_path, "PNG")
+                # Matches the "/pipeline_outputs" static mount in
+                # server/main.py, which serves self.config.output_dir at that
+                # fixed URL prefix.
+                page_image_urls.append(
+                    f"/pipeline_outputs/{Path(label).stem}/pages/page_{page_number}.png"
+                )
+            del pages, pages_blocks, crop_offsets, prepped_imgs
+
+        pages_blocks, crop_offsets = pages_blocks_all, crop_offsets_all
 
         t_build = time.time()
         markdown = build_markdown(pages_blocks, self.layout.label_schema)
@@ -139,8 +169,8 @@ class DocumentPipeline:
         t_extract = time.time()
         prediction, extraction_debug = extract_vbhc(
             pages_blocks,
-            original_page_sizes=[page.size for page in pages],
-            processed_page_sizes=[image.size for image in prepped_imgs],
+            original_page_sizes=original_sizes_all,
+            processed_page_sizes=processed_sizes_all,
             crop_offsets=crop_offsets,
             geometry_reliable=(
                 not self.config.page_deskew_enabled
@@ -170,7 +200,7 @@ class DocumentPipeline:
             response["debug"] = build_structured_debug(
                 debug_trace,
                 pages_blocks,
-                prepped_imgs,
+                processed_sizes_all,
                 page_image_urls,
                 markdown,
                 prediction,
@@ -298,6 +328,44 @@ class DocumentPipeline:
         debug_dir: str | None,
         debug_trace: PipelineDebugTrace | None = None,
     ) -> tuple[list[list[PageBlock]], list[tuple[float, float]], list[Image.Image]]:
+        """Runs layout/OCR/table processing over `pages`, split into
+        consecutive page chunks when the document is longer than
+        pipeline.max_pages_per_batch so peak RAM stays bounded (page
+        images, layout blocks, table/OCR crops, recognition outputs and
+        debug pages are all held per processed page -- a 300+ page PDF
+        otherwise OOMs a small machine). Each chunk goes through
+        _process_page_chunk() and per-page results are concatenated back
+        in document order; every model call is page-independent given
+        identical inputs, so chunked output matches the unchunked path.
+        Documents shorter than the cap take one chunk == the old path.
+        """
+        max_pages = self.config.pipeline_max_pages_per_batch
+        if not max_pages or max_pages <= 0 or len(pages) <= max_pages:
+            return self._process_page_chunk(pages, debug_dir, debug_trace, pn_offset=0)
+        all_blocks: list[list[PageBlock]] = []
+        all_offsets: list[tuple[float, float]] = []
+        all_imgs: list[Image.Image] = []
+        for start in range(0, len(pages), max_pages):
+            chunk = pages[start : start + max_pages]
+            logger.info(
+                "Processing page chunk %d-%d/%d",
+                start + 1, min(start + max_pages, len(pages)), len(pages),
+            )
+            blocks, offsets, imgs = self._process_page_chunk(
+                chunk, debug_dir, debug_trace, pn_offset=start
+            )
+            all_blocks.extend(blocks)
+            all_offsets.extend(offsets)
+            all_imgs.extend(imgs)
+        return all_blocks, all_offsets, all_imgs
+
+    def _process_page_chunk(
+        self,
+        pages: list[Image.Image],
+        debug_dir: str | None,
+        debug_trace: PipelineDebugTrace | None = None,
+        pn_offset: int = 0,
+    ) -> tuple[list[list[PageBlock]], list[tuple[float, float]], list[Image.Image]]:
         """Runs layout/OCR/table processing (batched across the whole
         `pages` list) and returns each page's assembled blocks, alongside
         each page's whitespace-crop offset (see crop_whitespace_before_layout
@@ -327,11 +395,16 @@ class DocumentPipeline:
         references to raw layout detections and OCR lines. The caller combines
         those with the final blocks after extraction; nothing is stored on the
         shared ``DocumentPipeline`` instance.
+
+        ``pn_offset`` is this chunk's first page index in the whole document --
+        debug filenames/log lines always use global page numbers, and trace
+        lists are extended (never overwritten) so _process_pages_batch() can
+        call this once per chunk and concatenate.
         """
         # Phase 1a: whitespace crop + deskew -- genuinely page-specific/
         # sequential, each one lightweight.
         t_prep = time.time()
-        pre_pages = [self._prepare_page_pre_orientation(pn, img) for pn, img in enumerate(pages)]
+        pre_pages = [self._prepare_page_pre_orientation(pn + pn_offset, img) for pn, img in enumerate(pages)]
         crop_offsets = [p.crop_offset for p in pre_pages]
         logger.info("Whitespace/deskew for %d pages in %.2fs", len(pages), time.time() - t_prep)
 
@@ -380,16 +453,16 @@ class DocumentPipeline:
         )
 
         prepped = [
-            self._prepare_page_orientation(pn, pre_pages[pn], orient_results[pn], debug_dir)
+            self._prepare_page_orientation(pn + pn_offset, pre_pages[pn], orient_results[pn], debug_dir)
             for pn in range(len(pages))
         ]
 
-        # Phase 2: layout detection for ALL pages in ONE batched PaddleX
+        # Phase 2: layout detection for this call's pages in ONE batched PaddleX
         # call instead of one call per page -- see PPDocLayoutBackend.detect_batch.
         t_layout = time.time()
         raw_blocks_per_page = self.layout.detect_batch([p.img for p in prepped], self.config.layout_threshold)
         if debug_trace is not None:
-            debug_trace.layout_blocks = raw_blocks_per_page
+            debug_trace.layout_blocks.extend(raw_blocks_per_page)
         logger.info("Layout-detected %d pages in one batch in %.2fs", len(pages), time.time() - t_layout)
 
         # Saved HERE, right after the batch call, rather than later per-page
@@ -400,28 +473,31 @@ class DocumentPipeline:
         # correctly-ordered per-page results.
         if debug_dir:
             for pn, raw_blocks in enumerate(raw_blocks_per_page):
-                save_layout_debug(prepped[pn].img, raw_blocks, debug_dir, pn)
+                save_layout_debug(prepped[pn].img, raw_blocks, debug_dir, pn + pn_offset)
 
         # Phase 2.5: build every page's block skeleton (crop + deskew each
         # table, classify every other block's type) -- table CONTENT is
-        # left as None, collected into one flat list spanning ALL pages, so
-        # Phase 2.6 can batch the table-structure model across the WHOLE
-        # document instead of per-page (a document with 1 table/page across
+        # left as None, collected into one flat list spanning this call's
+        # pages (one chunk when _process_pages_batch() splits a long
+        # document), so Phase 2.6 can batch the table-structure model
+        # instead of per-page (a document with 1 table/page across
         # many pages would otherwise never batch anything).
         t_skel = time.time()
         page_blocks: list[list[PageBlock]] = []
         all_table_items: list[tuple[int, int, Image.Image]] = []  # (pn, tno, crop)
         for pn in range(len(pages)):
-            blocks, table_crops = self._build_table_skeleton(pn, prepped[pn].img, raw_blocks_per_page[pn])
+            blocks, table_crops = self._build_table_skeleton(
+                pn + pn_offset, prepped[pn].img, raw_blocks_per_page[pn]
+            )
             page_blocks.append(blocks)
-            all_table_items.extend((pn, tno, crop) for tno, crop in table_crops)
+            all_table_items.extend((pn + pn_offset, tno, crop) for tno, crop in table_crops)
         logger.info(
             "Built page skeletons (%d table(s) total across %d pages) in %.2fs",
             len(all_table_items), len(pages), time.time() - t_skel,
         )
 
         # Phase 2.6: fill in table content -- batched across EVERY table in
-        # the WHOLE DOCUMENT in one call when the backend supports it
+        # this call's pages in one call when the backend supports it
         # (process_batch, mineru backend), otherwise one crop at a time
         # (tsr backend, or any backend that doesn't opt into batching).
         if all_table_items:
@@ -444,19 +520,23 @@ class DocumentPipeline:
             # _build_table_skeleton -- tables are appended to `blocks` in
             # tno order), so it doubles as the lookup key back into
             # page_blocks[pn]'s table-block positions.
+            # all_table_items carries GLOBAL page numbers (for debug filenames
+            # inside the table processors); page_blocks stays chunk-local,
+            # hence the pn - pn_offset translation below.
             table_block_idx_by_page: dict[int, list[int]] = {
-                pn: [i for i, b in enumerate(blocks) if b["content_type"] == "table"]
+                pn + pn_offset: [i for i, b in enumerate(blocks) if b["content_type"] == "table"]
                 for pn, blocks in enumerate(page_blocks)
             }
             for (pn, tno, crop), content, kind in zip(all_table_items, contents, kinds):
                 block_idx = table_block_idx_by_page[pn][tno]
-                page_blocks[pn][block_idx]["content"] = content
+                page_blocks[pn - pn_offset][block_idx]["content"] = content
                 if debug_dir:
                     save_table_crop(crop, debug_dir, pn, tno, suffix=f"_{kind}" if kind else "")
 
         # Phase 3a: per-page OCR detection + cropping (cheap, no FastOCR
         # call yet) -- collects every page's not-yet-recognized crops into
-        # ONE flat list spanning the WHOLE document, mirroring table
+        # ONE flat list spanning this call's pages (one chunk when
+        # _process_pages_batch() splits a long document), mirroring table
         # content's Phase 2.5/2.6 pattern, so FastOCR recognizes them all
         # in as few batched forward passes as possible instead of once per
         # page.
@@ -469,7 +549,7 @@ class DocumentPipeline:
         # text ending up assigned to a different page.
         crop_owner_pn: list[int] = []
         for pn in range(len(pages)):
-            page_crop_debug_dir = os.path.join(debug_dir, f"page_{pn + 1}_fastocr_crops") if debug_dir else None
+            page_crop_debug_dir = os.path.join(debug_dir, f"page_{pn + 1 + pn_offset}_fastocr_crops") if debug_dir else None
             prep, crops = prepare_ocr_page(
                 prepped[pn].img, self.ocr, crop_debug_dir=page_crop_debug_dir,
                 dt_boxes=prepped[pn].dt_boxes_reuse, prerecognized=prepped[pn].prerecognized_reuse,
@@ -512,18 +592,19 @@ class DocumentPipeline:
             for pn in range(len(pages))
         ]
         if debug_trace is not None:
-            debug_trace.ocr_lines = pages_ocr_boxes
+            debug_trace.ocr_lines.extend(pages_ocr_boxes)
 
         # Phase 3c: per-page reading-order/content assembly, now that every
         # page's blocks (table content) and ocr_boxes (recognized text) are
         # already built.
         pages_blocks = [
-            self._process_page_after_layout(pn, prepped[pn], page_blocks[pn], pages_ocr_boxes[pn], debug_dir)
+            self._process_page_after_layout(pn + pn_offset, prepped[pn], page_blocks[pn], pages_ocr_boxes[pn], debug_dir)
             for pn in range(len(pages))
         ]
 
-        # Phase 4: correct completed plain-text layout blocks across the WHOLE
-        # document. Keeping this after Phase 3c gives the model linguistic
+        # Phase 4: correct completed plain-text layout blocks across this
+        # call's pages (one chunk when _process_pages_batch() splits a long
+        # document). Keeping this after Phase 3c gives the model linguistic
         # context across visual OCR line wraps, while flattening every block
         # into one correct_batch() call lets the backend batch its chunks.
         # Tables are deliberately excluded: their Markdown/HTML structure must

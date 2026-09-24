@@ -46,6 +46,7 @@ class PipelineConfig:
     batch_api_max_pages_per_group: int
     batch_api_max_images_per_group: int
     table_enabled: bool = True
+    pipeline_max_pages_per_batch: int = 64
 
     @classmethod
     def from_conf(cls, conf: dict) -> "PipelineConfig":
@@ -56,6 +57,7 @@ class PipelineConfig:
         page_deskew = conf.get("page_deskew", {})
         page_orientation = conf.get("page_orientation", {})
         batch_api = conf.get("batch_api", {})
+        pipeline = conf.get("pipeline", {})
         return cls(
             pdf_dpi=conf.get("pdf", {}).get("dpi", 200),
             layout_threshold=conf.get("layout", {}).get("threshold", 0.2),
@@ -93,4 +95,5 @@ class PipelineConfig:
             page_orientation_max_pages_per_batch=page_orientation.get("max_pages_per_batch", 15),
             batch_api_max_pages_per_group=batch_api.get("max_pages_per_group", 200),
             batch_api_max_images_per_group=batch_api.get("max_images_per_group", 200),
+            pipeline_max_pages_per_batch=pipeline.get("max_pages_per_batch", 64),
         )
