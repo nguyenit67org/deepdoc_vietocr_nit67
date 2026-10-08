@@ -25,6 +25,10 @@ pipeline_outputs*/
 debug_outputs/
 temp/
 
+# Local scratch work and Office temporary/lock files
+/scratch/
+~$*
+
 .env
 .env.*
 .*.env
@@ -481,4 +485,3 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django,jupyternotebooks,flask,pycharm+all
-

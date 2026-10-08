@@ -2,7 +2,7 @@
   "information": [
     {
       "type": {
-        "value": "Thông tư",
+        "value": "Nghị định",
         "type": "string"
       },
       "title": {
@@ -10,7 +10,7 @@
         "type": "string"
       },
       "code": {
-        "value": "27/2026/VBHN-ND-BTC",
+        "value": "27/2026/VBHN-NĐ-BTC",
         "type": "string"
       },
       "documentDate": {

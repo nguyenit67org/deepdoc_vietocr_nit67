@@ -637,8 +637,21 @@
                 'first_recipients',
                 'signer_title',
                 'province',
-                'receiverDate',
             ];
+            const FIELD_LABELS = {
+                type: 'Loại văn bản',
+                title: 'Trích yếu',
+                code: 'Số ký hiệu',
+                documentDate: 'Ngày ban hành',
+                officeSender: 'Cơ quan ban hành',
+                priority_level: 'Độ khẩn',
+                security_level: 'Độ mật',
+                recipients: 'Nơi nhận',
+                signer: 'Người ký',
+                first_recipients: 'Kính gửi',
+                signer_title: 'Chức danh ký',
+                province: 'Địa danh ban hành',
+            };
             const PRIORITY_OPTIONS = [
                 '0_BÌNH THƯỜNG',
                 '1_HỎA TỐC',
@@ -825,7 +838,7 @@
                             !FIELD_ORDER.includes(name) &&
                             !(name in debugFields),
                     ),
-                ];
+                ].filter((name) => name !== 'receiverDate');
                 for (const name of orderedNames) {
                     const debugField = debugFields[name];
                     const apiValue =
@@ -852,7 +865,23 @@
                     head.className = 'form-head';
                     const label = document.createElement('span');
                     label.className = 'form-label';
-                    label.textContent = name;
+                    if (FIELD_LABELS[name]) {
+                        const viSpan = document.createElement('span');
+                        viSpan.className = 'field-key';
+                        viSpan.textContent = FIELD_LABELS[name];
+                        label.appendChild(viSpan);
+
+                        const enSpan = document.createElement('span');
+                        enSpan.style.fontWeight = '500';
+                        enSpan.style.color = 'var(--muted)';
+                        enSpan.textContent = ' · ' + name;
+                        label.appendChild(enSpan);
+                    } else {
+                        const keySpan = document.createElement('span');
+                        keySpan.className = 'field-key';
+                        keySpan.textContent = name;
+                        label.appendChild(keySpan);
+                    }
                     head.appendChild(label);
                     if (status) {
                         const badge = document.createElement('span');

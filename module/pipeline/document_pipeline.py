@@ -125,14 +125,16 @@ class DocumentPipeline:
         processed_sizes_all: list[tuple[int, int]] = []
         page_image_urls: list[str] = []
         for start in range(0, total_pages, window_size):
-            pages = load_pdf_page_window(
-                pdf_path, dpi=self.config.pdf_dpi, start=start, limit=window_size
-            )
+            pages = load_pdf_page_window(pdf_path, dpi=self.config.pdf_dpi, start=start, limit=window_size)
             if not pages:
                 raise ValueError(f"Rendered 0 pages for window starting at page {start + 1}")
             logger.info(
                 "Processing %s (pages %d-%d/%d) | pdf_render=%.2fs",
-                label, start + 1, start + len(pages), total_pages, time.time() - t_render,
+                label,
+                start + 1,
+                start + len(pages),
+                total_pages,
+                time.time() - t_render,
             )
             original_sizes_all.extend([page.size for page in pages])
             pages_blocks, crop_offsets, prepped_imgs = self._process_pages_batch(
@@ -154,9 +156,7 @@ class DocumentPipeline:
                 # Matches the "/pipeline_outputs" static mount in
                 # server/main.py, which serves self.config.output_dir at that
                 # fixed URL prefix.
-                page_image_urls.append(
-                    f"/pipeline_outputs/{Path(label).stem}/pages/page_{page_number}.png"
-                )
+                page_image_urls.append(f"/pipeline_outputs/{Path(label).stem}/pages/page_{page_number}.png")
             del pages, pages_blocks, crop_offsets, prepped_imgs
 
         pages_blocks, crop_offsets = pages_blocks_all, crop_offsets_all
@@ -172,10 +172,7 @@ class DocumentPipeline:
             original_page_sizes=original_sizes_all,
             processed_page_sizes=processed_sizes_all,
             crop_offsets=crop_offsets,
-            geometry_reliable=(
-                not self.config.page_deskew_enabled
-                and not self.config.page_orientation_enabled
-            ),
+            geometry_reliable=(not self.config.page_deskew_enabled and not self.config.page_orientation_enabled),
         )
         logger.info("Extracted VBHC prediction in %.2fs", time.time() - t_extract)
 
@@ -262,15 +259,22 @@ class DocumentPipeline:
             json_out = build_json(label, sub_blocks, crop_offsets[start:end])
             out_dir = os.path.join(self.config.output_dir, Path(label).stem)
             os.makedirs(out_dir, exist_ok=True)
-            shutil.copyfile(pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf"))
+            shutil.copyfile(
+                pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf")
+            )
             with open(os.path.join(out_dir, "output.json"), "w", encoding="utf-8") as f:
                 json.dump(json_out, f, ensure_ascii=False, indent=2)
             with open(os.path.join(out_dir, "output.md"), "w", encoding="utf-8") as f:
                 f.write(markdown)
-            results.append({
-                "file": label, "status": "success", "output_dir": out_dir,
-                "json": json_out, "markdown": markdown,
-            })
+            results.append(
+                {
+                    "file": label,
+                    "status": "success",
+                    "output_dir": out_dir,
+                    "json": json_out,
+                    "markdown": markdown,
+                }
+            )
 
         return results
 
@@ -315,10 +319,15 @@ class DocumentPipeline:
                 json.dump(json_out, f, ensure_ascii=False, indent=2)
             with open(os.path.join(out_dir, "output.md"), "w", encoding="utf-8") as f:
                 f.write(markdown)
-            results.append({
-                "file": label, "status": "success", "output_dir": out_dir,
-                "json": json_out, "markdown": markdown,
-            })
+            results.append(
+                {
+                    "file": label,
+                    "status": "success",
+                    "output_dir": out_dir,
+                    "json": json_out,
+                    "markdown": markdown,
+                }
+            )
 
         return results
 
@@ -349,11 +358,11 @@ class DocumentPipeline:
             chunk = pages[start : start + max_pages]
             logger.info(
                 "Processing page chunk %d-%d/%d",
-                start + 1, min(start + max_pages, len(pages)), len(pages),
+                start + 1,
+                min(start + max_pages, len(pages)),
+                len(pages),
             )
-            blocks, offsets, imgs = self._process_page_chunk(
-                chunk, debug_dir, debug_trace, pn_offset=start
-            )
+            blocks, offsets, imgs = self._process_page_chunk(chunk, debug_dir, debug_trace, pn_offset=start)
             all_blocks.extend(blocks)
             all_offsets.extend(offsets)
             all_imgs.extend(imgs)
@@ -416,14 +425,12 @@ class DocumentPipeline:
         dt_boxes_0_per_page: list = [None] * len(pages)
         if self.config.page_orientation_enabled:
             t_detect = time.time()
-            imgs_bgr_0 = [
-                cv2.cvtColor(np.array(p.img.convert("RGB")), cv2.COLOR_RGB2BGR)
-                for p in pre_pages
-            ]
+            imgs_bgr_0 = [cv2.cvtColor(np.array(p.img.convert("RGB")), cv2.COLOR_RGB2BGR) for p in pre_pages]
             dt_boxes_0_per_page = self.ocr.detect_sorted_batch(imgs_bgr_0)
             logger.info(
                 "Batch-detected orientation baseline for %d pages in %.2fs",
-                len(pages), time.time() - t_detect,
+                len(pages),
+                time.time() - t_detect,
             )
 
         # Phase 1c: orientation correction for ALL pages, batched across the
@@ -449,7 +456,8 @@ class DocumentPipeline:
             orient_results = [(p.img, "0", 0.0, None, None) for p in pre_pages]
         logger.info(
             "Batch-corrected orientation for %d pages in %.2fs",
-            len(pages), time.time() - t_orient,
+            len(pages),
+            time.time() - t_orient,
         )
 
         prepped = [
@@ -486,14 +494,14 @@ class DocumentPipeline:
         page_blocks: list[list[PageBlock]] = []
         all_table_items: list[tuple[int, int, Image.Image]] = []  # (pn, tno, crop)
         for pn in range(len(pages)):
-            blocks, table_crops = self._build_table_skeleton(
-                pn + pn_offset, prepped[pn].img, raw_blocks_per_page[pn]
-            )
+            blocks, table_crops = self._build_table_skeleton(pn + pn_offset, prepped[pn].img, raw_blocks_per_page[pn])
             page_blocks.append(blocks)
             all_table_items.extend((pn + pn_offset, tno, crop) for tno, crop in table_crops)
         logger.info(
             "Built page skeletons (%d table(s) total across %d pages) in %.2fs",
-            len(all_table_items), len(pages), time.time() - t_skel,
+            len(all_table_items),
+            len(pages),
+            time.time() - t_skel,
         )
 
         # Phase 2.6: fill in table content -- batched across EVERY table in
@@ -513,7 +521,8 @@ class DocumentPipeline:
                     kinds.append(None)
             logger.info(
                 "Processed %d table(s) (batched across whole document) in %.2fs",
-                len(all_table_items), time.time() - t_tables,
+                len(all_table_items),
+                time.time() - t_tables,
             )
 
             # tno IS the table's index within its own page's block list (see
@@ -549,14 +558,24 @@ class DocumentPipeline:
         # text ending up assigned to a different page.
         crop_owner_pn: list[int] = []
         for pn in range(len(pages)):
-            page_crop_debug_dir = os.path.join(debug_dir, f"page_{pn + 1 + pn_offset}_fastocr_crops") if debug_dir else None
+            page_crop_debug_dir = (
+                os.path.join(debug_dir, f"page_{pn + 1 + pn_offset}_fastocr_crops") if debug_dir else None
+            )
             prep, crops = prepare_ocr_page(
-                prepped[pn].img, self.ocr, crop_debug_dir=page_crop_debug_dir,
-                dt_boxes=prepped[pn].dt_boxes_reuse, prerecognized=prepped[pn].prerecognized_reuse,
-                excluded_regions=[
-                    b["bbox"] for b in raw_blocks_per_page[pn]
-                    if b["type"].lower() in self.layout.label_schema.table_types
-                ] if not self.config.table_enabled else None,
+                prepped[pn].img,
+                self.ocr,
+                crop_debug_dir=page_crop_debug_dir,
+                dt_boxes=prepped[pn].dt_boxes_reuse,
+                prerecognized=prepped[pn].prerecognized_reuse,
+                excluded_regions=(
+                    [
+                        b["bbox"]
+                        for b in raw_blocks_per_page[pn]
+                        if b["type"].lower() in self.layout.label_schema.table_types
+                    ]
+                    if not self.config.table_enabled
+                    else None
+                ),
                 exclusion_overlap_threshold=self.config.map_overlap_threshold,
             )
             ocr_preps.append(prep)
@@ -564,7 +583,9 @@ class DocumentPipeline:
             crop_owner_pn.extend([pn] * len(crops))
         logger.info(
             "Prepared OCR boxes for %d pages (%d crop(s) need fresh recognition) in %.2fs",
-            len(pages), len(all_ocr_crops), time.time() - t_ocr_prep,
+            len(pages),
+            len(all_ocr_crops),
+            time.time() - t_ocr_prep,
         )
 
         # Phase 3b: recognize EVERY crop across the WHOLE document in ONE
@@ -575,7 +596,8 @@ class DocumentPipeline:
         fresh_rec_res_all, _ = self.ocr.text_recognizer[0](all_ocr_crops) if all_ocr_crops else ([], 0.0)
         logger.info(
             "Recognized %d text crop(s) (batched across whole document) in %.2fs",
-            len(all_ocr_crops), time.time() - t_ocr_rec,
+            len(all_ocr_crops),
+            time.time() - t_ocr_rec,
         )
 
         # Slot each page's OWN slice of the whole-document recognition
@@ -588,8 +610,7 @@ class DocumentPipeline:
             fresh_rec_res_by_page[pn].append(res)
 
         pages_ocr_boxes = [
-            finish_ocr_page(ocr_preps[pn], fresh_rec_res_by_page[pn], self.ocr)
-            for pn in range(len(pages))
+            finish_ocr_page(ocr_preps[pn], fresh_rec_res_by_page[pn], self.ocr) for pn in range(len(pages))
         ]
         if debug_trace is not None:
             debug_trace.ocr_lines.extend(pages_ocr_boxes)
@@ -598,7 +619,9 @@ class DocumentPipeline:
         # page's blocks (table content) and ocr_boxes (recognized text) are
         # already built.
         pages_blocks = [
-            self._process_page_after_layout(pn + pn_offset, prepped[pn], page_blocks[pn], pages_ocr_boxes[pn], debug_dir)
+            self._process_page_after_layout(
+                pn + pn_offset, prepped[pn], page_blocks[pn], pages_ocr_boxes[pn], debug_dir
+            )
             for pn in range(len(pages))
         ]
 
@@ -622,8 +645,7 @@ class DocumentPipeline:
                 corrected_contents = self.corrector.correct_batch(original_contents)
                 if len(corrected_contents) != len(text_blocks):
                     raise RuntimeError(
-                        f"Corrector returned {len(corrected_contents)} blocks "
-                        f"for {len(text_blocks)} inputs"
+                        f"Corrector returned {len(corrected_contents)} blocks " f"for {len(text_blocks)} inputs"
                     )
             except Exception:
                 # Correction is optional post-processing. Preserve valid raw
@@ -637,7 +659,9 @@ class DocumentPipeline:
                     block["content"] = corrected
                 logger.info(
                     "Corrected %d text block(s) across %d pages in %.2fs",
-                    len(text_blocks), len(pages_blocks), time.time() - t_correction,
+                    len(text_blocks),
+                    len(pages_blocks),
+                    time.time() - t_correction,
                 )
 
         return pages_blocks, crop_offsets, [p.img for p in prepped]
@@ -677,7 +701,8 @@ class DocumentPipeline:
 
         if cfg.page_deskew_enabled:
             img, tilt_angle = deskew_page(
-                img, self.ocr,
+                img,
+                self.ocr,
                 min_boxes=cfg.page_deskew_min_boxes,
                 angle_threshold=cfg.page_deskew_angle_threshold,
                 max_angle=cfg.page_deskew_max_angle,
@@ -811,7 +836,8 @@ class DocumentPipeline:
         n_ocr_total = len(ocr_boxes)
         if n_ocr_total > 0:
             figure_to_drop = [
-                b for b in blocks
+                b
+                for b in blocks
                 if b["type"].lower() in cfg.figure_drop_types
                 and len(b.get("text_items", [])) / n_ocr_total > cfg.figure_drop_ratio
             ]
@@ -821,19 +847,27 @@ class DocumentPipeline:
                     reclaim_boxes.extend(b["text_items"])
                     logger.debug(
                         "Page %d: dropping block '%s' bbox=%s (absorbed %d/%d = %.0f%% of OCR boxes)",
-                        pn + 1, b["type"], [round(v) for v in b["bbox"]],
-                        len(b["text_items"]), n_ocr_total, 100 * len(b["text_items"]) / n_ocr_total,
+                        pn + 1,
+                        b["type"],
+                        [round(v) for v in b["bbox"]],
+                        len(b["text_items"]),
+                        n_ocr_total,
+                        100 * len(b["text_items"]) / n_ocr_total,
                     )
 
                 drop_ids = {id(b) for b in figure_to_drop}
                 blocks = [b for b in blocks if id(b) not in drop_ids]
 
-                unmatched.extend(reassign_ocr_boxes(reclaim_boxes, blocks, label_schema.skip_types, cfg.map_overlap_threshold))
+                unmatched.extend(
+                    reassign_ocr_boxes(reclaim_boxes, blocks, label_schema.skip_types, cfg.map_overlap_threshold)
+                )
 
         if unmatched:
             extra_blocks = unmatched_to_blocks(unmatched)
             blocks.extend(extra_blocks)
-            logger.debug("Page %d: %d OCR boxes unmatched -> %d extra blocks", pn + 1, len(unmatched), len(extra_blocks))
+            logger.debug(
+                "Page %d: %d OCR boxes unmatched -> %d extra blocks", pn + 1, len(unmatched), len(extra_blocks)
+            )
         _mark("mapping")
 
         # Title/header-like blocks keep their original line breaks (<br>) in
@@ -859,7 +893,9 @@ class DocumentPipeline:
         _mark("content_build")
 
         blocks = sort_reading_order(
-            blocks, img_width=w, img_height=h,
+            blocks,
+            img_width=w,
+            img_height=h,
             overlap_min=cfg.line_overlap_min,
             band_mult=cfg.anchor_band_mult,
             anchor_min_width=cfg.anchor_min_width,
@@ -878,7 +914,13 @@ class DocumentPipeline:
         timings_str = " ".join(f"{k}={v:.2f}s" for k, v in timings.items())
         logger.info(
             "Page %d done in %.1fs: layout=%d ocr=%d table=%d text=%d | %s",
-            pn + 1, elapsed, n_raw_blocks, len(ocr_boxes), n_tbl, n_text, timings_str,
+            pn + 1,
+            elapsed,
+            n_raw_blocks,
+            len(ocr_boxes),
+            n_tbl,
+            n_text,
+            timings_str,
         )
 
         return blocks

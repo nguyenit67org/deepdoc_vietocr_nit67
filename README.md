@@ -17,6 +17,12 @@ Sau đó pipeline map các box chữ vào đúng khối layout, sắp thứ tự
 
 Chi tiết code nằm ở `module/pipeline/document_pipeline.py` (orchestration), `module/layout/`, `module/ocr/`, `module/tsr/`.
 
+### Tài liệu quan trọng
+
+- [Pipeline OCR](docs/ocr_pipeline.md): luồng xử lý `process_pdf()` từng bước, đầu vào/đầu ra và model sử dụng.
+- [Hợp đồng API và benchmark metrics](docs/ocr_pipeline_benchmark_metrics.md): nguồn chuẩn cho 13 trường API, quy tắc đánh giá và bằng chứng trích xuất; đọc trước khi thay đổi extraction hoặc benchmark.
+- [Quy luật bố cục văn bản hành chính](docs/vbhc_administrative_layout_rules.md): vị trí các thành phần thể thức và tín hiệu hình học phục vụ trích xuất VBHC.
+
 ## 2. Cấu trúc thư mục
 
 ```

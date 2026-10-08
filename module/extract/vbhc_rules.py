@@ -70,6 +70,10 @@ _SAVE_SUFFIX_RE = re.compile(
     re.IGNORECASE,
 )
 
+# A stamp serial riding inside a recipient value ("số 1.772") names no
+# addressee: only segments without any real (3+ letter) word are dropped, so
+# genuine references ("Số: 123/BQP") survive via their lettered token.
+_SERIAL_ONLY_SEGMENT_RE = re.compile(r"^\s*S[oố]\s*[:：.]?\s*[\d\s./\-]*$", re.IGNORECASE)
 # Longest values first so QUYẾT ĐỊNH LIÊN TỊCH wins over QUYẾT ĐỊNH.
 _DOCUMENT_TYPES = (
     "QUYẾT ĐỊNH LIÊN TỊCH",
@@ -102,6 +106,7 @@ _AUTHORITY_RE = re.compile(
     r"THỦ\s+TƯỚNG|PHÓ\s+THỦ\s+TƯỚNG|CỤC\s+TRƯỞNG|PHÓ\s+CỤC\s+TRƯỞNG|"
     r"CHÁNH\s+VĂN\s+PHÒNG|PHÓ\s+CHÁNH\s+VĂN\s+PHÒNG|CHỦ\s+NHIỆM|PHÓ\s+CHỦ\s+NHIỆM|"
     r"TỔNG\s+GIÁM\s+ĐỐC|NGƯỜI\s+ĐẠI\s+DIỆN|NGƯỜI\s+ỦY\s+QUYỀN|"
+    r"NGƯỜI\s+CÔNG\s+BỐ\s+THÔNG\s+TIN\w*|"
     r"NGƯỜI\s+THỰC\s+HIỆN\s+CÔNG\s+BỐ\s+THÔNG\s+TIN)\b",
     re.IGNORECASE,
 )
@@ -170,7 +175,13 @@ def _has_org_keyword(text: str, folded: str | None = None) -> bool:
     """Match issuing-authority keywords on raw or folded (accent-insensitive) text."""
     if _ORG_RE.search(text):
         return True
-    return bool(_ORG_FOLDED_RE.search(folded if folded is not None else _fold(text)))
+    folded_text = folded if folded is not None else _fold(text)
+    # "Sở" and "Số" both fold to "so": a code anchor ("Số:", "Số 12/...")
+    # is never an issuing authority, so those occurrences are removed before
+    # matching.  A genuine "Sở ..." (letters, no colon after "Sở") survives.
+    disambiguated = re.sub(r"\bso\s*[:：]", " ", folded_text)
+    disambiguated = re.sub(r"\bso\s+(?=\d)", " ", disambiguated)
+    return bool(_ORG_FOLDED_RE.search(disambiguated))
 
 
 def _is_annotation_header(text: str, folded: str | None = None) -> bool:
@@ -426,8 +437,18 @@ def _looks_like_person_name(value: str) -> bool:
     if not 2 <= len(words) <= 6:
         return False
     folded_words = {_fold(word).strip(".") for word in words}
-    if folded_words & _TITLE_WORDS_FOLDED:
-        return False
+    title_hits = folded_words & _TITLE_WORDS_FOLDED
+    if title_hits:
+        # Authority vocabulary veto.  Statutory titles are ALL-CAPS, so any
+        # hit disqualifies an all-caps candidate.  Title-case printed names
+        # often share one syllable with authority words ("Hiền"/"Hiện",
+        # "Thông", "Công"): a single hit is not disqualifying there, only
+        # two or more authority words mark a title ("Chủ tịch").
+        if any(ch.islower() for ch in value):
+            if len(title_hits) >= 2:
+                return False
+        else:
+            return False
     folded = _fold(value)
     if any(token in folded for token in ("trung tam", "cong ty", "uy ban", "chung khoan")):
         return False
@@ -492,7 +513,7 @@ def _split_signature(text: str) -> tuple[str, str]:
     if len(lines) > 1:
         for index in range(len(lines) - 1, -1, -1):
             if _looks_like_signature_name(lines[index]):
-                return " ".join(lines[:index]).strip(), lines[index].strip()
+                return _strip_signature_serial(" ".join(lines[:index]).strip()), lines[index].strip()
 
     if _has_authority_anchor(text):
         organization = re.search(
@@ -501,7 +522,7 @@ def _split_signature(text: str) -> tuple[str, str]:
             re.IGNORECASE,
         )
         if organization:
-            return " ".join(text[: organization.start()].split()).strip(), ""
+            return _strip_signature_serial(" ".join(text[: organization.start()].split()).strip()), ""
 
     # Layout sometimes merges the entire signature image into one line.
     words = text.strip().split()
@@ -509,8 +530,8 @@ def _split_signature(text: str) -> tuple[str, str]:
         suffix = " ".join(words[-width:]).strip(" ,.;:-")
         if _looks_like_signature_name(suffix):
             title = " ".join(words[:-width]).strip()
-            return title, suffix
-    return (" ".join(text.split()).strip(), "") if _has_authority_anchor(text) else ("", "")
+            return _strip_signature_serial(title), suffix
+    return (_strip_signature_serial(" ".join(text.split()).strip()), "") if _has_authority_anchor(text) else ("", "")
 
 
 def _signature_candidates(blocks: Iterable[_Block]) -> list[tuple[_Block, str, str]]:
@@ -719,6 +740,53 @@ def _code_match_reaches_line_end(block_text: str, match_end: int) -> bool:
     body citations ("... số 81/2013/NĐ-CP ngày 19 tháng 7 ...") continue.
     """
     return re.match(r"[\s;:,.]*(\n|$)", block_text[match_end:]) is not None
+
+
+def _extract_xac_thuc_office(
+    blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]
+) -> tuple[str, _Block | None]:
+    """Issuing authority restated beside a VBHN authentication label.
+
+    Only fires on closing pages carrying an "XÁC THỰC" anchor, and only takes
+    a short organization block in the same column band.  Stamp/arrival blocks
+    naming other institutions are excluded by the same markers as the header
+    flow.
+    """
+    anchors = [block for block in blocks if "xac thuc" in block.folded]
+    if not anchors:
+        return "", None
+    anchor = min(anchors, key=lambda block: (block.y0, block.x0))
+    best: tuple[float, _Block, str] | None = None
+    for block in blocks:
+        if block is anchor or "xac thuc" in block.folded:
+            continue
+        text = _clean_office_sender_text(block.text)
+        if not text or len(text) > 100:
+            continue
+        if not _has_org_keyword(text, _fold(text)):
+            continue
+        if _is_annotation_header(block.text, block.folded):
+            continue
+        if "van ban den" in block.folded or "cong van den" in block.folded:
+            continue
+        if any(token in block.folded for token in ("ky boi", "cong bao", "@")):
+            continue
+        if block.geometry_reliable:
+            if abs(block.cx - anchor.cx) > 0.30:
+                continue
+            gap = anchor.y0 - block.y1
+            if gap < -0.02 or gap > 0.25:
+                continue
+            score = abs(block.cx - anchor.cx) + max(gap, 0.0)
+        else:
+            score = 0.0
+        if best is None or score < best[0]:
+            best = (score, block, text)
+    if best is None:
+        return "", None
+    _, block, value = best
+    evidence["officeSender"].append(_evidence(block, "closing-xac-thuc-office", value))
+    return value, block
 
 
 def _extract_code(
@@ -1024,12 +1092,21 @@ def _split_country_office(text: str) -> str:
 
     Matched on folded text so OCR variants ("CỘNG HOÀ", "CỘNG HÒA") split the
     same way; the cut maps back by word position, preserving original spelling.
+    When OCR damages the words after "CỘNG HÒA" ("CỘNG HÒA NGHĨA..." for
+    "CỘNG HÒA XÃ HỘI..."), the strict four-word anchor misses, so a loose cut
+    at "CỘNG HÒA" applies whenever the head still names an issuing authority.
     """
     folded_words = _fold(text).split()
     for index in range(len(folded_words) - 3):
         if folded_words[index : index + 4] == ["cong", "hoa", "xa", "hoi"]:
             original_words = text.split()
             return " ".join(original_words[: min(index, len(original_words))])
+    for index in range(len(folded_words) - 1):
+        if folded_words[index : index + 2] == ["cong", "hoa"]:
+            original_words = text.split()
+            head = " ".join(original_words[: min(index, len(original_words))])
+            if head and _has_org_keyword(head):
+                return head
     return text
 
 
@@ -1038,6 +1115,14 @@ def _clean_office_sender_text(text: str) -> str:
     # block (e.g. "THỦ TƯỚNG CHÍNH PHỦ CỘNG HÒA XÃ HỘI..."); keep the part
     # before the country anchor.
     text = _split_country_office(text)
+    # A corporate letterhead label ("Tên tổ chức phát hành: X") is metadata,
+    # never part of the issuing authority itself.
+    text = re.sub(
+        r"^\s*T[eê]n\s+(?:c[oô]ng\s+ty|t[oổ]\s+ch[uứ]c(?:\s+ph[aá]t\s+h[aà]nh)?)\s*[:：]\s*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
     # A single layout line can merge the authority with its postal address
     # ("CÔNG TY ... TN Số 1253, CMT8, ..."): cut the address tail.  A comma
     # after "Số <digits>" never occurs in a statutory code.
@@ -1162,12 +1247,20 @@ def _extract_office_sender(
                 evidence["officeSender"].append(_evidence(b, "upper-left-organization", val))
             return val, parts[-1][1]
 
-    # "Tên công ty:" is the authoritative corporate letterhead anchor: prefer
-    # it over a loose centered-org guess (arrival stamps name other
-    # institutions, e.g. "SỞ GIAO DỊCH ... (HNX)", and would otherwise win by
-    # reading order).
+    # A corporate letterhead names its issuer through a labeled field ("Tên
+    # công ty:", "Tên tổ chức phát hành:"): prefer it over a loose
+    # centered-org guess (arrival stamps name other institutions, e.g. "SỞ
+    # GIAO DỊCH ... (HNX)", and would otherwise win by reading order).
+    # Letterheads live at the top of the page; a mid-body "Tên ..." mention
+    # is never the issuer.
     for block in blocks:
-        match = re.search(r"\bT[eê]n\s+c[oô]ng\s+ty\s*[:：]\s*(.+)$", block.text, re.IGNORECASE)
+        if block.geometry_reliable and block.y1 > 0.50:
+            continue
+        match = re.search(
+            r"\bT[eê]n\s+(?:c[oô]ng\s+ty|t[oổ]\s+ch[uứ]c(?:\s+ph[aá]t\s+h[aà]nh)?)\s*[:：]\s*(.+)$",
+            block.text,
+            re.IGNORECASE,
+        )
         if match:
             raw_val = match.group(1).strip()
             clean_val = " ".join(raw_val.split())
@@ -1195,6 +1288,38 @@ def _extract_office_sender(
                 return cleaned, block
 
     return "", None
+
+
+# A citation opening another instrument ("Thông tư số 46/2024/... ngày ...")
+# starts the consolidation preamble or a reference, never a title
+# continuation.  Matched on folded text so OCR variants ("Thông tự") split
+# the same way; a digit in the code token is required so prose merely
+# mentioning an instrument ("thi hành nghị quyết của đại hội") flows on.
+_DOCUMENT_CITATION_OPEN_RE = re.compile(
+    r"^\s*(?:\d+\s*[.)]\s*)?"
+    r"(luat|nghi dinh|nghi quyet|quyet dinh|thong tu|chi thi|cong dien)"
+    r"\s+so\s*[:：.]?\s*\S*\d\S*"
+)
+
+# A stamp serial standing alone ("Số 14501", "Số: 10608") carries no title
+# words; neither does a bare date keyword ("Ngày") or a letter-less fragment
+# ("03311-2020", "28981").  All are stamp/layout noise, never title text.
+_SERIAL_ONLY_FRAGMENT_RE = re.compile(r"^\s*S[oố]\s*[:：.]?\s*[\d\s./\-]+\s*$", re.IGNORECASE)
+_BARE_DATE_KEYWORD_RE = re.compile(r"^\s*Ng[aà]y\s*[:：]?\s*$", re.IGNORECASE)
+
+
+def _is_title_noise_fragment(text: str) -> bool:
+    """True for stamp/layout fragments that can never continue a title."""
+    stripped = text.strip()
+    if not stripped or not re.search(r"[A-Za-zÀ-ỹĐđ]", stripped):
+        return True
+    if _SERIAL_ONLY_FRAGMENT_RE.match(stripped):
+        return True
+    return bool(_BARE_DATE_KEYWORD_RE.match(stripped))
+
+
+def _starts_with_document_citation(folded: str) -> bool:
+    return bool(_DOCUMENT_CITATION_OPEN_RE.match(folded))
 
 
 def _first_content_heading(
@@ -1226,6 +1351,14 @@ def _first_content_heading(
             if _FIRST_RECIPIENT_RE.search(candidate.text):
                 break
             if candidate.y0 - block.y1 > 0.14:
+                break
+            if _is_title_noise_fragment(candidate.text):
+                continue
+            if _starts_with_document_citation(candidate.folded):
+                break
+            # A numbered form/body item ("2. Nội dung ...", "3. ...") opens a
+            # new section, never continues the title.
+            if re.match(r"^\s*\d+\s*[.)]", candidate.text):
                 break
             if re.fullmatch(r"\d+", candidate.text.strip()):
                 continue
@@ -1318,6 +1451,14 @@ def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str,
                         break
                     if candidate.y0 - block.y1 > 0.14:
                         break
+                    if _is_title_noise_fragment(candidate.text):
+                        continue
+                    if _starts_with_document_citation(candidate.folded):
+                        break
+                    # A numbered form/body item ("2. Nội dung ...", "3. ...")
+                    # opens a new section, never continues the title.
+                    if re.match(r"^\s*\d+\s*[.)]", candidate.text):
+                        break
                     if re.fullmatch(r"\d+", candidate.text.strip()):
                         continue
                     if any(anchor in candidate.folded for anchor in ("van ban den", "cong van den")):
@@ -1370,17 +1511,82 @@ def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str,
     return "", ""
 
 
+def _extract_disclosure_content_title(
+    blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]
+) -> str:
+    """Subject of a CÔNG BỐ THÔNG TIN BẤT THƯỜNG form from its content item.
+
+    The heading names the form, not the subject; the actual subject sits in
+    the numbered "Nội dung thông tin công bố:" item below (same pattern as
+    the CÔNG ĐIỆN dispatch handler: a form-level anchor, never a filename).
+    """
+    for block_index, block in enumerate(blocks):
+        if "noi dung" not in block.folded or "cong bo" not in block.folded:
+            continue
+        if ":" not in block.text or len(block.text) > 160:
+            continue
+        match = re.search(r":\s*(.*)$", block.text)
+        tail = match.group(1).strip() if match else ""
+        parts = [tail] if tail else []
+        evidence["title"].append(_evidence(block, "disclosure-content-anchor", block.text.strip()))
+        for candidate in blocks[block_index + 1 : block_index + 4]:
+            text = candidate.text.strip()
+            if not text:
+                continue
+            if re.match(r"^\s*\d+\s*[.)]", text) or candidate.folded.startswith("can cu"):
+                break
+            if _FIRST_RECIPIENT_RE.search(text) or _RECIPIENT_RE.search(text):
+                break
+            if len(text) > 400:
+                break
+            parts.append(text)
+            evidence["title"].append(_evidence(candidate, "disclosure-content-continuation", text))
+        value = " ".join(" ".join(parts).split())
+        if value:
+            return value
+    return ""
+
+
 def _clean_recipient_value(value: str) -> str:
+    # Recipients keep the OCR wording.  A line break after "," continues the
+    # same value (joined with a space, swallowing a wrap bullet); a bare
+    # line end (no "," or ";" behind it) starts a new item ("; ").  Explicit
+    # source markers (";", bullets, "/") always survive as separators.
     value = _SAVE_RE.split(value, maxsplit=1)[0]
     value = _SAVE_SUFFIX_RE.sub("", value)
+    # A break after "," continues the same value (comma kept); a bare break
+    # with no "," or ";" behind it opens a new item.  A bullet on the next
+    # line always opens a new item, even after a comma.
+    value = re.sub(r",[ \t]*\n[ \t]*", ", ", value)
+    value = re.sub(r";[ \t]*\n[ \t]*", "; ", value)
     value = value.replace("\n", "; ")
-    # OCR turns quotation marks into "?" and joins wrapped values with "/":
-    # neither is ever a meaningful recipient character.
-    value = re.sub(r"\s+/\s+", "; ", value)
+    # OCR turns quotation marks into "?": never a meaningful character.
     value = re.sub(r"[?\"'“”‘’«»`]", "", value)
+    # OCR joins wrapped values with "/": an explicit source marker, kept as a
+    # separator like bullets and ";" (only soft line wraps join with space).
+    value = re.sub(r"\s+/\s+", "; ", value)
+    # An arrival-stamp serial riding inside the value ("số 1.772 - ...")
+    # names no addressee: drop digit-only serials, keep genuine references
+    # ("Số: 123/BQP" survives via its lettered token).
+    value = re.sub(
+        r"\s*\bS[oố]\s*[:：.]?\s*\d[\d\s./\-]*(?=\s*(?:[;]|$|\s+[-–—•]\s))",
+        " ",
+        value,
+        flags=re.IGNORECASE,
+    )
     value = _BULLET_RE.sub("; ", value)
+    parts = []
+    for segment in value.split(";"):
+        text = " ".join(segment.split())
+        if not text:
+            continue
+        if _SERIAL_ONLY_SEGMENT_RE.match(text) and not any(
+            sum(ch.isalpha() for ch in word) >= 3 for word in text.split()
+        ):
+            continue
+        parts.append(text)
+    value = "; ".join(parts)
     value = re.sub(r"\s*;\s*", "; ", value)
-    value = re.sub(r"(?:;\s*)+", "; ", value)
     value = re.sub(r"^[.;,:\s]+", "", value)
     value = re.sub(r"[;:\s]+$", "", value)
     return value.strip(" ;")
@@ -1438,7 +1644,10 @@ def _extract_anchor_value(
                     break
                 if re.match(r"^\s*[-–—•]?\s*L[uư]u\b", candidate.text, re.IGNORECASE):
                     break
-                if not parts and not re.match(r"^\s*[-–—•]", candidate.text):
+                # The first item need not be bulleted: form lists often carry
+                # no markers at all.  Still require a short block so body
+                # paragraphs are never absorbed through an empty label.
+                if not parts and not re.match(r"^\s*[-–—•]", candidate.text) and len(candidate.text) > 120:
                     break
                 if _RECIPIENT_RE.search(candidate.text):
                     break
@@ -1450,14 +1659,67 @@ def _extract_anchor_value(
         value = _clean_recipient_value(value)
         continuation_block: _Block | None = None
         continuation_value = ""
-        if field_name == "first_recipients" and value and ";" not in value:
+        anchor_had_value = bool(value.strip())
+        if field_name == "first_recipients" and not anchor_had_value:
+            # The label can sit alone on its line ("Kính gửi:"), the addressees
+            # riding in the blocks below (form lists, dispatches).  Follow the
+            # same column downward with the same stop rules as the inline
+            # continuation; fragments join with a space via the shared cleaner.
+            anchor_block = block
+            collected: list[str] = []
+            last_x0: float | None = None
+            last_y1 = anchor_block.y1
+            for candidate in blocks[block_index + 1 : block_index + 6]:
+                if candidate.geometry_reliable and candidate.y0 > anchor_block.y1 + 0.10:
+                    break
+                if any(anchor in candidate.folded for anchor in ("van ban den", "cong van den")):
+                    continue
+                if not candidate.text.strip() or len(candidate.text) > 160:
+                    break
+                if re.search(
+                    r"\b(?:tru so|ten cong ty|ten to chuc|dia chi|noi dung|can cu|thuc hien|thong bao|dieu\s+\d+)\b",
+                    candidate.folded,
+                ):
+                    break
+                # Stamp serial fragments ("Số: 10608") are not organizations,
+                # even though folded "số" collides with the "sở" keyword.
+                if re.match(r"^\s*S[oố]\s*[:：]", candidate.text, re.IGNORECASE):
+                    break
+                if _RECIPIENT_RE.search(candidate.text) or _FIRST_RECIPIENT_RE.search(candidate.text):
+                    break
+                if _has_org_keyword(candidate.text, candidate.folded) or re.match(
+                    r"^\s*[-–—•]", candidate.text
+                ):
+                    collected.append(candidate.text)
+                    evidence[field_name].append(_evidence(candidate, f"{rule}-continuation", candidate.text))
+                    last_x0 = candidate.x0 if candidate.geometry_reliable else last_x0
+                    last_y1 = candidate.y1
+                    continue
+                # A wrapped item line keeps its column: same left edge as the
+                # anchor or the previous item, adjacent, short, no stop
+                # keywords.  Body text restarts at the page margin instead.
+                if (
+                    candidate.geometry_reliable
+                    and last_x0 is not None
+                    and abs(candidate.x0 - last_x0) <= 0.03
+                    and candidate.y0 <= last_y1 + 0.06
+                    and " ".join(candidate.text.split())
+                ):
+                    collected.append(candidate.text)
+                    evidence[field_name].append(_evidence(candidate, f"{rule}-continuation", candidate.text))
+                    last_y1 = candidate.y1
+                    continue
+                break
+            if collected:
+                value = _clean_recipient_value("\n".join(collected))
+        if field_name == "first_recipients" and anchor_had_value and value and ";" not in value:
             for candidate in blocks[block_index + 1 : block_index + 5]:
                 if candidate.geometry_reliable and candidate.y0 > block.y1 + 0.06:
                     break
                 if any(anchor in candidate.folded for anchor in ("van ban den", "cong van den")):
                     continue
                 if len(candidate.text) > 160 or re.search(
-                    r"\b(?:tru so|ten cong ty|ten to chuc|dia chi|noi dung|" r"can cu|thuc hien|dieu\s+\d+)\b",
+                    r"\b(?:tru so|ten cong ty|ten to chuc|dia chi|noi dung|" r"can cu|thuc hien|thong bao|dieu\s+\d+)\b",
                     candidate.folded,
                 ):
                     break
@@ -1468,7 +1730,7 @@ def _extract_anchor_value(
                 if _has_org_keyword(candidate.text, candidate.folded):
                     continuation = _clean_recipient_value(candidate.text)
                     if continuation:
-                        value = f"{value}; {continuation}"
+                        value = _clean_recipient_value(f"{value}\n{continuation}")
                         continuation_block = candidate
                         continuation_value = continuation
                     break
@@ -1515,74 +1777,87 @@ def _extract_levels(blocks: list[_Block], evidence: dict[str, list[dict[str, Any
 
 
 def _extract_receiver_date(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]) -> str:
-    for block in blocks:
-        has_den = bool(re.search(r"(?:^|\W)den(?:$|\W)", block.folded))
-        has_stamp_phrase = any(anchor in block.folded for anchor in ("cong van den", "van ban den"))
-        has_stamp_fields = has_den and "ngay:" in block.folded and len(block.text) <= 180
-        starts_with_den = bool(re.match(r"^\s*ĐẾN\b", block.text, re.IGNORECASE)) and len(block.text) <= 80
-        if not (has_stamp_phrase or has_stamp_fields or starts_with_den):
-            continue
-        if len(block.text) > 220 and not any(anchor in block.folded for anchor in ("cong van den", "van ban den")):
-            continue
-        value = _find_date(block.text)
-        if "ngay" in block.folded:
-            if value:
-                evidence["receiverDate"].append(_evidence(block, "arrival-stamp-date", value))
-                return value
-            # The stamp has its own date slot but OCR did not produce a valid
-            # calendar value.  Do not substitute a nearby body/issuance date.
-            continue
-        # Arrival stamp text is often split into adjacent layout blocks.
-        nearby_blocks = [
-            candidate
-            for candidate in blocks
-            if candidate.index != block.index
-            and re.match(r"^\s*ngay\s*[:：]", candidate.folded)
-            and len(candidate.text) <= 80
-            and candidate.x0 <= block.x1 + 0.12
-            and candidate.x1 >= block.x0 - 0.12
-            and candidate.y0 <= block.y1 + 0.14
-            and candidate.y1 >= block.y0 - 0.14
-        ]
-        joined = "\n".join([block.text, *(candidate.text for candidate in nearby_blocks)])
-        if "ngay" in _fold(joined):
-            value = _find_date(joined)
-            if value:
-                evidence["receiverDate"].append(_evidence(block, "split-arrival-stamp-date", value))
-                for candidate in nearby_blocks:
-                    evidence["receiverDate"].append(_evidence(candidate, "split-arrival-stamp-date-part", value))
-                return value
-    # Arrival stamps often wrap across two layout blocks: the previous block
-    # ends with "Đến" and the next block holds "Ngày: <date>" (the issuance
-    # line and the stamp share the header strip, so reading order links them).
-    for index, block in enumerate(blocks):
-        if index == 0 or "ngay" not in block.folded:
-            continue
-        if block.geometry_reliable and (block.y0 > 0.35 or block.x0 < 0.40):
-            continue
-        value = _find_date(block.text)
-        if not value:
-            continue
-        previous = blocks[index - 1]
-        if previous.folded.rstrip(" :.-").endswith("den"):
-            evidence["receiverDate"].append(_evidence(block, "wrapped-arrival-stamp-date", value))
-            evidence["receiverDate"].append(_evidence(previous, "wrapped-arrival-stamp-den-part", value))
-            return value
+    """Arrival-stamp date (``receiverDate``) is out of scope this round.
+
+    The API key is still returned (always ``""``) for schema stability, but no
+    stamp block is read and nothing is scored.  See
+    ``docs/ocr_pipeline_benchmark_metrics.md``.
+    """
     return ""
 
 
+
+
+# A trailing stamp serial glued to a signature title ("THỨ TRƯỞNG AY 4"):
+# signature titles never end with a serial/token code, while authority
+# acronyms without digits ("HĐQT") are untouched.
+_SIGNATURE_TITLE_SERIAL_SUFFIX_RE = re.compile(r"\s+[A-ZÀ-ỸĐ]{1,3}\s+\d[\d\s./\-]*$")
+
+
+def _strip_signature_serial(title: str) -> str:
+    """Drop a trailing stamp serial glued to a signature title."""
+    return _SIGNATURE_TITLE_SERIAL_SUFFIX_RE.sub("", title).strip()
+
+
+def _nearby_standalone(block: _Block, standalone: list[_Block]) -> bool:
+    """True when a standalone printed name sits in the same signature zone."""
+    for other in standalone:
+        if other is block:
+            continue
+        if not other.geometry_reliable or not block.geometry_reliable:
+            return True
+        if abs(other.cx - block.cx) <= 0.30 and other.y0 >= block.y0 - 0.02 and other.y0 <= block.y1 + 0.25:
+            return True
+    return False
+
+
 def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]) -> tuple[str, str]:
-    titles: list[str] = []
-    signers: list[str] = []
+    # Contract 3.1: one signature cluster per signer/position.  Lines of the
+    # same cluster join with a space; only distinct clusters split with "; ".
+    # Adjacent authority-only blocks ("KT. BỘ TRƯỞNG" / "THỨ TRƯỞNG") are one
+    # cluster, not two: the old flat "; "-join over-split them.
     candidates = sorted(_signature_candidates(blocks), key=lambda item: (item[0].y0, item[0].x0))
+    standalone = []
+    for block in blocks:
+        text = " ".join(block.text.split()).strip()
+        if text and len(text) <= 80 and _looks_like_signature_name(text) and not _is_seal_name_fragment(text):
+            standalone.append(block)
+    standalone_texts = {" ".join(block.text.split()).strip() for block in standalone}
+
+    restored: list[tuple[_Block, str, str]] = []
     for block, title, signer in candidates:
         clean_title = " ".join(title.split()).strip() if title else ""
+        if signer and clean_title:
+            # An all-caps org fragment split off a title line ("KT. CỤC
+            # TRƯỞNG CỤC | QUẢN LÝ VÀ PHÁT TRIỂN") is not the signer when a
+            # standalone printed name sits in the same signature zone: the
+            # full line is title, the fragment is dropped.  Verified names
+            # (matching a standalone block) never trigger this.  Runs before
+            # the follower search so the restored title can still absorb a
+            # wrapped line below.
+            lines = [line for line in block.text.splitlines() if line.strip()]
+            full = " ".join(block.text.split()).strip()
+            if (
+                len(lines) == 1
+                and full != signer
+                and signer not in standalone_texts
+                and signer
+                and not any(ch.islower() for ch in signer)
+                and _has_authority_anchor(clean_title)
+                and _has_org_keyword(clean_title, _fold(clean_title))
+                and _nearby_standalone(block, standalone)
+            ):
+                signer = ""
+                clean_title = full
         if clean_title and not signer:
             # Authority wrapped onto a second block ("TM. ĐOÀN CHỦ TỊCH" /
             # "CHỦ TỌA"): the following, column-aligned short block continues
             # the SAME title with a space (contract 3.1), unless it is a
             # person name, another anchor, or list content.  Recipient bullets
-            # interleaved between the two lines are stepped over.
+            # interleaved between the two lines are stepped over.  A wrapped
+            # line without title vocabulary still joins when it is plain
+            # prose ("THỊ TRƯỜNG TRONG NƯỚC"): stamp serials carry digits and
+            # stay out.
             follower = None
             try:
                 position = blocks.index(block) + 1
@@ -1601,10 +1876,14 @@ def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, 
                 if (
                     follower_text
                     and len(follower_text) <= 60
-                    # A wrapped title line still speaks the authority's
-                    # language: stamp serials ("0010843") and OCR crumbs
-                    # ("SK") carry no title word and must not join.
-                    and (follower_words & _TITLE_WORDS_FOLDED)
+                    and (
+                        (follower_words & _TITLE_WORDS_FOLDED)
+                        or (
+                            bool(re.search(r"[A-Za-zÀ-ỹĐđ]", follower_text))
+                            and not re.search(r"\d", follower_text)
+                            and len(follower_text.split()) >= 2
+                        )
+                    )
                     and not _has_authority_anchor(follower_text)
                     and not _has_org_keyword(follower_text, follower.folded)
                     and not _looks_like_signature_name(follower_text)
@@ -1620,18 +1899,118 @@ def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, 
                     evidence["signer_title"].append(
                         _evidence(follower, "signature-authority-continuation", clean_title)
                     )
-        if clean_title and clean_title not in titles:
-            titles.append(clean_title)
-            evidence["signer_title"].append(_evidence(block, "signature-authority", clean_title))
-        if signer and signer not in signers:
-            signers.append(signer)
-            evidence["signer"].append(_evidence(block, "signature-name", signer))
-        if title and not signer:
+        if clean_title or signer:
+            restored.append((block, clean_title, signer))
+
+    # Cluster assembly: one cluster per distinct signer; title-only blocks
+    # attach to the nearest cluster, otherwise merge adjacently with a space.
+    clusters: list[dict[str, Any]] = []
+    by_signer: dict[str, dict[str, Any]] = {}
+    open_plain: dict[str, Any] | None = None
+
+    def _attachable(cluster: dict[str, Any], block: _Block) -> tuple[float, float] | None:
+        best: tuple[float, float] | None = None
+        refs = list(cluster["titles"])
+        if cluster.get("signer_block") is not None:
+            refs.append((cluster["signer_block"], ""))
+        for ref, _ in refs:
+            if ref.geometry_reliable and block.geometry_reliable:
+                if abs(ref.cx - block.cx) > 0.24:
+                    continue
+                if block.y1 <= ref.y0:
+                    gap = ref.y0 - block.y1
+                elif block.y0 >= ref.y1:
+                    gap = block.y0 - ref.y1
+                else:
+                    gap = 0.0
+                if gap < -0.02 or gap > 0.10:
+                    continue
+                key = (gap, abs(ref.cx - block.cx))
+                if best is None or key < best:
+                    best = key
+            elif best is None:
+                best = (0.0, 0.0)
+        return best
+
+    for block, title, signer in restored:
+        if not signer:
+            continue
+        cluster = by_signer.get(signer)
+        if cluster is None:
+            cluster = {"signer": signer, "titles": [], "signer_block": block}
+            by_signer[signer] = cluster
+            clusters.append(cluster)
+        if title:
+            cluster["titles"].append((block, title))
+    for block, title, signer in restored:
+        if signer or not title:
+            continue
+        # Title-only: prefer the nearest signer cluster in the same column.
+        target: dict[str, Any] | None = None
+        target_key: tuple[float, float] | None = None
+        for cluster in clusters:
+            key = _attachable(cluster, block)
+            if key is not None and (target_key is None or key < target_key):
+                target, target_key = cluster, key
+        if target is not None:
+            target["titles"].append((block, title))
+            open_plain = None
+            continue
+        if (
+            open_plain is not None
+            and block.geometry_reliable
+            and open_plain["ref"].geometry_reliable
+            and abs(open_plain["ref"].cx - block.cx) <= 0.24
+            and -0.02 <= block.y0 - open_plain["ref"].y1 <= 0.06
+        ):
+            open_plain["cluster"]["titles"].append((block, title))
+            open_plain["ref"] = block
+            continue
+        cluster = {"signer": "", "titles": [(block, title)], "signer_block": None}
+        clusters.append(cluster)
+        open_plain = {"cluster": cluster, "ref": block} if block.geometry_reliable else None
+
+    titles: list[str] = []
+    signers: list[str] = []
+    # Reading order across clusters: a title-only cluster above a signer
+    # cluster keeps its position (no more "B; A" swaps from build order).
+    def _cluster_key(cluster: dict[str, Any]) -> tuple[float, float]:
+        ys = [ref.y0 for ref, _ in cluster["titles"]]
+        xs = [ref.x0 for ref, _ in cluster["titles"]]
+        if cluster.get("signer_block") is not None:
+            ys.append(cluster["signer_block"].y0)
+            xs.append(cluster["signer_block"].x0)
+        return (min(ys), min(xs)) if ys else (0.0, 0.0)
+
+    for cluster in sorted(clusters, key=_cluster_key):
+        parts = sorted(cluster["titles"], key=lambda item: (item[0].y0, item[0].x0))
+        anchored = [(ref, text) for ref, text in parts if _has_authority_anchor(text)]
+        # A title fragment without any authority anchor inside a multi-part
+        # cluster is stamp/org noise from a merged image block ("TỔNG CÔNG
+        # ... TÁI BẢO H PT" next to the real "TỔNG GIÁM ĐỐC"), never title.
+        kept = anchored if anchored else parts
+        merged: list[str] = []
+        for _, text in kept:
+            folded = _fold(text)
+            if any(folded == _fold(done) or folded in _fold(done) for done in merged):
+                continue
+            merged = [done for done in merged if _fold(done) not in folded] + [text]
+        cluster_title = " ".join(merged)
+        if cluster_title:
+            titles.append(cluster_title)
+            for _, text in kept:
+                if text in merged:
+                    evidence["signer_title"].append(_evidence(_ref_of(cluster, text), "signature-authority", cluster_title))
+        if cluster["signer"] and cluster["signer"] not in signers:
+            signers.append(cluster["signer"])
+            evidence["signer"].append(_evidence(cluster["signer_block"], "signature-name", cluster["signer"]))
+        if cluster_title and not cluster["signer"]:
+            anchor_block = parts[-1][0]
             for name_block in blocks:
-                if name_block.type == "seal" or name_block.y0 < block.y0:
+                if name_block.type == "seal" or name_block.y0 < anchor_block.y0:
                     continue
                 if name_block.geometry_reliable:
-                    if name_block.y0 > block.y1 + 0.22 or abs(name_block.cx - block.cx) > 0.24:
+                    if name_block.y0 > anchor_block.y1 + 0.22 or abs(name_block.cx - anchor_block.cx) > 0.24:
                         continue
                 if (
                     _looks_like_signature_name(name_block.text)
@@ -1663,6 +2042,13 @@ def _extract_signature(blocks: list[_Block], evidence: dict[str, list[dict[str, 
     return "; ".join(titles), "; ".join(signers)
 
 
+def _ref_of(cluster: dict[str, Any], text: str) -> _Block:
+    for ref, part in cluster["titles"]:
+        if part == text:
+            return ref
+    return cluster["titles"][0][0]
+
+
 def _extract_cong_dien_recipients(
     blocks: list[_Block],
     evidence: dict[str, list[dict[str, Any]]],
@@ -1692,7 +2078,7 @@ def _extract_cong_dien_recipients(
                 break
             parts.append(text)
             evidence["first_recipients"].append(_evidence(candidate, "dien-dispatch-continuation", text))
-        value = _clean_recipient_value("; ".join(part for part in parts if part))
+        value = _clean_recipient_value("\n".join(part for part in parts if part))
         if value:
             evidence["first_recipients"].append(_evidence(block, "dien-dispatch-anchor", value))
             return value
@@ -1750,6 +2136,12 @@ def extract_vbhc(
     # the office, so the office no longer depends on the code.
     frame = _header_frame(header_blocks)
     office_sender, office_block = _extract_office_sender(header_blocks, None, evidence, country_block=frame.country)
+    if not office_sender:
+        # Consolidated (VBHN) authentication: the issuer is restated next to
+        # the "XÁC THỰC VĂN BẢN HỢP NHẤT" label on the closing page when the
+        # header carries no issuing authority (form-level anchor, never a
+        # filename).  Arrival-stamp institutions stay excluded.
+        office_sender, office_block = _extract_xac_thuc_office(closing_blocks, evidence)
     document_date, province = _extract_date_province(header_blocks, None, evidence, country_block=frame.country)
     date_hint = None
     # Re-resolve the issuance block as a code anchor when present.
@@ -1768,6 +2160,8 @@ def extract_vbhc(
         country_block=frame.country,
     )
     document_type, title = _extract_type_title(header_blocks, evidence)
+    if not title and _fold(document_type) == "cong bo thong tin bat thuong":
+        title = _extract_disclosure_content_title(header_blocks, evidence)
     first_recipients = _extract_anchor_value(
         header_blocks, _FIRST_RECIPIENT_RE, "first_recipients", "kinh-gui-anchor", evidence
     )

@@ -28,10 +28,11 @@ class EvidenceRegressionTests(unittest.TestCase):
                   block('Căn cứ Luật ngày 29 tháng 6 năm 2006;', [180,375,600,410])]
         self.assertEqual(extract(blocks)['receiverDate'], '')
 
-    def test_arrival_stamp_can_be_in_right_column(self):
+    def test_arrival_stamp_out_of_scope(self):
+        # receiverDate is out of extraction scope this round: always "".
         blocks = [block('VĂN BẢN ĐẾN',[650,300,900,330]),
                   block('Ngày: 02/03/2024',[650,335,900,365])]
-        self.assertEqual(extract(blocks)['receiverDate'], '02/03/2024')
+        self.assertEqual(extract(blocks)['receiverDate'], '')
 
     def test_noise_in_signature_image_is_not_authority(self):
         items = [dict(text='CHỦ TỊCH',bbox=[600,600,850,630]),

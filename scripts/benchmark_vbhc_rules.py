@@ -31,9 +31,9 @@ from module.pipeline import build_pipeline, load_pipeline_conf
 FIELDS = (
     "type", "title", "code", "documentDate", "officeSender", "recipients",
     "signer", "priority_level", "security_level", "first_recipients",
-    "signer_title", "province", "receiverDate",
+    "signer_title", "province",
 )
-DATE_ENUM_FIELDS = {"documentDate", "receiverDate", "priority_level", "security_level"}
+DATE_ENUM_FIELDS = {"documentDate", "priority_level", "security_level"}
 
 
 def information(payload: dict[str, Any]) -> dict[str, Any]:

@@ -93,7 +93,7 @@ class VBHCRuleExtractionTests(unittest.TestCase):
         self.assertEqual(info["signer"]["value"], "Nguyễn Văn An")
         self.assertEqual(info["security_level"]["value"], "1_MẬT")
         self.assertEqual(info["priority_level"]["value"], "1_HỎA TỐC")
-        self.assertEqual(info["receiverDate"]["value"], "02/03/2024")
+        self.assertEqual(info["receiverDate"]["value"], "")
         self.assertEqual(debug["document_start_page"], 1)
         self.assertEqual(debug["document_end_page"], 3)
         self.assertEqual(debug["next_document_start_page"], 4)
@@ -177,8 +177,8 @@ class VBHCRuleExtractionTests(unittest.TestCase):
         self.assertEqual(prediction["information"][0]["title"]["value"], "Về việc thử nghiệm")
         self.assertEqual([item["block_id"] for item in debug["evidence"]["title"]], [5])
         self.assertEqual([item["block_id"] for item in debug["evidence"]["first_recipients"]], [6, 7])
-        self.assertEqual([item["block_id"] for item in debug["evidence"]["receiverDate"]], [8, 9])
-        for field in ("title", "first_recipients", "receiverDate"):
+        self.assertEqual([item["block_id"] for item in debug["evidence"]["receiverDate"]], [])
+        for field in ("title", "first_recipients"):
             for item in debug["evidence"][field]:
                 self.assertEqual(len(item["bbox"]), 4)
                 self.assertIn("block_type", item)
@@ -337,7 +337,10 @@ class VBHCRuleExtractionTests(unittest.TestCase):
             "Như Điều 5; HĐQT, Ban TGĐ",
         )
 
-    def test_wrapped_arrival_stamp_den_prefix_links_date(self):
+    def test_wrapped_arrival_stamp_den_prefix_out_of_scope(self):
+        # receiverDate is out of extraction scope this round: the API key is
+        # still returned (always "") for schema stability, but no stamp block
+        # is read.
         pages = [[
             block("CÔNG TY THỬ NGHIỆM", [150, 60, 460, 110]),
             block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
@@ -348,7 +351,7 @@ class VBHCRuleExtractionTests(unittest.TestCase):
         ]]
         prediction, _ = extract(pages)
         self.assertEqual(
-            prediction["information"][0]["receiverDate"]["value"], "03/07/2017"
+            prediction["information"][0]["receiverDate"]["value"], ""
         )
 
     def test_vv_wrapped_type_word_is_not_a_heading(self):
@@ -540,6 +543,160 @@ class LoaderAndPipelineIntegrationTests(unittest.TestCase):
             self.assertTrue((out_dir / "output.json").exists())
             self.assertTrue((out_dir / "output.md").exists())
             self.assertTrue((out_dir / "prediction.json").exists())
+
+
+class SignatureClusterAndTitleBoundaryTests(unittest.TestCase):
+    """Title boundaries and signer clusters per contract 3.1 (synthetic)."""
+
+    def test_consolidated_title_stops_before_cited_instrument(self):
+        pages = [[
+            block("VĂN BẢN HỢP NHẤT", [200, 150, 600, 200]),
+            block("Số 66/2026/VBHN-TT-BXD", [150, 250, 550, 290]),
+            block("THÔNG TƯ", [700, 350, 950, 400], "paragraph_title"),
+            block("Quy định về thử nghiệm", [230, 460, 870, 540]),
+            block("Thông tư số 46/2024/TT-BGTVT ngày 15 tháng 11 năm 2024 của Bộ trưởng", [220, 560, 900, 700]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["title"]["value"], "Quy định về thử nghiệm"
+        )
+
+    def test_title_skips_stamp_serial_and_letterless_fragments(self):
+        pages = [[
+            block("THÔNG BÁO", [300, 200, 700, 250]),
+            block("Ngày", [500, 260, 600, 290]),
+            block("03311-2020", [500, 300, 650, 330]),
+            block("Số 14501", [700, 300, 850, 330]),
+            block("(Về ngày đăng ký cuối cùng)", [400, 340, 800, 390]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["title"]["value"], "(Về ngày đăng ký cuối cùng)"
+        )
+
+    def test_adjacent_authority_blocks_merge_with_space(self):
+        pages = [[
+            block("Nơi nhận:\n- Như trên;\n- Lưu: VT.", [100, 700, 400, 800]),
+            block("KT. BỘ TRƯỞNG", [600, 600, 850, 640]),
+            block("THỨ TRƯỞNG AY 4", [610, 645, 840, 685]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["signer_title"]["value"], "KT. BỘ TRƯỞNG THỨ TRƯỞNG")
+        self.assertEqual(info["signer"]["value"], "")
+
+    def test_org_fragment_without_anchor_is_not_a_second_cluster(self):
+        pages = [[
+            block("Nơi nhận:\n- Như trên;\n- Lưu: VT.", [100, 700, 400, 800]),
+            block("TỔNG GIÁM ĐỐC", [700, 550, 900, 590], "figure_title"),
+            block("TỔNG CÔNG TY X Trịnh Văn An", [650, 600, 950, 800], "image"),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["signer_title"]["value"], "TỔNG GIÁM ĐỐC")
+        self.assertEqual(info["signer"]["value"], "Trịnh Văn An")
+
+    def test_org_fragment_suffix_is_not_signer_beside_printed_name(self):
+        pages = [[
+            block("Nơi nhận:\n- Như trên;\n- Lưu: VT.", [100, 700, 400, 800]),
+            block("TL. BỘ TRƯỞNG", [700, 680, 950, 720]),
+            block("KT. CỤC TRƯỞNG CỤC QUẢN LÝ VÀ PHÁT TRIỂN", [600, 725, 950, 770]),
+            block("Nguyễn Thúy Hiền", [650, 780, 950, 900], "image"),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(
+            info["signer_title"]["value"],
+            "TL. BỘ TRƯỞNG KT. CỤC TRƯỞNG CỤC QUẢN LÝ VÀ PHÁT TRIỂN",
+        )
+        self.assertEqual(info["signer"]["value"], "Nguyễn Thúy Hiền")
+
+    def test_code_anchor_is_not_office_sender(self):
+        pages = [[
+            block("Số:", [100, 150, 200, 180]),
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(prediction["information"][0]["officeSender"]["value"], "")
+
+    def test_damaged_country_header_still_splits_office(self):
+        pages = [[
+            block("BỘ VĂN HÓA VÀ DU LỊCH CỘNG HÒA NGHĨA VIỆT NAM", [100, 40, 700, 110]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"], "BỘ VĂN HÓA VÀ DU LỊCH"
+        )
+
+    def test_empty_recipients_collect_unbulleted_short_items(self):
+        pages = [[
+            block("Nơi nhận:", [80, 600, 200, 625]),
+            block("Văn phòng A;", [80, 630, 400, 655]),
+            block("Văn phòng B;", [80, 660, 400, 685]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["recipients"]["value"], "Văn phòng A; Văn phòng B"
+        )
+
+    def test_empty_kinh_gui_collects_items_below(self):
+        pages = [[
+            block("Kính gửi:", [300, 300, 500, 340]),
+            block("- Sở Tài chính", [320, 350, 700, 390]),
+            block("- UBND tỉnh", [320, 400, 700, 440]),
+            block("1. Tên tổ chức: X", [200, 450, 800, 490]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["first_recipients"]["value"],
+            "Sở Tài chính; UBND tỉnh",
+        )
+
+    def test_stamp_serial_segment_dropped_from_recipients(self):
+        pages = [[
+            block("Nơi nhận:\n- Uỷ ban A;\n- số 1.772;\n- Sở B;", [100, 500, 470, 750]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["recipients"]["value"], "Uỷ ban A; Sở B"
+        )
+
+    def test_comma_break_continues_value_bare_break_opens_item(self):
+        pages = [[
+            block("Nơi nhận:\nĐồng chí A,\nĐồng chí B\nĐồng chí C;", [100, 500, 470, 800]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["recipients"]["value"],
+            "Đồng chí A, Đồng chí B; Đồng chí C",
+        )
+
+    def test_disclosure_form_takes_content_item_as_title(self):
+        pages = [[
+            block("CÔNG BỐ THÔNG TIN BẤT THƯỜNG", [300, 200, 700, 250]),
+            block("Kính gửi:", [300, 260, 500, 290]),
+            block("2. Nội dung thông tin công bố:", [200, 400, 600, 440]),
+            block("Nghị quyết về việc thử nghiệm", [200, 450, 800, 500]),
+            block("3. Thông tin đã công bố", [200, 520, 600, 560]),
+        ]]
+        prediction, _ = extract(pages)
+        info = prediction["information"][0]
+        self.assertEqual(info["type"]["value"], "CÔNG BỐ THÔNG TIN BẤT THƯỜNG")
+        self.assertEqual(info["title"]["value"], "Nghị quyết về việc thử nghiệm")
+
+    def test_xac_thuc_office_fallback_on_closing_page(self):
+        pages = [[
+            block("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", [510, 40, 920, 100]),
+            block("Số: 66/2026/VBHN-TT-BXD", [100, 140, 460, 185]),
+            block("QUYẾT ĐỊNH\nVề việc thử nghiệm", [250, 220, 800, 300]),
+            block("BỘ THỬ NGHIỆM", [700, 600, 950, 640]),
+            block("XÁC THỰC VĂN BẢN HỢP NHẤT", [680, 660, 970, 700]),
+            block("Nơi nhận:\n- Như trên;\n- Lưu: VT.", [100, 700, 400, 800]),
+        ]]
+        prediction, _ = extract(pages)
+        self.assertEqual(
+            prediction["information"][0]["officeSender"]["value"], "BỘ THỬ NGHIỆM"
+        )
 
 
 if __name__ == "__main__":

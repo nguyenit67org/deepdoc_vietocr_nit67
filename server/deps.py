@@ -12,6 +12,8 @@ def get_pipeline(request: Request) -> DocumentPipeline:
 
 
 def get_extractor(request: Request) -> ExtractBackend:
+    if not getattr(request.app.state, "extract_enabled", True):
+        raise HTTPException(status_code=503, detail="Entity extraction is disabled")
     extractor = getattr(request.app.state, "extractor", None)
     if extractor is None:
         raise HTTPException(status_code=503, detail="Extractor is not ready")

@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nháp nội dung · Demo OCR văn bản hành chính</title>
+  <style>
+    :root { color-scheme: light; --ink:#172235; --muted:#59677b; --line:#dce3ea; --paper:#ffffff; --back:#edf1f5; --accent:#c84a47; --soft:#fff3ef; --good:#167b65; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--back); color:var(--ink); font-family:Arial, "Noto Sans", sans-serif; }
+    button { font:inherit; cursor:pointer; }
+    .shell { min-height:100vh; display:grid; grid-template-columns:220px minmax(0,1fr); }
+    .rail { padding:27px 18px; background:#172235; color:#fff; height:100vh; overflow:auto; position:sticky; top:0; }
+    .rail__title { font-size:19px; font-weight:800; line-height:1.25; }
+    .rail__note { color:#b9c6d5; font-size:12px; margin:11px 0 23px; line-height:1.55; }
+    .rail__label { color:#91a4b9; text-transform:uppercase; font-size:11px; letter-spacing:.12em; margin:20px 0 8px; }
+    .rail__link { display:block; width:100%; text-align:left; border:0; border-radius:8px; color:#cbd5df; background:transparent; padding:9px 10px; font-size:13px; line-height:1.25; }
+    .rail__link:hover,.rail__link[aria-current="true"] { background:#324055; color:#fff; }
+    .stage { min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 22px 12px; gap:12px; }
+    .slide { background:var(--paper); width:min(100%, 1280px); aspect-ratio:16/9; min-height:590px; display:none; flex-direction:column; box-shadow:0 16px 55px #152d4633; overflow:hidden; }
+    .slide.is-active { display:flex; }
+    .slide__header { padding:28px 48px 0; display:flex; justify-content:space-between; gap:24px; align-items:flex-start; }
+    .eyebrow { font-size:12px; color:var(--accent); font-weight:800; text-transform:uppercase; letter-spacing:.11em; }
+    h1,h2,h3,p { margin-top:0; }
+    h1 { font-size:clamp(40px,5.5vw,70px); line-height:1.06; letter-spacing:-.045em; margin:14px 0 22px; max-width:1000px; }
+    h2 { font-size:clamp(26px,2.9vw,39px); letter-spacing:-.035em; line-height:1.12; margin:8px 0 0; }
+    h3 { font-size:18px; line-height:1.25; margin:0 0 9px; }
+    p,li,td,th { line-height:1.42; }
+    p { margin-bottom:10px; }
+    .status { flex:none; font-size:11px; font-weight:700; color:#7a5560; background:var(--soft); border-radius:999px; padding:8px 11px; white-space:nowrap; }
+    .slide__body { padding:27px 48px 16px; flex:1; min-height:0; overflow:auto; }
+    .slide__footer { border-top:1px solid var(--line); margin:0 48px; padding:10px 0 14px; display:flex; justify-content:space-between; gap:12px; color:#6e7988; font-size:11px; }
+    .sub { color:var(--muted); font-size:19px; max-width:960px; }
+    .lede { color:var(--muted); font-size:20px; line-height:1.4; max-width:850px; }
+    .grid { display:grid; gap:16px; }
+    .grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .grid.four { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .card { border:1px solid var(--line); border-radius:13px; padding:17px 20px; background:#fff; min-width:0; }
+    .card.soft { background:#f5f7f9; }
+    .card.warm { background:var(--soft); border-color:#f2c9c2; }
+    .card.good { background:#eaf6f1; border-color:#a6d9c7; }
+    .card p,.card li { font-size:15px; }
+    .card ul { margin:8px 0 0; padding-left:20px; }
+    .kpi { font-size:48px; font-weight:800; line-height:1; letter-spacing:-.05em; margin-bottom:9px; }
+    .kpi small { font-size:19px; font-weight:600; letter-spacing:0; }
+    .big { font-size:23px; font-weight:700; line-height:1.35; }
+    .muted { color:var(--muted); }
+    .tag { display:inline-block; background:#ecf0f4; color:#3a4b60; border-radius:6px; font-size:11px; font-weight:700; padding:5px 7px; margin-right:5px; }
+    .tag.bad { background:#ffe9e4; color:#a5302c; }
+    .tag.ok { background:#dff4e9; color:#12634f; }
+    .flow { display:flex; flex-wrap:wrap; gap:9px; align-items:stretch; margin:12px 0 24px; }
+    .flow span { background:#f1f4f8; border:1px solid var(--line); padding:15px; border-radius:10px; font-weight:700; flex:1; text-align:center; min-width:135px; }
+    .flow b { align-self:center; color:var(--accent); }
+    .split { display:grid; grid-template-columns:minmax(0,1.03fr) minmax(0,.97fr); gap:22px; align-items:start; }
+    .evidence { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#eef1f4; margin:0; min-width:0; }
+    .evidence img { display:block; width:100%; max-height:370px; object-fit:contain; }
+    .evidence.crop img { padding:12px; background:#f5f6f7; }
+    .evidence.tall img { max-height:360px; }
+    figcaption { background:#fff; border-top:1px solid var(--line); color:#59677b; font-size:11px; padding:8px 11px; line-height:1.35; }
+    .pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .pair .evidence img { max-height:230px; }
+    .quote { padding:11px 13px; border-left:3px solid #a5b2c1; background:#f4f6f9; border-radius:0 8px 8px 0; margin-bottom:8px; font-size:15px; overflow-wrap:anywhere; }
+    .quote.pred { border-color:var(--accent); background:#fff3ef; }
+    .quote.gt { border-color:var(--good); background:#eff8f4; }
+    .quote small { display:block; color:var(--muted); font-size:11px; font-weight:800; margin-bottom:3px; text-transform:uppercase; letter-spacing:.05em; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th,td { padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; }
+    th { background:#f2f5f8; font-size:12px; }
+    .micro { color:var(--muted); font-size:12px; line-height:1.45; }
+    .source { color:#687686; font-size:11px; margin-top:8px; overflow-wrap:anywhere; }
+    .source a { color:#365c83; }
+    .banner { border-left:5px solid var(--accent); padding:14px 20px; background:var(--soft); border-radius:0 10px 10px 0; font-size:20px; font-weight:700; margin:14px 0; }
+    .controls { width:min(100%,1280px); display:flex; align-items:center; gap:8px; }
+    .controls button { border:1px solid #cad4df; border-radius:8px; background:#fff; padding:9px 13px; color:var(--ink); }
+    .controls button:disabled { opacity:.4; cursor:default; }
+    .counter { color:var(--muted); font-size:13px; margin-left:auto; }
+    .progress { width:100%; height:4px; background:#d8e0e8; overflow:hidden; border-radius:6px; }
+    .progress > span { display:block; height:100%; background:var(--accent); transition:width .15s; }
+    @media(max-width:850px) { .shell{display:block}.rail{height:auto;position:static;padding:12px 18px}.rail__note,.rail__label,#slide-nav{display:none}.stage{padding:12px}.slide{aspect-ratio:auto;min-height:650px}.slide__header{padding:22px 22px 0}.slide__body{padding:20px 22px}.slide__footer{margin:0 22px}.grid.two,.grid.three,.grid.four,.split{grid-template-columns:1fr}.status{font-size:9px}h1{font-size:42px}h2{font-size:28px} }
+    @media print { @page{size:landscape;margin:0} body{background:#fff}.shell{display:block}.rail,.controls,.progress{display:none}.stage{display:block;padding:0}.slide,.slide.is-active{display:flex;width:100vw;height:100vh;min-height:0;aspect-ratio:auto;box-shadow:none;break-after:page;page-break-after:always}.slide__body{overflow:visible}.slide__header{padding-top:25px} }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail" aria-label="Điều hướng">
+    <div class="rail__title">Demo OCR · VBHC</div>
+    <p class="rail__note">Bản nháp duyệt <strong>nội dung</strong>. Chưa áp dụng slide template VTS, chưa xuất PDF. Dùng ← → để chuyển trang.</p>
+    <div id="slide-nav"></div>
+  </aside>
+  <main class="stage">
+    <div class="progress" aria-hidden="true"><span id="progress-fill"></span></div>
+
+    <section class="slide is-active" data-section="Mở đầu" aria-label="Trang bìa">
+      <div class="slide__header"><div class="eyebrow">Báo cáo demo · 29/09/2026</div><span class="status">BẢN NHÁP NỘI DUNG</span></div>
+      <div class="slide__body" style="display:flex;flex-direction:column;justify-content:center">
+        <h1>AI OCR cho văn bản hành chính</h1>
+        <p class="lede">Tự động đọc PDF, trích xuất thông tin cần nhập vào Văn phòng số và đo chất lượng trên benchmark có thể truy vết.</p>
+        <div class="grid three" style="margin-top:25px"><div class="card soft"><strong>100 văn bản</strong><p>2.249 trang, nhiều nguồn và định dạng.</p></div><div class="card soft"><strong>35/100 đạt</strong><p>Document Success@5% · full inference.</p></div><div class="card soft"><strong>Mục tiêu</strong><p>Đánh giá khả năng phát triển giải pháp in-house cho UAT dự án VPS.</p></div></div>
+      </div>
+      <div class="slide__footer"><span>Pipeline 01 · PoC / demo</span><span>01</span></div>
+    </section>
+
+    <section class="slide" data-section="Bối cảnh" aria-label="Bài toán cần giải quyết">
+      <div class="slide__header"><div><div class="eyebrow">01 · Bối cảnh</div><h2>Từ nhập liệu thủ công đến dữ liệu có cấu trúc</h2></div><span class="status">BÀI TOÁN</span></div>
+      <div class="slide__body"><div class="grid three">
+        <div class="card"><div class="kpi">01</div><h3>Hiện trạng</h3><p>Nhân viên đọc văn bản và nhập lại số ký hiệu, ngày ban hành, cơ quan, trích yếu… vào hệ thống.</p></div>
+        <div class="card"><div class="kpi">02</div><h3>Pain point</h3><p>Khối lượng lớn làm tăng thời gian, công sức kiểm tra và nguy cơ sai sót; khó mở rộng theo nhu cầu xử lý.</p></div>
+        <div class="card warm"><div class="kpi">03</div><h3>Mục tiêu PoC</h3><p>Kiểm chứng giải pháp OCR/KIE tự chủ, có thể điều chỉnh theo nghiệp vụ và từng bước thử nghiệm tại UAT VPS.</p></div>
+      </div><div class="banner">Đây là bước đánh giá khả thi, chưa phải cam kết thay thế dịch vụ hiện tại.</div><p class="micro">Định hướng: giảm phụ thuộc API bên thứ ba và tối ưu chi phí sau khi chứng minh được chất lượng trên cùng giao thức đánh giá.</p></div>
+      <div class="slide__footer"><span>Nguồn: outline báo cáo · mục 1</span><span>02</span></div>
+    </section>
+
+    <section class="slide" data-section="Bối cảnh" aria-label="Cách tiếp cận Agile">
+      <div class="slide__header"><div><div class="eyebrow">01 · Bối cảnh</div><h2>Viettel Agile: học từ dữ liệu thật</h2></div><span class="status">CÁCH TIẾP CẬN</span></div>
+      <div class="slide__body"><div class="flow"><span>Aware<br><small>Nhận diện pain point</small></span><b>→</b><span>Go Through<br><small>Khảo sát nghiệp vụ</small></span><b>→</b><span>Implement<br><small>Xây baseline</small></span><b>→</b><span>Learn<br><small>Benchmark & phân tích lỗi</small></span><b>→</b><span>Enable<br><small>Hướng tới áp dụng</small></span></div>
+        <div class="grid two"><div class="card"><h3>Nhu cầu khách hàng là điểm xuất phát</h3><p>Đối chiếu biểu mẫu với BA để phân biệt trường cần đọc từ PDF, trường người dùng nhập và trường hệ thống tự điền.</p></div><div class="card"><h3>Tối ưu có căn cứ</h3><p>Mỗi vòng cải tiến cần benchmark, trace và regression test; không sửa luật chỉ vì một tên file hoặc một đáp án GT.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: outline báo cáo · mục 1; chuẩn benchmark §6, §9</span><span>03</span></div>
+    </section>
+
+    <section class="slide" data-section="Phạm vi" aria-label="Dữ liệu benchmark">
+      <div class="slide__header"><div><div class="eyebrow">02 · Phạm vi</div><h2>Benchmark 100 PDF — đủ đa dạng để lộ điểm yếu</h2></div><span class="status">DATASET</span></div>
+      <div class="slide__body"><div class="grid four">
+        <div class="card soft"><div class="kpi">100</div><strong>văn bản</strong><p class="micro">GT gắn theo tài liệu.</p></div><div class="card soft"><div class="kpi">2.249</div><strong>trang</strong><p class="micro">1–353 trang/tài liệu.</p></div><div class="card soft"><div class="kpi">69</div><strong>scan</strong><p class="micro">Chất lượng OCR thay đổi.</p></div><div class="card soft"><div class="kpi">31</div><strong>điện tử</strong><p class="micro">Print/digital PDF.</p></div>
+      </div><div class="grid two" style="margin-top:16px"><div class="card"><h3>Loại văn bản</h3><p>Quyết định, Công văn, Nghị quyết, Thông báo, Thông tư, Kế hoạch…</p><p class="micro">Trong 100 mẫu: Quyết định 30; Công văn 17.</p></div><div class="card"><h3>Nguồn và chủ thể</h3><p>Cơ quan Chính phủ, bộ/ngành, địa phương, sở giao dịch chứng khoán, doanh nghiệp…</p><p class="micro">Có scan, dấu mộc, chữ viết tay và tài liệu nhiều trang; chưa đủ phủ lớp hiếm.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: full inference manifest.json + predictions.jsonl · 100 PDF</span><span>04</span></div>
+    </section>
+
+    <section class="slide" data-section="Phạm vi" aria-label="Đầu ra và cách chấm">
+      <div class="slide__header"><div><div class="eyebrow">02 · Phạm vi</div><h2>Định nghĩa đầu ra trước khi đo độ chính xác</h2></div><span class="status">HỢP ĐỒNG API</span></div>
+      <div class="slide__body"><div class="grid two">
+        <div class="card"><h3>7 trường bắt buộc</h3><p><code>type</code>, <code>title</code>, <code>code</code>, <code>documentDate</code>, <code>officeSender</code>, <code>priority_level</code>, <code>security_level</code>.</p><h3>5 trường đánh giá thêm</h3><p><code>recipients</code>, <code>signer</code>, <code>first_recipients</code>, <code>signer_title</code>, <code>province</code>.</p></div>
+        <div class="card warm"><h3>13 key trong API, chỉ chấm 12 field</h3><p>Theo chuẩn hiện hành, <code>receiverDate</code> giữ trong schema nhưng phải trả <code>""</code> và không chấm. Bundle full inference này còn lưu giá trị legacy ở field đó; bản nháp loại khỏi phần đánh giá.</p><p><strong>Document Success@5%:</strong> mọi required field có GT trong cùng một tài liệu đều phải đạt Exact hoặc Acceptable theo metric của field.</p></div>
+      </div><p class="micro" style="margin-top:18px">GT → chuẩn hóa benchmark → phân bucket Exact / Acceptable / Wrong / Missing / Hallucination / Correct Absent. Text thuộc nhóm F1@5% cho phép 0 &lt; CER ≤ 5%; ngày, enum và nhóm F1 Exact cần khớp theo luật tương ứng.</p></div>
+      <div class="slide__footer"><span>Nguồn: docs/ocr_pipeline_benchmark_metrics.md · §1, §5</span><span>05</span></div>
+    </section>
+
+    <section class="slide" data-section="Phạm vi" aria-label="Bảng danh mục trường API">
+      <div class="slide__header"><div><div class="eyebrow">02 · Phạm vi</div><h2>Danh mục 13 trường API &amp; tiêu chí đánh giá</h2></div><span class="status">13 KEY / 12 FIELD ĐƯỢC CHẤM</span></div>
+      <div class="slide__body">
+        <table>
+          <thead>
+            <tr>
+              <th>Mô tả ngắn tiếng Việt</th>
+              <th>Key API</th>
+              <th>Nhóm field</th>
+              <th>Metric đánh giá</th>
+              <th>Target F1 / NEM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Loại văn bản</strong></td><td><code>type</code></td><td><span class="tag bad">Critical + required</span></td><td>F1 Exact (khớp tuyệt đối)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Trích yếu</strong></td><td><code>title</code></td><td><span class="tag bad">Critical + required</span></td><td>F1@5% (CER ≤ 5%)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Số, ký hiệu</strong></td><td><code>code</code></td><td><span class="tag bad">Critical + required</span></td><td>F1 Exact (gạch nối)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Ngày ban hành</strong></td><td><code>documentDate</code></td><td><span class="tag bad">Critical + required</span></td><td>F1 Exact (dd/mm/yyyy)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Cơ quan ban hành</strong></td><td><code>officeSender</code></td><td><span class="tag bad">Critical + required</span></td><td>F1@5% (CER ≤ 5%)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Độ khẩn</strong></td><td><code>priority_level</code></td><td><span class="tag bad">Critical + required</span></td><td>F1 Exact (Enum)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Độ mật</strong></td><td><code>security_level</code></td><td><span class="tag bad">Critical + required</span></td><td>F1 Exact (Enum)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Nơi nhận</strong></td><td><code>recipients</code></td><td><span class="tag">Critical + optional</span></td><td>F1@5% (CER ≤ 5%)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Người ký</strong></td><td><code>signer</code></td><td><span class="tag">Critical + optional</span></td><td>F1 Exact (khớp tên)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Kính gửi</strong></td><td><code>first_recipients</code></td><td><span class="tag">Critical + optional</span></td><td>F1@5% (CER ≤ 5%)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Chức danh ký</strong></td><td><code>signer_title</code></td><td><span class="tag">Critical + optional</span></td><td>F1@5% (CER ≤ 5%)</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td><strong>Địa danh ban hành</strong></td><td><code>province</code></td><td><span class="tag ok">Non-critical + optional</span></td><td>F1 Exact</td><td>F1 ≥ 0,85 · NEM ≥ 0,75</td></tr>
+            <tr><td style="color:var(--muted)">Ngày tiếp nhận</td><td><code>receiverDate</code></td><td style="color:var(--muted)">Out of scope</td><td style="color:var(--muted)">Không chấm (luôn trả <code>""</code>)</td><td style="color:var(--muted)">— (Ngoài phạm vi)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="slide__footer"><span>Nguồn: docs/ocr_pipeline_benchmark_metrics.md · §1, §5</span><span>06</span></div>
+    </section>
+
+    <section class="slide" data-section="Phạm vi" aria-label="Công việc và luồng xử lý">
+      <div class="slide__header"><div><div class="eyebrow">02 · Phạm vi</div><h2>Team đã xây gì, và pipeline chạy ra sao?</h2></div><span class="status">PIPELINE</span></div>
+      <div class="slide__body"><div class="flow"><span>PDF</span><b>→</b><span>Layout + OCR</span><b>→</b><span>Extraction</span><b>→</b><span>Chuẩn hóa API</span><b>→</b><span>Benchmark + evidence</span></div>
+      <div class="grid three"><div class="card"><h3>Chuẩn bị</h3><p>Thu thập PDF; xây GT; chốt quy tắc nghiệp vụ và 13-field API với BA.</p></div><div class="card"><h3>Thử nghiệm</h3><p>Các thành viên khảo sát pipeline riêng; chọn pipeline 01 làm baseline để demo.</p></div><div class="card"><h3>Đo & truy vết</h3><p>Chấm chất lượng, thời gian, RAM/GPU; giữ ảnh trang, bbox và OCR nguồn để soi lỗi.</p></div></div><p class="micro" style="margin-top:17px">Demo dùng kết quả <strong>full inference</strong>: PDF → model → extraction, không trộn chỉ số tốc độ/tài nguyên từ extraction replay.</p></div>
+      <div class="slide__footer"><span>Nguồn: outline báo cáo · mục 2; chuẩn benchmark §6–§8</span><span>07</span></div>
+    </section>
+
+    <section class="slide" data-section="Demo" aria-label="Kịch bản demo">
+      <div class="slide__header"><div><div class="eyebrow">03 · Demo</div><h2>Demo theo 3 mức độ: dễ → phổ biến → khó</h2></div><span class="status">KỊCH BẢN</span></div>
+      <div class="slide__body"><div class="grid three">
+        <div class="card good"><span class="tag ok">CASE DỄ</span><h3>Đầu ra đúng</h3><p>Quyết định <code>3116</code> và Nghị quyết <code>26/2026</code>: không có field Wrong/Missing/Hallucination.</p></div>
+        <div class="card"><span class="tag">CASE PHỔ BIẾN</span><h3>Quyết định / Công văn</h3><p><code>1666</code> sạch; <code>8906</code> đạt đủ 7 required nhưng vẫn miss 2 field optional.</p></div>
+        <div class="card warm"><span class="tag bad">CASE KHÓ</span><h3>Scan, dấu, chữ viết tay</h3><p><code>8931</code>, <code>8948</code>, <code>29+CT</code> cho thấy lỗi tập trung ở ngày, dấu khẩn và vùng ký.</p></div>
+      </div><div class="banner">Mỗi case: PDF đầu vào → 13 key đầu ra → GT/prediction → ảnh + evidence → thời gian xử lý.</div></div>
+      <div class="slide__footer"><span>Nguồn: full inference predictions.jsonl, document_success.csv, field_errors.csv</span><span>07</span></div>
+    </section>
+
+    <section class="slide" data-section="Demo" aria-label="Case dễ">
+      <div class="slide__header"><div><div class="eyebrow">03 · Demo · Case dễ</div><h2>Văn bản rõ: trích xuất đúng và truy vết được</h2></div><span class="status">2 TÀI LIỆU</span></div>
+      <div class="slide__body"><div class="split"><figure class="evidence tall"><img src="assets/demo-3116.webp" alt="Trang đầu Quyết định 3116, bản in rõ" loading="lazy"><figcaption>3116+QĐ-BKHCN · trang 1 trong trace full inference.</figcaption></figure><div><div class="card good"><h3>3116+QĐ-BKHCN · 2 trang</h3><p><strong>4,37 giây/file.</strong> Document Success PASS. Trong 12 field được chấm theo policy hiện tại: 10 Exact, <code>title</code> Acceptable, <code>first_recipients</code> Correct Absent.</p></div><div class="card" style="margin-top:12px"><h3>26+2026+NQ-HĐND · 5 trang</h3><p><strong>7,93 giây/file.</strong> Document Success PASS; không có cả bucket Acceptable, Wrong, Missing hay Hallucination.</p></div><p class="micro" style="margin-top:13px">Correct Absent nghĩa là GT và prediction đều rỗng, không phải “pipeline đã đọc được Kính gửi”.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: predictions.jsonl + field_errors.csv · full inference</span><span>08</span></div>
+    </section>
+
+    <section class="slide" data-section="Demo" aria-label="Case phổ biến">
+      <div class="slide__header"><div><div class="eyebrow">03 · Demo · Case phổ biến</div><h2>2 dạng chiếm 47% tập mẫu: Quyết định và Công văn</h2></div><span class="status">2 TÀI LIỆU</span></div>
+      <div class="slide__body"><div class="pair"><div class="card"><h3>Quyết định · 1666+QĐ-TTg</h3><figure class="evidence tall"><img src="assets/demo-1666.webp" alt="Trang đầu Quyết định 1666 scan" loading="lazy"><figcaption>Scan 5 trang · 12,52 giây/file.</figcaption></figure><p style="margin-top:9px"><span class="tag ok">PASS</span> Không có Wrong/Missing/Hallucination.</p></div><div class="card"><h3>Công văn · 8906+VPCP-CN</h3><figure class="evidence tall"><img src="assets/demo-8906.webp" alt="Trang đầu Công văn 8906" loading="lazy"><figcaption>Print 2 trang · 4,89 giây/file.</figcaption></figure><p style="margin-top:9px"><span class="tag ok">7/7 required đạt</span> Optional <code>recipients</code>, <code>first_recipients</code> Missing.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: predictions.jsonl + document_success.csv + field_errors.csv</span><span>09</span></div>
+    </section>
+
+    <section class="slide" data-section="Demo" aria-label="Case khó">
+      <div class="slide__header"><div><div class="eyebrow">03 · Demo · Case khó</div><h2>Đúng được header chưa đồng nghĩa đúng cả văn bản</h2></div><span class="status">3 TÀI LIỆU SCAN</span></div>
+      <div class="slide__body"><div class="grid three">
+        <div class="card warm"><h3>8931+VPCP-PL</h3><p><strong>4,42 giây · 1 trang</strong></p><p>Ngày <code>29→19</code>, cơ quan bị dính chữ; mức Hỏa tốc trả về Bình thường. <strong>FAIL</strong> 3 required.</p></div>
+        <div class="card warm"><h3>8948+VPCP-CN</h3><p><strong>6,50 giây · 2 trang</strong></p><p>Ngày Missing, Kính gửi Missing, chức danh người ký lẫn OCR rác. <strong>FAIL</strong> vì ngày.</p></div>
+        <div class="card warm"><h3>29+CT-TTg</h3><p><strong>7,76 giây · 4 trang</strong></p><p>Header chính Exact, nhưng mất mức Hỏa tốc; tên người ký sai và chức danh Missing. <strong>FAIL</strong> vì độ khẩn.</p></div>
+      </div><div class="banner">Các trang tiếp theo đi từ <em>hiện tượng</em> đến <em>evidence</em>; không suy đoán vị trí GT từ một trang review tự chọn.</div></div>
+      <div class="slide__footer"><span>Nguồn: full inference document_success.csv + field_errors.csv + trace v2</span><span>10</span></div>
+    </section>
+
+    <section class="slide" data-section="Kết quả" aria-label="Kết quả tổng thể">
+      <div class="slide__header"><div><div class="eyebrow">04 · Kết quả</div><h2>35/100 tài liệu đạt; PoC còn cách 45 tài liệu</h2></div><span class="status">FULL INFERENCE · 100 PDF</span></div>
+      <div class="slide__body"><div class="grid three"><div class="card warm"><div class="kpi">35%</div><h3>Document Success@5%</h3><p>35 PASS / 100 văn bản. PoC ≥80%; stretch ≥90%. Chưa đạt.</p></div><div class="card"><div class="kpi">44,1<small> s</small></div><h3>Trung bình / văn bản</h3><p>Wall-clock, tính trên 100 PDF; số trang rất không đồng đều.</p></div><div class="card"><div class="kpi">2,48<small> s</small></div><h3>Trung bình / trang*</h3><p>*Trung bình của 100 giá trị (giây/file ÷ trang/file); khoảng 1,14–5,85.</p></div></div>
+        <div class="grid two" style="margin-top:16px"><div class="card soft"><h3>RAM tiến trình</h3><p><strong>2.745 MB trung bình / 6.012 MB đỉnh.</strong></p></div><div class="card soft"><h3>Bộ nhớ GPU — phải nói đúng phạm vi</h3><p><strong>Device VRAM 3.077 / 6.793 MB</strong> (trung bình/đỉnh, toàn GPU). <strong>Process VRAM: chưa đo được</strong>, không điền 0 hay thay bằng framework allocator.</p></div></div><p class="micro">Bundle gốc vẫn có dòng <code>receiverDate</code> từ lúc policy cũ; bản báo cáo này loại field đó theo chuẩn hiện hành. Document Success dùng 7 required field nên không đổi.</p></div>
+      <div class="slide__footer"><span>Nguồn: summary.json · metric v2.1; thiết bị Quadro RTX 5000</span><span>11</span></div>
+    </section>
+
+    <section class="slide" data-section="Kết quả" aria-label="Các trường đang tốt và chưa tốt">
+      <div class="slide__header"><div><div class="eyebrow">04 · Kết quả</div><h2>Điểm nghẽn: chức danh ký, trích yếu, ngày</h2></div><span class="status">CHỈ SỐ THEO FIELD</span></div>
+      <div class="slide__body"><div class="grid two"><div class="card good"><h3>Tín hiệu tích cực</h3><p><code>province</code> F1 <strong>0,984</strong> — field duy nhất đạt đủ target đánh giá.</p><p><code>type</code>, <code>security_level</code> F1 <strong>1,00</strong> nhưng <strong>chưa đánh giá đầy đủ</strong> lớp hiếm / mẫu GT trống.</p><p>Không có Hallucination trong các field có GT trống ở bundle này; không suy ra hiệu năng trên lớp chưa được phủ.</p></div><div class="card warm"><h3>Cần ưu tiên cải thiện</h3><table><thead><tr><th>Field</th><th>F1</th><th>Wrong + Missing</th></tr></thead><tbody><tr><td><code>signer_title</code></td><td>0,380</td><td>51 + 12</td></tr><tr><td><code>title</code></td><td>0,670</td><td>31 + 3</td></tr><tr><td><code>officeSender</code></td><td>0,735</td><td>24 + 4</td></tr><tr><td><code>documentDate</code></td><td>0,785</td><td>10 + 19</td></tr></tbody></table></div></div><p class="micro" style="margin-top:11px"><code>receiverDate</code> ngoài phạm vi chấm hiện hành. Phân bố nhóm nguyên nhân nằm ở slide riêng và có ghi rõ cỡ mẫu.</p></div>
+      <div class="slide__footer"><span>Nguồn: full inference metrics.csv · không lấy chỉ số của replay</span><span>12</span></div>
+    </section>
+
+    <section class="slide" data-section="Kết quả" aria-label="Target và kết quả required">
+      <div class="slide__header"><div><div class="eyebrow">04 · Kết quả theo field</div><h2>Critical + required: F1 (precision, recall) / NEM</h2></div><span class="status">7 FIELD</span></div>
+      <div class="slide__body"><div class="banner">Target từng field: ≥ 0,85 (0,85, 0,85) / 0,75</div><table><thead><tr><th>Field — tiếng Việt (key)</th><th>F1 (precision, recall) / NEM</th></tr></thead><tbody>
+        <tr><td>Loại văn bản (<code>type</code>)</td><td>1,000 (1,000, 1,000) / 1,000 *</td></tr><tr><td>Trích yếu (<code>title</code>)</td><td>0,670 (0,680, 0,660) / 0,400</td></tr><tr><td>Số, ký hiệu (<code>code</code>)</td><td>0,850 (0,850, 0,850) / 0,850 *</td></tr><tr><td>Ngày ban hành (<code>documentDate</code>)</td><td>0,785 (0,877, 0,710) / 0,710</td></tr><tr><td>Cơ quan ban hành (<code>officeSender</code>)</td><td>0,735 (0,750, 0,720) / 0,670</td></tr><tr><td>Độ khẩn (<code>priority_level</code>)</td><td>0,950 (0,950, 0,950) / 0,950 *</td></tr><tr><td>Độ mật (<code>security_level</code>)</td><td>1,000 (1,000, 1,000) / 1,000 *</td></tr>
+      </tbody></table><p class="micro">* Các con số đạt ngưỡng chưa đồng nghĩa “đánh giá đầy đủ” nếu thiếu mẫu GT trống hoặc lớp enum. Trạng thái trong bundle lưu target cũ, bảng này dùng giá trị metric gốc.</p></div><div class="slide__footer"><span>Nguồn: full inference metrics.csv · target từ docs/ocr_pipeline_benchmark_metrics.md</span><span>14</span></div>
+    </section>
+
+    <section class="slide" data-section="Kết quả" aria-label="Target và kết quả optional">
+      <div class="slide__header"><div><div class="eyebrow">04 · Kết quả theo field</div><h2>Optional: F1 (precision, recall) / NEM</h2></div><span class="status">5 FIELD</span></div>
+      <div class="slide__body"><div class="banner">Target từng field: ≥ 0,85 (0,85, 0,85) / 0,75</div><table><thead><tr><th>Nhóm / Field — tiếng Việt (key)</th><th>F1 (precision, recall) / NEM</th></tr></thead><tbody>
+        <tr><td>Critical · Nơi nhận (<code>recipients</code>)</td><td>0,885 (0,948, 0,830) / 0,341</td></tr><tr><td>Critical · Người ký (<code>signer</code>)</td><td>0,802 (0,869, 0,745) / 0,745</td></tr><tr><td>Critical · Kính gửi (<code>first_recipients</code>)</td><td>0,667 (0,810, 0,567) / 0,500</td></tr><tr><td>Critical · Chức danh người ký (<code>signer_title</code>)</td><td>0,380 (0,407, 0,357) / 0,296</td></tr><tr><td>Non-critical · Địa danh (<code>province</code>)</td><td>0,984 (0,990, 0,979) / 0,979</td></tr>
+      </tbody></table><p class="micro">Hallucination rate giữ ngưỡng cũ: ≤ 0,01; riêng Địa danh (<code>province</code>) ≤ 0,02. <code>receiverDate</code> không nằm trong bảng này.</p></div><div class="slide__footer"><span>Nguồn: full inference metrics.csv · không dùng trạng thái target cũ</span><span>15</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Nhóm lỗi OCR">
+      <div class="slide__header"><div><div class="eyebrow">04 · Evidence 1/6 · OCR/chính tả</div><h2>Một ký tự OCR có thể làm hỏng trường bắt buộc</h2></div><span class="status">8931+VPCP-PL · TRANG 1</span></div>
+      <div class="slide__body"><div class="split"><div><figure class="evidence crop"><img src="assets/ocr-date-8931.webp" alt="Crop ngày ban hành của 8931" loading="lazy"><figcaption>Ngày ban hành · bbox [847, 274, 1337, 308].</figcaption></figure><figure class="evidence crop" style="margin-top:12px"><img src="assets/ocr-sender-8931.webp" alt="Crop cơ quan ban hành 8931" loading="lazy"><figcaption>Cơ quan ban hành · bbox [236, 154, 663, 195].</figcaption></figure></div><div><div class="quote gt"><small>GT · documentDate</small>29/08/2026</div><div class="quote pred"><small>Pred / OCR</small>19/08/2026 · “Hà Nội, ngày 19 tháng 8 năm 2026”</div><div class="quote gt"><small>GT · officeSender</small>VĂN PHÒNG CHÍNH PHỦ</div><div class="quote pred"><small>Pred / OCR</small>VĂN PHÒNG CHÍNH PHỦNH PHỦ</div><p><strong>Nhận định:</strong> extraction đi theo OCR nguồn; cần xem lại nhận dạng vùng header. Metadata ghi tài liệu có chữ viết tay, nhưng <strong>chưa đủ bằng chứng để quy lỗi cụ thể cho chữ viết tay ở hai vùng này</strong>.</p><p class="source">Trace: <a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/8931+VPCP-PL_2026-08-29/trace.json">8931/trace.json</a> · rules <code>issuance-date</code>, <code>upper-left-organization</code>.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: field_errors.csv + trace v2 + ảnh trang 1 · full inference</span><span>13</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Nhóm lỗi dấu mộc chữ ký">
+      <div class="slide__header"><div><div class="eyebrow">04 · Evidence 2/6 · Dấu mộc / vùng ký</div><h2>Header đúng, nhưng mức khẩn và cụm ký vẫn rớt</h2></div><span class="status">29+CT-TTg · TRANG 1 & 4</span></div>
+      <div class="slide__body"><div class="split"><div class="pair"><figure class="evidence tall"><img src="assets/stamp-29.webp" alt="Trang đầu 29 CT TTg, vị trí cần review dấu Hỏa tốc" loading="lazy"><figcaption>Trang 1 · kiểm tra vùng dấu Hỏa tốc; prediction không có evidence.</figcaption></figure><figure class="evidence tall"><img src="assets/sign-29.webp" alt="Trang ký 29 CT TTg" loading="lazy"><figcaption>Trang 4 · vùng ký, OCR đọc “Huốc Dũng”.</figcaption></figure></div><div><div class="quote gt"><small>GT · priority_level</small>1_HỎA TỐC</div><div class="quote pred"><small>Pred · priority_level</small>0_BÌNH THƯỜNG · evidence rỗng</div><div class="quote gt"><small>GT · signer / signer_title</small>Hồ Quốc Dũng / KT. THỦ TƯỚNG PHÓ THỦ TƯỚNG</div><div class="quote pred"><small>Pred · signer / signer_title</small>Huốc Dũng / “ ”</div><p><strong>Nhận định:</strong> vùng dấu/chữ ký là điểm cần review trên ảnh màu; OCR nguồn của <code>signer</code> là “Huốc Dũng”. <strong>Chưa khẳng định</strong> dấu đã gây ra toàn bộ lỗi nếu không khoanh trực tiếp được vùng bị đè.</p><p class="source">Trace: <a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/29+CT-TTg_2026-07-16/trace.json">29+CT/trace.json</a> · <code>signature-name</code> trang 4; priority không có evidence.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: field_errors.csv + trace v2 + ảnh trang 1/4 · full inference</span><span>14</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Nhóm lỗi layout và crop">
+      <div class="slide__header"><div><div class="eyebrow">04 · Evidence 3/6 · Layout / crop</div><h2>Vùng text lẫn nội dung: trích yếu và cơ quan bị kéo sai</h2></div><span class="status">2 TRƯỜNG HỢP</span></div>
+      <div class="slide__body"><div class="grid two"><div class="card"><h3>12+NQ-PVIRe · title Wrong</h3><figure class="evidence crop"><img src="assets/layout-title-12.webp" alt="Crop layout title 12 NQ PVIRe có khung bbox trace" loading="lazy"><figcaption>Trang 1 · khung đỏ là bbox evidence <code>text-after-document-type</code>.</figcaption></figure><p class="micro" style="margin-top:9px"><strong>GT:</strong> “Về việc chốt danh sách cổ đông…”<br><strong>Pred:</strong> thêm “SỞ GIAO DỊCH CHỨNG KHOÁN HÀ NỘI … HỘI ĐỒNG QUẢN TRỊ”.</p><p class="source"><a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/12+NQ-PVIRe_2020-10-30/trace.json">Trace 12+NQ</a></p></div><div class="card"><h3>240+TB-PVIRe · officeSender Wrong</h3><figure class="evidence crop"><img src="assets/layout-sender-240.webp" alt="Crop sender 240 TB PVIRe, khung quanh chữ Số" loading="lazy"><figcaption>Trang 1 · khung đỏ là bbox evidence <code>upper-left-organization</code>.</figcaption></figure><p class="micro" style="margin-top:9px"><strong>GT:</strong> “TỔNG CÔNG TY CỔ PHẦN TÁI BẢO HIỂM PVI”<br><strong>Pred:</strong> “Số:” · bắt nhầm anchor làm cơ quan ban hành.</p><p class="source"><a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/240+TB-PVIRe_2020-10-30/trace.json">Trace 240+TB</a></p></div></div><p class="micro" style="margin-top:8px">Nhận định: kiểm tra phân vùng và hình học trước khi nới regex; khung đỏ là <strong>bbox prediction evidence</strong>, không phải vị trí GT đã xác nhận.</p></div>
+      <div class="slide__footer"><span>Nguồn: field_errors.csv + trace v2; crop theo tọa độ ảnh trang full inference</span><span>15</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Nhóm lỗi extraction">
+      <div class="slide__header"><div><div class="eyebrow">04 · Evidence 4/6 · Extraction / heuristics</div><h2>OCR có text, hậu xử lý vẫn giữ nhầm một “stub”</h2></div><span class="status">2125+TB-ĐLTKV · TRANG 1</span></div>
+      <div class="slide__body"><figure class="evidence crop"><img src="assets/extract-2125.webp" alt="Crop Kính gửi 2125 có stub số 1.772" loading="lazy"><figcaption>Vùng “Kính gửi” · rule <code>kinh-gui-anchor</code>, bbox [473, 616, 1450, 767].</figcaption></figure><div class="grid two" style="margin-top:16px"><div class="quote gt"><small>GT · first_recipients</small>Ủy ban Chứng khoán Nhà nước; Sở Giao dịch Chứng khoán Hà Nội; Trung tâm Lưu ký Chứng khoán Việt Nam.</div><div class="quote pred"><small>Pred · first_recipients</small>Uỷ ban Chứng khoán Nhà nước; <strong>số 1.772;</strong> Sở Giao dịch Chứng khoán Hà Nội; Trung tâm Lưu ký Chứng khoán Việt Nam.</div></div><p class="micro">Nguồn OCR/evidence chứa “Kính gửi: - Uỷ ban…; số 1.772 - Sở…”. Lỗi đáng thử ở bước lọc stub khi tách danh sách; vẫn cần regression test để tránh xóa số thật trong tên người nhận.</p><p class="source">Trace: <a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/2125+TB-ĐLTKV_2020-12-21/trace.json">2125/trace.json</a>.</p></div>
+      <div class="slide__footer"><span>Nguồn: field_errors.csv + trace v2 + crop ảnh trang 1</span><span>16</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Nhóm Missing và hallucination">
+      <div class="slide__header"><div><div class="eyebrow">04 · Evidence 5/6 · Missing</div><h2>Không thấy evidence ≠ GT ở vị trí mình đoán</h2></div><span class="status">8948+VPCP-CN · SCAN 2 TRANG</span></div>
+      <div class="slide__body"><div class="split"><figure class="evidence tall"><img src="assets/missing-8948.webp" alt="Trang đầu 8948 để review Missing ngày và Kính gửi" loading="lazy"><figcaption>Trang 1 do người review chọn để kiểm tra; không phải bbox GT được xác nhận.</figcaption></figure><div><div class="quote gt"><small>GT · documentDate</small>01/09/2026</div><div class="quote pred"><small>Pred · documentDate</small>“ ” · Missing · không có evidence</div><div class="quote gt"><small>GT · first_recipients</small>Bộ trưởng các Bộ: Công an, Xây dựng; Chủ tịch UBND các tỉnh, thành phố trực thuộc Trung ương.</div><div class="quote pred"><small>Pred · first_recipients</small>“ ” · Missing · không có evidence</div><p><strong>Nhận định:</strong> cần soi layout/OCR trang đầu và ranh giới văn bản trước khi quyết định fallback. Pipeline không bịa giá trị ngày khi không đọc được.</p><p class="micro">Bundle này không có bucket Hallucination ở những field có mẫu GT trống; đây là tín hiệu tốt, không thay thế đánh giá lớp hiếm.</p><p class="source">Trace: <a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/8948+VPCP-CN_2026-09-01/trace.json">8948/trace.json</a>.</p></div></div></div>
+      <div class="slide__footer"><span>Nguồn: field_errors.csv + trace v2 · không suy diễn vị trí GT</span><span>17</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Nghi vấn GT">
+      <div class="slide__header"><div><div class="eyebrow">04 · Evidence 6/6 · Nghi vấn GT</div><h2>Không phải mọi bucket Wrong đều là OCR đọc sai</h2></div><span class="status">CẦN REVIEW CHÍNH SÁCH GT</span></div>
+      <div class="slide__body"><div class="grid two"><div class="card"><h3>03+BC.HĐQT · dấu phân cách code</h3><figure class="evidence crop"><img src="assets/gt-03.webp" alt="Vùng số 03/BC HĐQT" loading="lazy"><figcaption>OCR nguồn: “Số 03/BC HĐQT” · trang 1.</figcaption></figure><p class="micro" style="margin-top:8px"><strong>GT:</strong> <code>03/BC.HĐQT</code> · <strong>Pred:</strong> <code>03/BC-HĐQT</code>.<br>Quy tắc API biến dấu cách còn lại thành <code>-</code>; cần xác nhận cách gán GT đối với dấu <code>.</code>.</p><p class="source"><a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/03+BC.HĐQT_2020-02-20/trace.json">Trace 03+BC</a></p></div><div class="card"><h3>27+2026+VBHN · ND hay NĐ?</h3><figure class="evidence crop"><img src="assets/gt-27.webp" alt="Vùng số 27/2026/VBHN-NĐ-BTC" loading="lazy"><figcaption>OCR nguồn: “Số 27/2026/VBHN-NĐ-BTC” · trang 1.</figcaption></figure><p class="micro" style="margin-top:8px"><strong>GT:</strong> <code>27/2026/VBHN-ND-BTC</code> · <strong>Pred:</strong> <code>27/2026/VBHN-NĐ-BTC</code>.<br>Ảnh/trace ủng hộ chữ <code>Đ</code>; cần người gán nhãn xác nhận, không tự sửa GT.</p><p class="source"><a href="../../../ocr-collab/artifacts/evidence_full_inference_all_v3/evidence/27+2026+VBHN-ND-BTC_2026-08-27/trace.json">Trace 27+VBHN</a></p></div></div><p class="micro" style="margin-top:8px">Hai record vẫn được benchmark chấm <strong>Wrong</strong>; slide chỉ nêu nghi vấn và evidence, không tự ý đổi nhãn hoặc nâng điểm.</p></div>
+      <div class="slide__footer"><span>Nguồn: field_errors.csv + trace v2 · chuẩn code §3.2</span><span>18</span></div>
+    </section>
+
+    <section class="slide" data-section="Phân tích lỗi" aria-label="Phân bố nguyên nhân lỗi">
+      <div class="slide__header"><div><div class="eyebrow">04 · Phân bố nguyên nhân</div><h2>229 ô field lỗi — phân loại sơ bộ 4 nhóm</h2></div><span class="status">FULL INFERENCE · 12 FIELD</span></div>
+      <div class="slide__body"><p class="sub">Mẫu số: 156 Wrong + 73 Missing. Không tính <code>receiverDate</code> và các bucket đạt.</p><div class="grid" style="gap:13px; margin-top:20px">
+        <div class="card" style="display:grid;grid-template-columns:180px 1fr 120px;gap:15px;align-items:center"><strong>OCR/chính tả</strong><div style="background:#eee;height:22px"><div style="width:100%;background:#c84a47;height:22px"></div></div><strong>109 · 47,6%</strong></div>
+        <div class="card" style="display:grid;grid-template-columns:180px 1fr 120px;gap:15px;align-items:center"><strong>Trích xuất</strong><div style="background:#eee;height:22px"><div style="width:37.6%;background:#44494d;height:22px"></div></div><strong>41 · 17,9%</strong></div>
+        <div class="card" style="display:grid;grid-template-columns:180px 1fr 120px;gap:15px;align-items:center"><strong>Dấu mộc</strong><div style="background:#eee;height:22px"><div style="width:4.6%;background:#be5063;height:22px"></div></div><strong>5 · 2,2%</strong></div>
+        <div class="card" style="display:grid;grid-template-columns:180px 1fr 120px;gap:15px;align-items:center"><strong>Khác</strong><div style="background:#eee;height:22px"><div style="width:67.9%;background:#a6aaae;height:22px"></div></div><strong>74 · 32,3%</strong></div>
+      </div><p class="micro" style="margin-top:16px">216 ô gán nhãn heuristic; 8 case đối chiếu evidence và 5 dấu “HỎA TỐC” đối chiếu ảnh trang 1. <strong>Chưa review toàn bộ:</strong> nhóm Khác gồm thiếu evidence/nghi vấn GT, không khẳng định nguyên nhân đã xác nhận. Bảng audit: <a href="error_cause_full_inference_v3.csv">error_cause_full_inference_v3.csv</a>.</p></div>
+      <div class="slide__footer"><span>Nguồn: full inference v3 field_errors.csv + trace + bảng phân loại theo từng ô</span><span>22</span></div>
+    </section>
+
+    <section class="slide" data-section="Đánh giá" aria-label="Hạn chế và tính khả thi">
+      <div class="slide__header"><div><div class="eyebrow">05 · Đánh giá</div><h2>Khả thi để tiếp tục R&amp;D; chưa đủ điều kiện thay thế</h2></div><span class="status">GATE QUYẾT ĐỊNH</span></div>
+      <div class="slide__body"><div class="grid two"><div class="card good"><h3>Đã chứng minh</h3><ul><li>Pipeline chạy end-to-end trên 100 PDF, có API dữ liệu cấu trúc.</li><li>Có GT, benchmark version hóa, ảnh trang, OCR và trace để lặp lại quá trình phân tích.</li><li>Có case print/scan hoạt động tốt; có thể ưu tiên cải thiện theo trường.</li></ul></div><div class="card warm"><h3>Chưa chứng minh</h3><ul><li>35% Document Success vẫn cách target PoC 80%.</li><li>Mẫu lớp mật/khẩn hiếm và tài liệu chụp nghiêng/ngang chưa đủ coverage.</li><li>Chưa có đo chi phí và benchmark đối chứng đủ điều kiện để kết luận thay thế API hiện tại.</li></ul></div></div><p class="micro" style="margin-top:16px">Tradeoff: tổng quát hóa vs. overfit mẫu quen; chất lượng vs. GPU; khả năng hiểu ngữ cảnh vs. thời gian chạy. Nhóm cũng cần hỗ trợ hạ tầng và phản biện chuyên môn/mentor để thử các phương án mạnh hơn.</p></div>
+      <div class="slide__footer"><span>Nguồn: outline báo cáo · mục 5; kết quả full inference v3</span><span>19</span></div>
+    </section>
+
+    <section class="slide" data-section="Tiếp theo" aria-label="Lộ trình ưu tiên">
+      <div class="slide__header"><div><div class="eyebrow">06 · Bước tiếp theo</div><h2>Ưu tiên accuracy, sau đó mới tối ưu vận hành</h2></div><span class="status">ĐỀ XUẤT</span></div>
+      <div class="slide__body"><div class="grid three"><div class="card"><span class="tag">01 · DỮ LIỆU</span><h3>Bổ sung coverage</h3><p>Thêm hard cases: dấu đỏ, chữ viết tay, trang nghiêng/ngang, lớp mật/khẩn và văn bản dài. Rà soát GT theo policy đã chốt; tách train/dev/test nếu fine-tune.</p></div><div class="card"><span class="tag">02 · KỸ THUẬT</span><h3>Đánh đúng bottleneck</h3><p>Benchmark riêng OCR; thử model chữ viết tay và xử lý dấu/watermark; cải thiện ranh giới văn bản/trang cuối; chuẩn hóa tập giá trị hữu hạn khi có evidence.</p></div><div class="card"><span class="tag">03 · KIỂM CHỨNG</span><h3>Không mất chất lượng cũ</h3><p>Regression test sau mỗi thay đổi. Đạt accuracy target rồi mới tối ưu tốc độ → tài nguyên → chi phí → pilot/UAT có kiểm soát.</p></div></div><div class="banner">Cần thống nhất mốc review kế tiếp, bộ hard cases ưu tiên và tài nguyên GPU/định hướng chuyên môn cho vòng thử nghiệm.</div></div>
+      <div class="slide__footer"><span>Nguồn: outline báo cáo · mục 6; chuẩn benchmark §6, §9</span><span>20</span></div>
+    </section>
+
+    <section class="slide" data-section="Kết luận" aria-label="Thông điệp kết thúc">
+      <div class="slide__header"><div><div class="eyebrow">Kết luận · Feedback</div><h2>Chúng ta biết pipeline đang sai ở đâu — và đo được khi nào nó tốt hơn</h2></div><span class="status">THẢO LUẬN</span></div>
+      <div class="slide__body"><div class="grid three"><div class="card warm"><div class="kpi">35/100</div><p>Đạt Document Success@5% ở lượt full inference hiện tại.</p></div><div class="card"><div class="kpi">80/100</div><p>Mốc PoC cần hướng tới, cùng bộ metric và GT snapshot.</p></div><div class="card good"><div class="kpi">Evidence</div><p>Ảnh, OCR, bbox, GT và prediction giúp ưu tiên đúng nơi cần sửa.</p></div></div><div class="banner" style="margin-top:30px">Xin feedback: thứ tự field ưu tiên, mức sai sót chấp nhận được trong nghiệp vụ, điều kiện pilot tại UAT.</div></div>
+      <div class="slide__footer"><span>Nháp duyệt nội dung · chưa áp template Viettel Solutions</span><span>21</span></div>
+    </section>
+
+    <div class="controls"><button id="prev" type="button" aria-label="Trang trước">← Trước</button><button id="next" type="button" aria-label="Trang sau">Sau →</button><span class="counter" id="counter"></span></div>
+  </main>
+</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const nav = document.querySelector('#slide-nav');
+  let current = 0;
+  let group = '';
+  slides.forEach((slide, i) => {
+    if (slide.dataset.section !== group) {
+      group = slide.dataset.section;
+      const label = document.createElement('div');
+      label.className = 'rail__label';
+      label.textContent = group;
+      nav.append(label);
+    }
+    const button = document.createElement('button');
+    button.className = 'rail__link';
+    button.type = 'button';
+    button.textContent = `${String(i + 1).padStart(2, '0')} · ${slide.getAttribute('aria-label')}`;
+    button.onclick = () => show(i);
+    nav.append(button);
+  });
+  const links = [...nav.querySelectorAll('button')];
+  function show(index, setHash = true) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides.forEach((slide, i) => { slide.classList.toggle('is-active', i === current); slide.querySelector('.slide__body').scrollTop = 0; slide.querySelector('.slide__footer span:last-child').textContent = String(i + 1).padStart(2, '0'); });
+    links.forEach((link, i) => link.setAttribute('aria-current', String(i === current)));
+    links[current].scrollIntoView({block:'nearest'});
+    document.querySelector('#counter').textContent = `${current + 1} / ${slides.length} · ← → để chuyển trang`;
+    document.querySelector('#progress-fill').style.width = `${(current + 1) / slides.length * 100}%`;
+    document.querySelector('#prev').disabled = current === 0;
+    document.querySelector('#next').disabled = current === slides.length - 1;
+    if (setHash) history.replaceState(null, '', `#slide-${current + 1}`);
+  }
+  document.querySelector('#prev').onclick = () => show(current - 1);
+  document.querySelector('#next').onclick = () => show(current + 1);
+  document.addEventListener('keydown', event => {
+    if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
+    if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+  });
+  window.addEventListener('hashchange', () => { const n = Number(location.hash.replace('#slide-', '')); if (n >= 1 && n <= slides.length) show(n - 1, false); });
+  const initial = Number(location.hash.replace('#slide-', ''));
+  show(initial >= 1 && initial <= slides.length ? initial - 1 : 0, false);
+</script>
+</body>
+</html>

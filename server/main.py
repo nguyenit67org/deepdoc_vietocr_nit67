@@ -13,11 +13,11 @@ from pathlib import Path  # noqa: E402
 from fastapi import Depends, FastAPI  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
-from module.extract import ExtractBackend, get_extract_backend  # noqa: E402
+from module.extract import get_extract_backend  # noqa: E402
 from module.pipeline import DocumentPipeline, PipelineConfig, build_pipeline, load_pipeline_conf  # noqa: E402
 
 from . import routes  # noqa: E402
-from .deps import get_extractor, get_pipeline  # noqa: E402
+from .deps import get_pipeline  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +38,14 @@ async def lifespan(app: FastAPI):
     logger.info("Loading OCR pipeline (layout/OCR/TSR models)...")
     app.state.pipeline = build_pipeline(_conf)
     logger.info("Pipeline ready")
-    logger.info("Loading entity-extraction model...")
-    app.state.extractor = get_extract_backend(_conf)
-    logger.info("Extractor ready")
+    app.state.extract_enabled = _conf.get("extract", {}).get("enabled", True)
+    if app.state.extract_enabled:
+        logger.info("Loading entity-extraction model...")
+        app.state.extractor = get_extract_backend(_conf)
+        logger.info("Extractor ready")
+    else:
+        logger.info("Entity extraction disabled by configuration")
+        app.state.extractor = None
     yield
     app.state.pipeline = None
     app.state.extractor = None
@@ -52,12 +57,8 @@ app = FastAPI(title="DeepDoc FastOCR API", lifespan=lifespan)
 @app.get("/health")
 async def health(
     pipeline: DocumentPipeline = Depends(get_pipeline),
-    extractor: ExtractBackend = Depends(get_extractor),
 ) -> dict:
-    """Liveness/readiness check -- 200 once BOTH the OCR pipeline and the
-    entity-extraction model have finished loading (via the same
-    get_pipeline/get_extractor dependencies the real routes use), 503 while
-    either is still starting up or failed to load."""
+    """Readiness check -- 200 once the OCR pipeline has finished loading."""
     return {"status": "ok"}
 
 
