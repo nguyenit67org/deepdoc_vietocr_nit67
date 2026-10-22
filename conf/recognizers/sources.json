@@ -1,0 +1,27 @@
+{
+  "PaddleOCR": {
+    "url": "https://github.com/PaddlePaddle/PaddleOCR.git",
+    "commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+    "local_dir": "scratch/ocr-recognizers/sources/PaddleOCR",
+    "role": "Reference CTC/preprocessing implementation; inference uses OcrDoc ONNX, not Paddle source import"
+  },
+  "vietocr": {
+    "url": "https://github.com/pbcquoc/vietocr.git",
+    "commit": "fe8c3a7fc714aec57ab81cec844eb3adf0c1636c",
+    "local_dir": "scratch/ocr-recognizers/sources/vietocr",
+    "role": "Architecture/reference source; inference uses pinned vudang449 ONNX encoder/decoder"
+  },
+  "HTR-ConvText": {
+    "url": "https://github.com/DAIR-Group/HTR-ConvText.git",
+    "commit": "9ce7485ff171902bff44d77f4f6ff64d5878d82b",
+    "local_dir": "scratch/ocr-recognizers/sources/HTR-ConvText",
+    "role": "License/source reference; actual inference source is pinned HF revision in catalog.json"
+  },
+  "SenOCR": {
+    "role": "Legacy model source bundled with pinned HF weights; actual inference uses native Transformers 5.0.0 implementation"
+  },
+  "OcrDoc": {
+    "upstream_url_from_card": "https://github.com/e4glevlr/ocr-doc",
+    "status": "GitHub API source lookup returned 404 on 2026-10-15; public ONNX weight/charset/model card downloaded successfully"
+  }
+}

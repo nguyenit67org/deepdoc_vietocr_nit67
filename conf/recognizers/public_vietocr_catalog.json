@@ -1,0 +1,35 @@
+{
+  "vietocr_nhay_seq2seq": {
+    "repo_type": "space",
+    "repo_id": "nhay103/VietOCR",
+    "revision": "a26e5f87aadc12f800b65a14f946a9eb307faa9d",
+    "weight_path": "train_old.pth",
+    "weight_sha256": "eed45bcd25593dca2576c20721a57a449a6b557faf40336bcd7690b2a82eb2e1",
+    "config_path": "vgg-seq2seq.yaml",
+    "variant": "vgg_seq2seq",
+    "license": "Space metadata: CC-BY-NC-SA-4.0; noncommercial research evaluation only",
+    "provenance_limit": "Config references CGGANv2; dataset composition and actual initialization history are not independently established. hantech/VietOCR is a same-hash mirror."
+  },
+  "vietocr_hocba_transformer": {
+    "repo_type": "space",
+    "repo_id": "SaitoHoujou/HocBa-OCR_Demo_Web",
+    "revision": "f50271b3c0b541475822727844e612a66d975286",
+    "weight_path": "weights/vgg19_transformer_hocba.pth",
+    "weight_sha256": "499cf6c6ffeea31a30d21f0303936d79740ab1c6e4294c7f0e6e4d2cdbf5ec03",
+    "config_path": "configs/vgg19_transformer_hocba.yml",
+    "variant": "vgg_transformer",
+    "license": "Not specified; local research evaluation, no redistribution or deployment",
+    "provenance_limit": "Author config identifies hocba_cells; real versus synthetic/handwritten composition is not independently established. Fixed parent crops, not the native full-page app/detector."
+  },
+  "vietocr_khoi_handwritten": {
+    "repo_type": "model",
+    "repo_id": "Khoi2k4/vietocr-handwritten-v1",
+    "revision": "66d8c9afe241930a94ea0f608dde248dd8733c8f",
+    "weight_path": "vietocr_handwritten.pth",
+    "weight_sha256": "f36ca2615e8407141da64c7e49a744ee58d89a0ea452a30153b72c0b92338857",
+    "config_path": null,
+    "variant": "vgg_transformer",
+    "license": "Not specified; local research evaluation, no redistribution or deployment",
+    "provenance_limit": "No author config/card/dataset. Stock upstream Transformer config is an explicit experimental assumption, subject to strict tensor compatibility; matching shapes do not verify tokenizer semantics or intended preprocessing."
+  }
+}

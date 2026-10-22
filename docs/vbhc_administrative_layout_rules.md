@@ -86,7 +86,7 @@ template.
 | `7c`          | Chữ ký của người có thẩm quyền                | Nằm giữa `7a` và phần họ tên trong `7b`, canh giữa theo cụm ký; có thể bị ô `8` chồng lên bên trái.                                                              | `x=[0.52,0.93]`, `y=[0.68,0.91]` | Nét ký tay hoặc ảnh chữ ký số, thường ít hoặc không có text OCR. Không dùng nét ký làm giá trị `signer`.                                                                                                    | Không có field text trực tiếp; dùng làm anchor giữa `signer_title` và `signer`.                              |
 | `8`           | Dấu/chữ ký số của cơ quan, tổ chức            | Trong cụm ký ở trang cuối; dấu cơ quan trùm khoảng `1/3` bên trái chữ ký của người có thẩm quyền.                                                                | `x=[0.45,0.80]`, `y=[0.67,0.92]` | Thường là dấu tròn màu đỏ hoặc ảnh chữ ký số. Cho phép giao cắt hình học với `7c`; không ép detector tách hai vùng thành các hộp không chồng lấn.                                                           | Không có field trực tiếp; dùng làm anchor/xác thực cụm ký.                                                   |
 | `7b`          | Chức vụ khác và họ tên người ký               | Nửa phải trang ký/cuối, dưới `7c`; họ tên canh giữa theo `7a`. Chức vụ khác, nếu có, nằm trên họ tên trong cùng vùng.                                            | `x=[0.50,0.93]`, `y=[0.76,0.96]` | Họ tên thường in thường, đậm. Phải tách dòng chức vụ bổ sung khỏi dòng họ tên; với nhiều người ký, giữ thứ tự trên xuống dưới rồi trái sang phải.                                                           | Phần chức vụ bổ sung → `signer_title`; phần họ tên → `signer`.                                               |
-| `9b`          | Nơi nhận cuối văn bản                         | Nửa trái trang ký/cuối, sau nội dung; tiêu đề thường ngang hàng với `7a`.                                                                                        | `x=[0.12,0.52]`, `y=[0.64,0.96]` | Anchor `Nơi nhận:`; danh sách thường bắt đầu bằng `-`, có thể có `Như trên` và kết thúc bằng dòng `Lưu:`. Không đưa dòng lưu nội bộ vào `recipients` nếu quy ước nhãn chỉ lấy cơ quan/tổ chức/cá nhân nhận. | `recipients`                                                                                                 |
+| `9b`          | Nơi nhận cuối văn bản                         | Nửa trái trang ký/cuối, sau nội dung; tiêu đề thường ngang hàng với `7a`. | `x=[0.12,0.52]`, `y=[0.64,0.96]` | Anchor `Nơi nhận:`; danh sách thường bắt đầu bằng `-`, có thể có `Như trên`. Giữ cả mục cuối bắt đầu bằng hoặc chứa `Lưu`, `Lưu: VT`,... và nội dung tiếp dòng trong `recipients`. | `recipients` |
 
 ### 3.1. Diễn giải hai dấu tùy chọn `10a` và `10b`
 
@@ -169,10 +169,10 @@ thể chen vào khoảng trắng và không thuộc luồng đọc nội dung.
 | `type`             | `5a`, hoặc phân loại cấu trúc Công văn từ `5b` kết hợp `3` | Không lấy một tiêu đề chương trong `6` làm loại văn bản.                                        |
 | `title`            | Trích yếu trong `5a` hoặc phần sau `V/v` trong `5b`        | Không bỏ marker `V/v` nếu quy ước nhãn không yêu cầu.                                           |
 | `code`             | `3`                                                        | Giữ các dấu cấu trúc `/`, `-`.                                                                  |
-| `documentDate`     | Phần ngày trong `4`                                        | Không nhầm với ngày được viện dẫn trong `6` hoặc ngày nhận văn bản.                             |
-| `officeSender`     | `2`                                                        | Giữ thứ tự hiển thị từ trên xuống dưới; không đảo cơ quan chủ quản/cơ quan ban hành.            |
+| `documentDate`     | Ưu tiên phần ngày trong `4`; fallback sau “thông qua ngày” ở phần kết thúc/ký/nơi nhận | Chỉ fallback khi thiếu ngày header hợp lệ; câu phải nói về chính văn bản, không lấy ngày viện dẫn/tiếp nhận; không ghi đè `province`. |
+| `officeSender`     | Ưu tiên `2`; cụm xác thực VBHN; nhãn tổ chức trong nội dung trang đầu; header/footer trang đầu | Theo thứ tự ở mục 6.1, dừng khi có tên hợp lệ; giữ thứ tự dòng, không đảo cơ quan chủ quản/cơ quan ban hành. |
 | `first_recipients` | `9a`                                                       | Chỉ lấy tên đối tượng nhận, giữ thứ tự trình bày.                                               |
-| `recipients`       | `9b`                                                       | Tách danh sách nhận khỏi nhãn `Nơi nhận:` và dữ liệu lưu nội bộ theo quy ước benchmark.         |
+| `recipients`       | `9b`                                                       | Bỏ nhãn `Nơi nhận:` nhưng giữ mục lưu nội bộ cuối danh sách (`Lưu`, `Lưu: VT`,...) và nội dung tiếp dòng. |
 | `signer_title`     | `7a` và phần chức vụ bổ sung trong `7b`                    | Không lấy chữ ký hoặc con dấu làm text chức vụ.                                                 |
 | `signer`           | Phần họ tên trong `7b`                                     | Không suy đoán họ tên từ nét ký tay.                                                            |
 | `province`         | Phần địa danh trong `4`                                    | Không tự động dùng địa chỉ cơ quan ở chân trang thay thế.                                       |
@@ -185,6 +185,8 @@ hiện tại, nhưng vẫn cần được phát hiện hoặc ước lượng đ
 gán nhầm.
 
 ## 6. Giới hạn và fallback
+
+Quy tắc giá trị đầu ra tuân theo [chuẩn OCR/KIE hiện hành](./ocr_pipeline_benchmark_metrics.md#3-quy-tắc-giá-trị-đầu-ra); các fallback dưới đây là chính sách KIE nội bộ, không phải quy định vị trí bắt buộc của Nghị định.
 
 - Block có thể co giãn, xuống nhiều dòng hoặc dịch theo chiều dọc do độ dài
   nội dung; quan hệ neo quan trọng hơn tọa độ tuyệt đối.
@@ -203,3 +205,24 @@ gán nhầm.
 - Các cửa sổ tọa độ cần được hiệu chỉnh bằng dữ liệu thực tế trước khi dùng
   làm điều kiện hard filter. Trong baseline, nên dùng chúng như feature hoặc
   prior có trọng số thấp hơn anchor text và quan hệ block.
+
+### 6.1. Luồng tìm cơ quan ban hành
+
+![Ví dụ cụm xác thực VBHN với cơ quan ban hành phía trên nhãn xác thực](./vbhc_consolidated_authentication_example.png)
+
+Ảnh minh họa được render lại từ trang vật lý 5 của PDF `05+2026+VBHN-TT-BTP_2026-08-28.pdf` trong tập dữ liệu, tương ứng trang người dùng cung cấp (không phải bản sao byte của ảnh đính kèm). `officeSender` là `BỘ TƯ PHÁP` ngay trên nhãn xác thực; nhãn xác thực không phải `type` hay `signer_title`. `type` lấy từ heading `THÔNG TƯ` ở trang mở đầu, không suy từ ảnh cuối trang này hoặc từ mã văn bản.
+
+Với VBHN, ghi chú hợp nhất có thể viện dẫn Quốc hiệu, loại văn bản hoặc nội dung ký/nhận của văn bản gốc. Không coi một câu chứa tên đầy đủ quốc gia là Quốc hiệu độc lập để cắt văn bản. Khi có cụm xác thực hợp lệ trong phạm vi văn bản chính, dùng nó làm tín hiệu kết thúc VBHN thay vì vùng ký được trích dẫn trước đó; vẫn dừng trước header độc lập thực sự của văn bản khác. Heading và cụm xác thực có thể được OCR gộp hoặc tách block, nên cần kiểm tra cả các dòng trong block và quan hệ giữa block.
+
+1. Chuẩn hóa Unicode/khoảng trắng và so khớp anchor không phân biệt hoa/thường tại ô `2`, bên trái Quốc hiệu/Tiêu ngữ trên trang mở đầu văn bản chính. Nếu là tên tổ chức hợp lệ trong vai trò ban hành thì lấy và dừng.
+2. Nếu text là `VĂN BẢN HỢP NHẤT`, không dùng nhãn này làm `officeSender`. Tìm tên cơ quan ngay trên dòng in hoa `XÁC THỰC VĂN BẢN HỢP NHẤT` ở các trang kết thúc/ký/nơi nhận của cùng văn bản. Quan hệ dọc thường là **cơ quan → nhãn xác thực → địa danh/ngày → chức danh → chữ ký/con dấu → họ tên**. Ví dụ `BỘ TƯ PHÁP` trên nhãn xác thực là giá trị cơ quan; các dòng còn lại chỉ là anchor hỗ trợ, không ghép vào tên.
+3. Nếu chưa có tên hợp lệ ở các bước trên, tìm trong nội dung trang mở đầu mẫu `Tên công ty`/`Tên tổ chức` + `phát hành` (tùy chọn) + `:` (tùy chọn) + tên tổ chức hợp lệ; chỉ lấy phần tên và dừng nếu hợp lệ.
+4. Nếu vẫn thiếu, tìm tên cơ quan ban hành ở vùng trên/dưới trang mở đầu (Quốc hiệu/header/footer). Phải có bằng chứng về vai trò ban hành, không chỉ dựa vào vị trí mép trang.
+
+Loại tên thuộc `Kính gửi`, `... điện:`, `Tên công ty nhận`, `Tên tổ chức nhận`, `Nơi nhận`, dấu tiếp nhận hoặc nhãn người nhận/liên hệ tương tự; không lấy chức danh, tên người ký hay nhãn hình thức làm tên tổ chức. Dừng ngay khi có giá trị hợp lệ; nếu không có thì trả `""`. Nối các dòng tên bằng một dấu cách, giữ nguồn OCR trong evidence. Khi fallback lấy tên ở trang ký/footer, ô `3` vẫn được tìm ở bố cục đầu trang, không neo theo vị trí fallback của `officeSender`.
+
+### 6.2. Ngày thông qua và mục lưu cuối danh sách
+
+- Ưu tiên ngày ngay dưới Quốc hiệu/Tiêu ngữ (ô `4`) ở trang mở đầu văn bản chính. Chỉ khi không tìm được ngày hợp lệ, tìm ngày sau cụm “...thông qua ngày...” ở phần kết thúc trên các trang ký/nơi nhận thuộc `document_end_pages`. Câu phải xác nhận việc thông qua chính văn bản; không lấy ngày viện dẫn, ngày hiệu lực hoặc ngày của phụ lục/văn bản kế tiếp. Fallback chỉ trả `documentDate`, không ghi đè ngày header hợp lệ hoặc xóa/ghi đè `province`; thiếu cả hai nguồn thì trả `""`.
+- Ô `9b` bao gồm cả mục lưu nội bộ cuối danh sách bắt đầu bằng hoặc chứa `Lưu`, `Lưu:`, `Lưu: VT`,... (ví dụ `Lưu: VT, TCCB.`). Giữ cả nhãn và nội dung tiếp dòng, không dừng trước mục lưu và không nhặt từ “lưu” ngoài vùng Nơi nhận. Ghép dòng và phân cách các mục theo chuẩn OCR/KIE, giữ thứ tự đọc.
+- Các fallback chỉ xét văn bản chính đầu tiên, với page/anchor/source text/bbox trong evidence; không dùng GT, tên file hoặc metadata ngoài PDF.

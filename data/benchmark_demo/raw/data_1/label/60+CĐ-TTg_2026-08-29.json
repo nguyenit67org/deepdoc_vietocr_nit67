@@ -61,7 +61,7 @@
       "type": "string"
     },
     "has_handwriting": {
-      "value": true,
+      "value": false,
       "type": "boolean"
     },
     "field": {
@@ -75,6 +75,27 @@
     "source_url_detail": {
       "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219355",
       "type": "string"
+    },
+    "document_start_page": {
+      "value": 0,
+      "type": "integer"
+    },
+    "document_end_pages": {
+      "value": [
+        2
+      ],
+      "type": "array"
+    },
+    "handwritten_fields": {
+      "value": [],
+      "type": "array"
+    },
+    "stamp_affected_fields": {
+      "value": [
+        "signer",
+        "signer_title"
+      ],
+      "type": "array"
     }
   }
 }

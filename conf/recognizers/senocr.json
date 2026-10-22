@@ -1,0 +1,14 @@
+{
+  "backend": "senocr",
+  "model_dir": "scratch/ocr-recognizers/models/senocr",
+  "device": "cuda",
+  "max_batch_size": 1,
+  "dtype": "float32",
+  "max_new_tokens": 256,
+  "runtime": {
+    "pythonpath": ["scratch/ocr-recognizers/senocr-deps"],
+    "env": {"TORCH_DISABLE_NATIVE_JIT": "1"},
+    "ipc_batch_size": 32,
+    "timeout_seconds": 900
+  }
+}

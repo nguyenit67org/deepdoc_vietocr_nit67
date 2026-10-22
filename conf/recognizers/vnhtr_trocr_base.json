@@ -1,0 +1,14 @@
+{
+  "backend": "vnhtr_jit",
+  "variant": "trocr",
+  "rethinking_head": false,
+  "model_dir": "scratch/ocr-recognizers/models/vnhtr_trocr_base",
+  "device": "cuda",
+  "max_batch_size": 4,
+  "runtime": {
+    "env": {"TORCH_DISABLE_NATIVE_JIT": "1"},
+    "pythonpath": ["scratch/ocr-recognizers/candidate-deps"],
+    "ipc_batch_size": 16,
+    "timeout_seconds": 900
+  }
+}

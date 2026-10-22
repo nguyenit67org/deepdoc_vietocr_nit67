@@ -12,6 +12,12 @@ img
 .venv
 venv
 
+# Secrets are injected at runtime, never baked into an image.
+.env*
+*.env
+**/.env*
+**/*.env
+
 # Both docker-compose.yml and docker-compose.gpu.yml already bind-mount the
 # WHOLE ./fastocr/weight host directory over /app/fastocr/weight at runtime
 # (read-only) -- that mount replaces the image's copy of the directory

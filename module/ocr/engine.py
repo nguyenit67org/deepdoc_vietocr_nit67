@@ -314,7 +314,8 @@ def _build_mineru_text_detector(device: str):
 class OCR:
     def __init__(self, model_dir=None, fastocr_weight_path: str = None, fastocr_base_config: str = None,
                  crop_pad_px_h: float = 3.0, crop_pad_px_w: float = 0.0, det_backend: str = "onnx",
-                 det_max_batch_size: int = 8, fastocr_max_batch_size: int = 64):
+                 det_max_batch_size: int = 8, fastocr_max_batch_size: int = 64,
+                 recognizer_config: dict | None = None):
         """
         If you have trouble downloading HuggingFace models, -_^ this might help!!
 
@@ -354,11 +355,16 @@ class OCR:
         else:
             raise ValueError(f"Unknown ocr det_backend: {det_backend!r}")
 
-        self.text_recognizer = [TextRecognizer(
-            model_dir, d,
-            weight_path=fastocr_weight_path,
-            base_config_name=fastocr_base_config,
-            max_batch_size=fastocr_max_batch_size) for d in devices]
+        if recognizer_config is None:
+            # Preserve legacy construction and default output byte-for-byte.
+            self.text_recognizer = [TextRecognizer(
+                model_dir, d,
+                weight_path=fastocr_weight_path,
+                base_config_name=fastocr_base_config,
+                max_batch_size=fastocr_max_batch_size) for d in devices]
+        else:
+            from .recognizers import create_recognizer
+            self.text_recognizer = [create_recognizer(recognizer_config, device_id=d) for d in devices]
 
         self.drop_score = 0.5
         self.crop_image_res_index = 0

@@ -1,0 +1,30 @@
+{
+  "ocrdoc": {
+    "repo_id": "truonggiabao7/ocrdoc-models",
+    "revision": "9b5346432fb84a447fdc4d780a7741126b446b0f",
+    "files": ["README.md", "recognition.onnx", "charset.txt"],
+    "backend": "ocrdoc_onnx",
+    "license": "Apache-2.0 according to model card"
+  },
+  "vietocr_handwriting": {
+    "repo_id": "vudang449/vietocr-vietnamese-handwriting",
+    "revision": "f1973b930f907c378f6e3152ce9d8658724b228a",
+    "files": ["README.md", "best_ep11.pth", "encoder_fp16.onnx", "decoder_fp16.onnx", "vocab.txt"],
+    "backend": "vietocr_onnx",
+    "license": "Apache-2.0 according to model card"
+  },
+  "htr_convtext": {
+    "repo_id": "DAIR-Group/HTR-ConvText",
+    "revision": "8ed2ad5390d67f44828c528d9254cc72deeab423",
+    "files": ["README.md", "config.json", "checkpoints/hands-vnondb.pth", "model/*.py", "data/dataset.py", "test.py", "valid.py", "utils/utils.py", "requirements.txt"],
+    "backend": "htr_convtext",
+    "license": "UNRESOLVED: HF card Apache-2.0; GitHub LICENSE GPL-3.0; internal benchmark only pending clarification"
+  },
+  "senocr": {
+    "repo_id": "VietAlphaLabs/SenOCR-Vi",
+    "revision": "9c52e6f53ef85434be57f51a8993d7facf12c2f6",
+    "files": ["*.json", "*.py", "*.jinja", "*.model", "*.safetensors", "*.yml", "README.md", "LICENSE"],
+    "backend": "senocr",
+    "license": "Apache-2.0 according to model card and LICENSE"
+  }
+}

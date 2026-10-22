@@ -22,6 +22,24 @@
         "source_url_detail": {
             "value": "https://dxcenter.hochiminhcity.gov.vn/van-ban/van-ban-cua-thanh-pho-ho-chi-minh/ke-hoach-so-49kh-ubnd-ngay-04022026-cua-uy-ban-nhan-dan-thanh-pho-ho-chi-minh-ve-thuc-hien-chu-de-nam-2026-hoan-thien-nang-cao-chat-luong-to-chuc-bo-may-khai-thong-the-che-dot-pha-ha-tang-nang-cao-hieu-qua-phuc-vu-nhan-dan/",
             "type": "string"
+        },
+        "document_start_page": {
+            "value": 0,
+            "type": "integer"
+        },
+        "document_end_pages": {
+            "value": [
+                4
+            ],
+            "type": "array"
+        },
+        "handwritten_fields": {
+            "value": [],
+            "type": "array"
+        },
+        "stamp_affected_fields": {
+            "value": [],
+            "type": "array"
         }
     },
     "information": {

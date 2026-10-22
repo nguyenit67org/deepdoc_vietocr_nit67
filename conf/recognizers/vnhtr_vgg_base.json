@@ -1,0 +1,13 @@
+{
+  "backend": "vnhtr_jit",
+  "variant": "vgg",
+  "rethinking_head": false,
+  "model_dir": "scratch/ocr-recognizers/models/vnhtr_vgg_base",
+  "device": "cuda",
+  "max_batch_size": 4,
+  "runtime": {
+    "env": {"TORCH_DISABLE_NATIVE_JIT": "1"},
+    "ipc_batch_size": 16,
+    "timeout_seconds": 900
+  }
+}

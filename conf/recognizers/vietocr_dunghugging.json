@@ -1,0 +1,7 @@
+{
+  "backend": "vietocr_original",
+  "model_dir": "scratch/ocr-recognizers/models/vietocr_dunghugging",
+  "device": "cuda",
+  "max_batch_size": 16,
+  "max_seq_length": 128
+}

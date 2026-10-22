@@ -1,0 +1,21 @@
+{
+  "backend": "pytesseract_direct",
+  "model_dir": "scratch/ocr-recognizers/models/nom_tesseract",
+  "raw_cache": "scratch/ocr-recognizers/pytesseract-vie-selected-only-cache",
+  "lang": "vie",
+  "psm": 7,
+  "oem": 1,
+  "border_px": 10,
+  "workers": 4,
+  "max_batch_size": 32,
+  "timeout_seconds": 60,
+  "runtime": {
+    "pythonpath": ["scratch/ocr-recognizers/nom-deps"],
+    "env": {
+      "LD_LIBRARY_PATH": "/home/nguyen/projects/deepdoc_vietocr_dh/scratch/ocr-recognizers/models/nom_tesseract/runtime/usr/lib/x86_64-linux-gnu",
+      "OMP_THREAD_LIMIT": "1"
+    },
+    "ipc_batch_size": 32,
+    "timeout_seconds": 900
+  }
+}

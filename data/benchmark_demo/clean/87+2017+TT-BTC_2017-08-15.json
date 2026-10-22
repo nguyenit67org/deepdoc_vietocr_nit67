@@ -22,6 +22,24 @@
         "source_url_detail": {
             "value": "https://www.hsx.vn/vi/van-ban-phap-quy/detail/1281210",
             "type": "string"
+        },
+        "document_start_page": {
+            "value": 0,
+            "type": "integer"
+        },
+        "document_end_pages": {
+            "value": [
+                32
+            ],
+            "type": "array"
+        },
+        "handwritten_fields": {
+            "value": [],
+            "type": "array"
+        },
+        "stamp_affected_fields": {
+            "value": [],
+            "type": "array"
         }
     },
     "information": {

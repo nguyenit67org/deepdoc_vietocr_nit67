@@ -38,6 +38,7 @@ from .text_mapping import (
 )
 from .types import PageBlock
 from .whitespace import crop_whitespace_before_layout
+from .red_removal import process_red_pages
 
 logger = logging.getLogger(__name__)
 
@@ -482,6 +483,36 @@ class DocumentPipeline:
         if debug_dir:
             for pn, raw_blocks in enumerate(raw_blocks_per_page):
                 save_layout_debug(prepped[pn].img, raw_blocks, debug_dir, pn + pn_offset)
+
+        # Phase 2.1: inspect original red ROIs only; layout geometry stays unchanged.
+        if self.config.remove_red_enabled:
+            originals = [p.img for p in prepped]
+            try:
+                red_images, red_reports, red_masks = process_red_pages(
+                    originals, raw_blocks_per_page, self.ocr, self.config
+                )
+            except Exception:
+                logger.exception("Red-removal failed; preserving original page images and OCR caches")
+                if debug_trace is not None:
+                    debug_trace.red_removal.extend([{"status": "failed_preserved"} for _ in originals])
+            else:
+                if debug_trace is not None:
+                    debug_trace.red_removal.extend(red_reports)
+                for pn, (image, report, masks) in enumerate(zip(red_images, red_reports, red_masks)):
+                    if debug_dir:
+                        prefix = os.path.join(debug_dir, f"page_{pn + pn_offset + 1}_red")
+                        originals[pn].convert("RGB").save(prefix + "_before.png")
+                        image.convert("RGB").save(prefix + "_after.png")
+                        for name, mask in zip(("keep", "cleanup"), masks):
+                            Image.fromarray(mask.astype(np.uint8) * 255).save(prefix + f"_{name}.png")
+                        with open(prefix + ".json", "w", encoding="utf-8") as stream:
+                            json.dump(report, stream, ensure_ascii=False, indent=2)
+                    prepped[pn].img = image
+                    prepped[pn].timings["red_removal"] = report["seconds"]
+                    if report["changed_pixels"]:
+                        prepped[pn].dt_boxes_reuse = None
+                        prepped[pn].prerecognized_reuse = None
+                logger.info("Red-removal: %d/%d pages changed", sum(r["changed_pixels"] > 0 for r in red_reports), len(red_reports))
 
         # Phase 2.5: build every page's block skeleton (crop + deskew each
         # table, classify every other block's type) -- table CONTENT is

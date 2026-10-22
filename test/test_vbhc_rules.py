@@ -399,7 +399,7 @@ class VBHCRuleExtractionTests(unittest.TestCase):
         ]]
         prediction, _ = extract(pages)
         self.assertEqual(
-            prediction["information"][0]["type"]["value"], "VĂN BẢN HỢP NHẤT"
+            prediction["information"][0]["type"]["value"], "NGHỊ ĐỊNH"
         )
 
     def test_title_continuation_stops_at_citation_lines(self):

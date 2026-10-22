@@ -282,8 +282,12 @@ def _match_document_type(block: _Block) -> tuple[str, str, int] | None:
     ``tail`` is the remainder of the same original line after the heading.
     """
     assert _TYPE_FOLDED_RE is not None
-    match = _TYPE_FOLDED_RE.search(block.folded)
-    if not match:
+    # The consolidation label is a wrapper, never the instrument's type.
+    # Continue within the same block as well as across blocks: OCR may merge
+    # "VĂN BẢN HỢP NHẤT\nTHÔNG TƯ\n..." into one region.
+    match = next((m for m in _TYPE_FOLDED_RE.finditer(block.folded)
+                  if m.group(1) != "van ban hop nhat"), None)
+    if match is None:
         return None
     canonical = _TYPE_FOLDED_TO_CANONICAL[match.group(1)]
     # Group 1 starts at the heading itself (the leading (?:^|\n)\s* may span
@@ -328,12 +332,32 @@ def _zone(block: _Block, *, x0: float = 0.0, x1: float = 1.0, y0: float = 0.0, y
     return block.x1 >= x0 and block.x0 <= x1 and block.y1 >= y0 and block.y0 <= y1
 
 
+def _skipped_adoption_text(block: PageBlock) -> str:
+    """Read an adoption assertion misclassified as a footnote, for date KIE only.
+
+    Do not mutate the skipped block or make arbitrary footnotes available to
+    header, type, issuer, signature or document-boundary extraction.
+    """
+    if str(block.get("type", "")).lower() != "footnote" or block.get("content_type") != "skip":
+        return ""
+    items = sorted(block.get("text_items", []), key=lambda item: (item["bbox"][1], item["bbox"][0]))
+    text = "\n".join(str(item.get("text", "")).strip() for item in items if str(item.get("text", "")).strip())
+    folded = _fold(text)
+    if not re.match(r"^(?:luat|nghi quyet|van ban|quy che|quy dinh)\s+nay\s+(?:da\s+)?duoc\b", folded):
+        return ""
+    if not re.search(r"\bthong\s+qua\s+ngay\b", folded):
+        return ""
+    return text
+
+
 def _make_blocks(
     pages_blocks: list[list[PageBlock]],
     original_page_sizes: list[tuple[int, int]],
     processed_page_sizes: list[tuple[int, int]],
     crop_offsets: list[tuple[float, float]],
     geometry_reliable: bool,
+    *,
+    skipped_adoption_only: bool = False,
 ) -> list[list[_Block]]:
     pages: list[list[_Block]] = []
     for page_index, blocks in enumerate(pages_blocks):
@@ -342,7 +366,7 @@ def _make_blocks(
         offset_x, offset_y = crop_offsets[page_index]
         converted: list[_Block] = []
         for block_index, block in enumerate(blocks):
-            text = _plain_text(block.get("content"))
+            text = _skipped_adoption_text(block) if skipped_adoption_only else _plain_text(block.get("content"))
             if not text:
                 continue
             # A signature image can include stamp fragments after the title.
@@ -425,7 +449,17 @@ def _next_document_start(pages: list[list[_Block]], start: int) -> int | None:
     for page_index in range(start + 1, len(pages)):
         blocks = pages[page_index]
         folded = "\n".join(block.folded for block in blocks if _zone(block, y1=0.45))
-        has_country = "cong hoa xa hoi chu nghia viet nam" in folded
+        # A body clause can mention the country's full name. That substring,
+        # especially in a tall paragraph crossing the header search window,
+        # is not an independent national heading.
+        has_country = any(
+            re.fullmatch(
+                r"cong hoa xa hoi chu nghia viet nam[ .]*(?:\s+doc lap.*)?",
+                line.strip(),
+            )
+            for block in blocks if _zone(block, y1=0.45)
+            for line in block.folded.splitlines()
+        )
         if has_country and _header_score(blocks) >= 3:
             return page_index
     return None
@@ -604,6 +638,16 @@ def _is_seal_name_fragment(value: str) -> bool:
 
 
 def _closing_page(pages: list[list[_Block]], start: int, limit: int) -> int:
+    consolidated = any(
+        "van ban hop nhat" in b.folded or re.search(r"\bvbhn\s*-", b.folded)
+        for b in pages[start] if _zone(b, y1=0.35)
+    )
+    if consolidated:
+        # Consolidation footnotes may quote old closing/signature material.
+        # The authentication is the closing of this wrapper, not that quote.
+        for page_index in range(start, limit + 1):
+            if any("xac thuc van ban hop nhat" in b.folded for b in pages[page_index]):
+                return page_index
     for page_index in range(start, limit + 1):
         blocks = pages[page_index]
         # The "Nơi nhận" anchor itself is a strong closing signal.  No lower
@@ -752,10 +796,19 @@ def _extract_xac_thuc_office(
     naming other institutions are excluded by the same markers as the header
     flow.
     """
-    anchors = [block for block in blocks if "xac thuc" in block.folded]
+    anchors = [block for block in blocks if "xac thuc van ban hop nhat" in block.folded]
     if not anchors:
         return "", None
     anchor = min(anchors, key=lambda block: (block.y0, block.x0))
+    # OCR may put the issuer and authentication label in one text block.
+    lines = anchor.text.splitlines()
+    anchor_line = next((i for i, line in enumerate(lines)
+                        if "xac thuc van ban hop nhat" in _fold(line)), 0)
+    if anchor_line:
+        value = _clean_office_sender_text(" ".join(lines[:anchor_line]))
+        if len(value) <= 100 and _office_candidate_valid(value):
+            evidence["officeSender"].append(_evidence(anchor, "closing-xac-thuc-office", value))
+            return value, anchor
     best: tuple[float, _Block, str] | None = None
     for block in blocks:
         if block is anchor or "xac thuc" in block.folded:
@@ -1173,6 +1226,7 @@ def _extract_office_sender(
     evidence: dict[str, list[dict[str, Any]]],
     *,
     country_block: _Block | None = None,
+    closing_pages: list[list[_Block]] | None = None,
 ) -> tuple[str, _Block | None]:
     # QH-anchored flow: the office lives LEFT of the country header and its
     # vertical band is anchored on the country (not on the code — the code is
@@ -1222,7 +1276,7 @@ def _extract_office_sender(
             continue
         if any(token in block.folded for token in ("ky boi", "cong bao")):
             continue
-        if _has_org_keyword(block.text, block.folded):
+        if _office_candidate_valid(block.text):
             candidates.append(block)
 
     if candidates:
@@ -1247,29 +1301,32 @@ def _extract_office_sender(
                 evidence["officeSender"].append(_evidence(b, "upper-left-organization", val))
             return val, parts[-1][1]
 
+    for closing in closing_pages or []:
+        value, source = _extract_xac_thuc_office(closing, evidence)
+        if value:
+            return value, source
+
     # A corporate letterhead names its issuer through a labeled field ("Tên
     # công ty:", "Tên tổ chức phát hành:"): prefer it over a loose
     # centered-org guess (arrival stamps name other institutions, e.g. "SỞ
     # GIAO DỊCH ... (HNX)", and would otherwise win by reading order).
-    # Letterheads live at the top of the page; a mid-body "Tên ..." mention
-    # is never the issuer.
+    # Explicit issuer labels can occur in the first page's body as well.
     for block in blocks:
-        if block.geometry_reliable and block.y1 > 0.50:
-            continue
         match = re.search(
-            r"\bT[eê]n\s+(?:c[oô]ng\s+ty|t[oổ]\s+ch[uứ]c(?:\s+ph[aá]t\s+h[aà]nh)?)\s*[:：]\s*(.+)$",
+            r"\bTên\s+(?:công\s+ty|tổ\s+chức)(?!\s+nhận\b)(?:\s+phát\s+hành)?\s*[:：]?\s+([^\n]+)",
             block.text,
             re.IGNORECASE,
         )
         if match:
             raw_val = match.group(1).strip()
             clean_val = " ".join(raw_val.split())
-            evidence["officeSender"].append(_evidence(block, "company-name-anchor", clean_val))
-            return clean_val, block
+            if _office_candidate_valid(clean_val):
+                evidence["officeSender"].append(_evidence(block, "company-name-anchor", clean_val))
+                return clean_val, block
 
     # Corporate letterheads commonly center the issuing company rather than using statutory left column
     for block in blocks:
-        if block.geometry_reliable and block.y1 > max_y:
+        if block.geometry_reliable and block.y1 > max_y and block.y0 < 0.85:
             continue
         if block.geometry_reliable and block.y1 < 0.04:
             continue
@@ -1281,13 +1338,44 @@ def _extract_office_sender(
             continue
         if re.search(r"(?:^|\W)den(?:$|\W)", block.folded):
             continue
-        if _has_org_keyword(block.text, block.folded):
+        if _office_candidate_valid(block.text) and not re.search(
+            r"\b(?:ban hanh|quyet dinh|nhu sau|can cu|de nghi|chiu trach nhiem)\b", block.folded
+        ):
             cleaned = _clean_office_sender_text(block.text)
             if cleaned:
                 evidence["officeSender"].append(_evidence(block, "upper-left-organization", cleaned))
                 return cleaned, block
 
     return "", None
+
+
+def _office_candidate_valid(text: str) -> bool:
+    text = _clean_office_sender_text(text)
+    folded = _fold(text)
+    if any(token in folded for token in (
+        "kinh gui", "noi nhan", "ten cong ty nhan", "ten to chuc nhan",
+        "van ban hop nhat", "van ban den", "cong van den",
+    )) or re.search(r"\bdien\s*[:：]", folded):
+        return False
+    return bool(_clean_office_sender_text(text) and _has_org_keyword(text, folded))
+
+
+def _extract_adoption_date(blocks, evidence, *, rule="closing-adoption-date"):
+    """Only a closing assertion about this instrument, not a cited date."""
+    for block in blocks:
+        if not re.search(r"\b(?:luat|nghi quyet|van ban|quy che|quy dinh)\s+nay\b", block.folded):
+            continue
+        anchor = re.search(r"\bth[oô]ng\s+qua\s+ng[aà]y\b", block.text, re.IGNORECASE)
+        if not anchor:
+            continue
+        tail = "ngày " + block.text[anchor.end():].lstrip()
+        match = _LONG_DATE_RE.match(unicodedata.normalize("NFKC", tail))
+        if match:
+            value = _canonical_date(*match.groups())
+            if value:
+                evidence["documentDate"].append(_evidence(block, rule, value))
+                return value
+    return ""
 
 
 # A citation opening another instrument ("Thông tư số 46/2024/... ngày ...")
@@ -1399,6 +1487,10 @@ def _clean_type_tail(tail: str) -> str:
 
 
 def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str, Any]]]) -> tuple[str, str]:
+    consolidated = any(
+        "van ban hop nhat" in b.folded or re.search(r"\bvbhn\s*-", b.folded)
+        for b in blocks if _zone(b, y1=0.35)
+    )
     # A named heading in the header zone is the authoritative document type,
     # even when a "V/v" subject line appears earlier on the page (corporate
     # letterheads put the subject above the heading).  ``V/v`` only identifies
@@ -1418,20 +1510,33 @@ def _extract_type_title(blocks: list[_Block], evidence: dict[str, list[dict[str,
             if not matched:
                 continue
             document_type, tail, line_index = matched
+            if consolidated and _starts_with_document_citation(_fold(block.text.splitlines()[line_index])):
+                continue
             # A "type word" starting a wrapped line of a V/v subject sentence
             # (e.g. "V/v: ... thông tin\nNghị quyết Đại hội...") is a subject
             # continuation, not the document heading: the heading never shares
             # its block with an earlier V/v anchor.
             if _VV_RE.search("\n".join(block.text.splitlines()[:line_index])):
                 continue
-            if _fold(document_type) == "van ban hop nhat":
-                # Edge case: the VBHN label is the container, not the subject.
-                # The title belongs to the consolidated instrument's own
-                # heading (the first non-VBHN named heading below).
-                content = _first_content_heading(blocks, block_index, evidence)
-                evidence["type"].append(_evidence(block, "named-document-type", document_type))
-                return document_type, content
             if re.fullmatch(r"s[oố]\s*[:.]?\s*[0-9A-Za-zÀ-ỹĐđ./\-\s]+", tail, re.IGNORECASE):
+                # "Nghị quyết số: ..." is a number line, not the title's
+                # heading. Prefer the same instrument's actual named heading
+                # below it, otherwise its whole "NGHỊ QUYẾT\n<title>" block
+                # would incorrectly become a title continuation.
+                actual_heading_below = False
+                for candidate in blocks[block_index + 1:]:
+                    if candidate.folded.startswith("can cu"):
+                        break
+                    if not _zone(candidate, y0=0.08, y1=0.52):
+                        continue
+                    candidate_match = _match_document_type(candidate)
+                    if candidate_match and candidate_match[0] == document_type:
+                        candidate_tail = candidate_match[1]
+                        if not re.fullmatch(r"s[oố]\s*[:.]?\s*[0-9A-Za-zÀ-ỹĐđ./\-\s]+", candidate_tail, re.IGNORECASE):
+                            actual_heading_below = True
+                            break
+                if actual_heading_below:
+                    continue
                 tail = ""
             title = _clean_type_tail(tail)
             title_evidence: list[tuple[_Block, str, str]] = []
@@ -2135,13 +2240,18 @@ def extract_vbhc(
     # code BELOW office and LEFT of the date.  A wrong code must never mask
     # the office, so the office no longer depends on the code.
     frame = _header_frame(header_blocks)
-    office_sender, office_block = _extract_office_sender(header_blocks, None, evidence, country_block=frame.country)
-    if not office_sender:
-        # Consolidated (VBHN) authentication: the issuer is restated next to
-        # the "XÁC THỰC VĂN BẢN HỢP NHẤT" label on the closing page when the
-        # header carries no issuing authority (form-level anchor, never a
-        # filename).  Arrival-stamp institutions stay excluded.
-        office_sender, office_block = _extract_xac_thuc_office(closing_blocks, evidence)
+    ending_pages = [pages[end]]
+    for page in pages[end + 1:search_limit + 1]:
+        if any(_RECIPIENT_RE.search(b.text) or "xac thuc van ban hop nhat" in b.folded for b in page):
+            ending_pages.append(page)
+        else:
+            break
+    office_sender, office_block = _extract_office_sender(
+        header_blocks, None, evidence, country_block=frame.country,
+        closing_pages=ending_pages,
+    )
+    # A fallback issuer on another page/footer must not move the header frame.
+    code_office = office_block if office_block in header_blocks and office_block.y1 < 0.35 else frame.office
     document_date, province = _extract_date_province(header_blocks, None, evidence, country_block=frame.country)
     date_hint = None
     # Re-resolve the issuance block as a code anchor when present.
@@ -2155,11 +2265,30 @@ def extract_vbhc(
     code, code_block = _extract_code(
         header_blocks,
         evidence,
-        office_block=office_block,
+        office_block=code_office,
         date_block_hint=date_hint,
         country_block=frame.country,
     )
     document_type, title = _extract_type_title(header_blocks, evidence)
+    if not document_date:
+        for ending in ending_pages:
+            document_date = _extract_adoption_date(ending, evidence)
+            if document_date:
+                break
+    if not document_date:
+        # Keep this side channel separate from ordinary content: skipped
+        # footnotes must not influence document boundaries or other fields.
+        adoption_pages = _make_blocks(
+            pages_blocks, original_page_sizes, processed_page_sizes, crop_offsets,
+            geometry_reliable, skipped_adoption_only=True,
+        )
+        for page_index in range(end, end + len(ending_pages)):
+            document_date = _extract_adoption_date(
+                adoption_pages[page_index], evidence,
+                rule="closing-adoption-date-skipped-footnote",
+            )
+            if document_date:
+                break
     if not title and _fold(document_type) == "cong bo thong tin bat thuong":
         title = _extract_disclosure_content_title(header_blocks, evidence)
     first_recipients = _extract_anchor_value(

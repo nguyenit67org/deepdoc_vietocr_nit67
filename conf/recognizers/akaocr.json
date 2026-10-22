@@ -1,0 +1,6 @@
+{
+  "backend": "akaocr",
+  "model_dir": "scratch/ocr-recognizers/models/akaocr",
+  "device": "cuda",
+  "max_batch_size": 32
+}

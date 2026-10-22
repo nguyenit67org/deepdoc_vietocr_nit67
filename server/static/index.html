@@ -1220,10 +1220,9 @@
                 form.append('file', selectedFile);
                 const t0 = performance.now();
                 try {
-                    const response = await fetch('/api/v1/ocr/pdf', {
+                    const response = await fetch('/debug/ocr/pdf', {
                         method: 'POST',
                         body: form,
-                        headers: { 'ngrok-skip-browser-warning': 'true' },
                     });
                     const data = await response.json();
                     if (!response.ok)

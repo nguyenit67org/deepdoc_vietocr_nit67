@@ -75,6 +75,27 @@
     "source_url_detail": {
       "value": "https://moit.gov.vn/upload/2005517/20260730/cv_5963_die____u_ha__nh_nga__y_30_7_2026_2a743.pdf",
       "type": "string"
+    },
+    "document_start_page": {
+      "value": 0,
+      "type": "integer"
+    },
+    "document_end_pages": {
+      "value": [
+        4
+      ],
+      "type": "array"
+    },
+    "handwritten_fields": {
+      "value": [],
+      "type": "array"
+    },
+    "stamp_affected_fields": {
+      "value": [
+        "signer",
+        "signer_title"
+      ],
+      "type": "array"
     }
   }
 }

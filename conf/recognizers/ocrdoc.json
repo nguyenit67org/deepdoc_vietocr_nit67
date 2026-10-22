@@ -1,0 +1,7 @@
+{
+  "backend": "ocrdoc_onnx",
+  "model_dir": "scratch/ocr-recognizers/models/ocrdoc",
+  "device": "cuda",
+  "max_batch_size": 16,
+  "width": 640
+}

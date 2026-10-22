@@ -22,6 +22,26 @@
         "source_url_detail": {
             "value": "https://vanban.hanoi.gov.vn/chi-tiet-van-ban/ve-viec-quy-dinh-chinh-sach-thuc-day-chuyen-doi-so-phat-trien-san-pham-dich-vu-cong-nghe-so-tren-di-257326",
             "type": "string"
+        },
+        "document_start_page": {
+            "value": 0,
+            "type": "integer"
+        },
+        "document_end_pages": {
+            "value": [
+                11
+            ],
+            "type": "array"
+        },
+        "handwritten_fields": {
+            "value": [],
+            "type": "array"
+        },
+        "stamp_affected_fields": {
+            "value": [
+                "signer_title"
+            ],
+            "type": "array"
         }
     },
     "information": {

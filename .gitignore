@@ -3,6 +3,7 @@
 docs/ai/
 
 ocr-collab/
+ocr-public/
 
 # Local tooling/caches (per-machine, not shared)
 node_modules/
@@ -33,6 +34,7 @@ temp/
 .env.*
 .*.env
 *.env
+!.env.example
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,jupyternotebooks,flask,pycharm+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django,jupyternotebooks,flask,pycharm+all

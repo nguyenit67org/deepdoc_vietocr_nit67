@@ -22,6 +22,9 @@
       "description": "Thời gian xử lý tài liệu, tính bằng giây.",
       "type": "number",
       "minimum": 0
+    },
+    "metadata": {
+      "$ref": "#/definitions/metadata"
     }
   },
   "definitions": {
@@ -104,6 +107,284 @@
         }
       }
     },
+    "metadataStringField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Giá trị chuỗi metadata hoặc null nếu chưa xác định.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "const": "string"
+        }
+      }
+    },
+    "hasHandwritingField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Giá trị boolean cho biết có chữ viết tay trong 12 trường trích xuất hay không.",
+          "type": "boolean"
+        },
+        "type": {
+          "const": "boolean"
+        }
+      }
+    },
+    "documentStartPageField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Chỉ số trang 0-based của trang đầu tiên chứa phần mở đầu văn bản chính.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "type": {
+          "const": "integer"
+        }
+      }
+    },
+    "documentEndPagesField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Danh sách các chỉ số trang 0-based tăng dần duy nhất chứa phần kết thúc văn bản chính.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "type": {
+          "const": "array"
+        }
+      }
+    },
+    "handwrittenFieldsField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Danh sách duy nhất tên các trường trong 12 trường có nội dung giá trị viết tay.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "type",
+              "title",
+              "code",
+              "documentDate",
+              "officeSender",
+              "recipients",
+              "signer",
+              "priority_level",
+              "security_level",
+              "first_recipients",
+              "signer_title",
+              "province"
+            ]
+          }
+        },
+        "type": {
+          "const": "array"
+        }
+      }
+    },
+    "stampAffectedFieldsField": {
+      "type": "object",
+      "required": [
+        "value",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "Danh sách duy nhất tên các trường trong 12 trường có mực con dấu đè trực tiếp lên nội dung giá trị thực tế.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "type",
+              "title",
+              "code",
+              "documentDate",
+              "officeSender",
+              "recipients",
+              "signer",
+              "priority_level",
+              "security_level",
+              "first_recipients",
+              "signer_title",
+              "province"
+            ]
+          }
+        },
+        "type": {
+          "const": "array"
+        }
+      }
+    },
+    "metadata": {
+      "description": "Metadata tài liệu và thông tin bổ sung cho benchmark.",
+      "type": "object",
+      "required": [
+        "has_handwriting",
+        "document_start_page",
+        "document_end_pages",
+        "handwritten_fields"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "document_format": {
+          "description": "Định dạng tài liệu (ví dụ: scan, digital).",
+          "allOf": [
+            {
+              "$ref": "#/definitions/metadataStringField"
+            }
+          ]
+        },
+        "has_handwriting": {
+          "description": "Cờ đánh dấu tài liệu có trường viết tay trong 12 trường trích xuất hay không.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/hasHandwritingField"
+            }
+          ]
+        },
+        "field": {
+          "description": "Lĩnh vực văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/metadataStringField"
+            }
+          ]
+        },
+        "source_name": {
+          "description": "Tên nguồn thu thập văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/metadataStringField"
+            }
+          ]
+        },
+        "source_url_detail": {
+          "description": "URL trang chi tiết chứa văn bản.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/metadataStringField"
+            }
+          ]
+        },
+        "source_url_pdf": {
+          "description": "URL tải file PDF gốc.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/metadataStringField"
+            }
+          ]
+        },
+        "document_start_page": {
+          "description": "Trang bắt đầu phần mở đầu văn bản chính (0-based).",
+          "allOf": [
+            {
+              "$ref": "#/definitions/documentStartPageField"
+            }
+          ]
+        },
+        "document_end_pages": {
+          "description": "Các trang kết thúc văn bản chính (0-based, tăng dần).",
+          "allOf": [
+            {
+              "$ref": "#/definitions/documentEndPagesField"
+            }
+          ]
+        },
+        "handwritten_fields": {
+          "description": "Danh sách các trường có nội dung giá trị viết tay trong 12 trường.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/handwrittenFieldsField"
+            }
+          ]
+        },
+        "stamp_affected_fields": {
+          "description": "Danh sách các trường có mực con dấu đè trực tiếp lên nội dung giá trị thực tế trong 12 trường.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/stampAffectedFieldsField"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_handwriting": {
+                "properties": {
+                  "value": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "handwritten_fields": {
+                "properties": {
+                  "value": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "handwritten_fields": {
+                "properties": {
+                  "value": {
+                    "maxItems": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "information": {
       "type": "object",
       "required": [
@@ -140,7 +421,6 @@
           ]
         },
         "code": {
-          "description": "Số ký hiệu văn bản; giữ dấu cấu trúc /, - và .",
           "description": "Số ký hiệu văn bản; giữ dấu cấu trúc / và -, loại bỏ dấu chấm và chuẩn hóa khoảng trắng thành gạch nối.",
           "allOf": [
             {
@@ -149,7 +429,7 @@
           ]
         },
         "documentDate": {
-          "description": "Ngày văn bản, chuẩn hóa theo dd/mm/yyyy.",
+          "description": "Ngày văn bản, chuẩn hóa theo dd/mm/yyyy; ưu tiên dưới Quốc hiệu/Tiêu ngữ ở trang mở đầu văn bản chính, nếu không tìm được thì lấy ngày sau cụm thông qua ngày ở phần kết thúc/ký/nơi nhận của chính văn bản; không ghi đè province.",
           "allOf": [
             {
               "$ref": "#/definitions/dateField"
@@ -157,8 +437,7 @@
           ]
         },
         "officeSender": {
-          "description": "Cơ quan gửi/ban hành; giữ thứ tự đọc từ trên xuống dưới, trái sang phải và không đảo thành cơ quan con/cơ quan cha.",
-          "description": "Cơ quan gửi/ban hành; giữ thứ tự đọc từ trên xuống dưới, trái sang phải, không đảo thành cơ quan con/cơ quan cha, nhiều dòng nối bằng một khoảng trắng.",
+          "description": "Cơ quan ban hành; ưu tiên tên hợp lệ ở góc trên trái trang mở đầu. Nếu là nhãn VĂN BẢN HỢP NHẤT, tìm cơ quan ngay trên XÁC THỰC VĂN BẢN HỢP NHẤT ở phần kết thúc. Nếu chưa có, tìm Tên công ty/Tên tổ chức [phát hành] [:] trong nội dung trang mở đầu rồi vùng header/footer của trang đó; loại người nhận/liên hệ. Dừng khi có tên hợp lệ; giữ thứ tự đọc, không đảo cơ quan con/cơ quan cha, nhiều dòng nối bằng một khoảng trắng.",
           "allOf": [
             {
               "$ref": "#/definitions/textField"
@@ -166,7 +445,7 @@
           ]
         },
         "recipients": {
-          "description": "Tên cơ quan, tổ chức, cá nhân trong phần Nơi nhận; nhiều giá trị theo thứ tự đọc và phân cách bằng dấu chấm phẩy (;).",
+          "description": "Toàn bộ danh sách trong phần Nơi nhận, bao gồm mục cuối bắt đầu bằng hoặc chứa Lưu, Lưu: VT,... và nội dung tiếp dòng; giữ nhãn Lưu theo nguồn. Nhiều giá trị theo thứ tự đọc và phân cách bằng dấu chấm phẩy (; ).",
           "allOf": [
             {
               "$ref": "#/definitions/textField"
@@ -206,7 +485,6 @@
           ]
         },
         "signer_title": {
-          "description": "Nội dung KT./TM./chức vụ/quyền hạn ký; cùng format nhiều giá trị với signer.",
           "description": "Nội dung KT./TM./chức vụ/quyền hạn ký; nhiều dòng của một chức danh nối bằng một khoảng trắng (không chứa newline); nhiều chức danh độc lập phân cách bằng dấu chấm phẩy (;).",
           "allOf": [
             {

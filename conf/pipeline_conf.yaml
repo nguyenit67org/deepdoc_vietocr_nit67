@@ -37,6 +37,15 @@ page_orientation:
   # batch call and risk a GPU OOM.
   max_pages_per_batch: 30
 
+remove_red:
+  enabled: false  # experimental; preserve baseline until full-inference A/B review
+  max_regions_per_page: 16
+  max_probe_area_ratio: 0.25  # unprobed regions are never cleaned
+  padding: 4
+  dense_threshold: 0.18
+  dark_red_max: 145
+  min_black_neighbors: 8
+
 layout:
   backend: pp_doclayout
   model_name: PP-DocLayout_plus-L

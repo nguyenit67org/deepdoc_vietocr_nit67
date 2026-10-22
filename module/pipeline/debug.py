@@ -30,6 +30,7 @@ class PipelineDebugTrace:
 
     layout_blocks: list[list[LayoutBlock]] = field(default_factory=list)
     ocr_lines: list[list[OCRBox]] = field(default_factory=list)
+    red_removal: list[dict] = field(default_factory=list)
 
 
 def _rounded_bbox(values: list[float] | tuple[float, ...]) -> list[float]:
@@ -89,6 +90,7 @@ def build_structured_debug(
             "width": page_width,
             "height": page_height,
             "image_url": page_image_urls[page_index],
+            **({"red_removal": trace.red_removal[page_index]} if page_index < len(trace.red_removal) else {}),
             "layout_blocks": [
                 {
                     "id": layout_id,

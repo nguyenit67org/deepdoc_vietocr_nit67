@@ -71,6 +71,27 @@
     "source_url_detail": {
       "value": "https://sbv.gov.vn/documents/d/sbv_portal/591494",
       "type": "string"
+    },
+    "document_start_page": {
+      "value": 0,
+      "type": "integer"
+    },
+    "document_end_pages": {
+      "value": [
+        1
+      ],
+      "type": "array"
+    },
+    "handwritten_fields": {
+      "value": [
+        "code",
+        "documentDate"
+      ],
+      "type": "array"
+    },
+    "stamp_affected_fields": {
+      "value": [],
+      "type": "array"
     }
   }
 }

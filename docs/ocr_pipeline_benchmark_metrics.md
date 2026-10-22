@@ -36,12 +36,16 @@ Các enum hợp lệ:
 
 Không có `article_one` trong hợp đồng mới. Không suy đoán giá trị từ tên file, metadata ngoài PDF hoặc GT.
 
-## 2. Ranh giới văn bản thứ nhất
+## 2. Ranh giới văn bản thứ nhất và metadata chuẩn hóa
 
-Pipeline trích xuất văn bản chính đầu tiên trong PDF.
+Pipeline trích xuất văn bản chính đầu tiên trong PDF. Metadata của tài liệu được chuẩn hóa trong object `metadata` cùng cấu trúc typed `{value, type}`:
 
-- `document_start_page` dựa trên header hành chính: Quốc hiệu/Tiêu ngữ, cơ quan ban hành, số ký hiệu hoặc trích yếu. Bìa hay trang rác trước văn bản có thể bị bỏ qua.
-- `document_end_page` dựa trên phần kết thúc: Nơi nhận, thẩm quyền ký, chữ ký hoặc con dấu.
+- `document_start_page` (`type: "integer"`): chỉ số trang vật lý 0-based của trang đầu tiên chứa phần mở đầu văn bản chính (Quốc hiệu, Tiêu ngữ, cơ quan ban hành, số ký hiệu hoặc trích yếu), bỏ qua trang bìa hoặc trang rác phía trước.
+- `document_end_pages` (`type: "array"`): mảng danh sách chỉ số trang vật lý 0-based tăng dần duy nhất chứa toàn bộ nội dung kết thúc của văn bản chính (người ký, thẩm quyền ký, chữ ký, con dấu, nơi nhận), bao gồm cả trường hợp phần kết thúc trải dài nhiều trang; loại trừ các văn bản đính kèm, phụ lục hoặc văn bản độc lập tiếp theo.
+- `handwritten_fields` (`type: "array"`): mảng danh sách tên các trường duy nhất trong 12 trường trích xuất được đánh giá (loại trừ `receiverDate`) mà nội dung giá trị thực tế của trường được viết tay một phần hoặc toàn bộ. Chữ viết tay phải là nội dung thực tế của trường, không tính chữ ký tự do (autograph) thay cho tên in sẵn của người ký, không tính dấu tiếp nhận đến, và không tính ghi chú lề hay nét vẽ xung quanh.
+- `has_handwriting` (`type: "boolean"`): bắt buộc `has_handwriting.value` phải tương đương logic với việc `handwritten_fields.value` không rỗng (`has_handwriting.value == (len(handwritten_fields.value) > 0)`). Quy tắc này chỉ áp dụng duy nhất cho nội dung giá trị của 12 trường trích xuất trong phạm vi, không áp dụng cho chữ viết tay ở các vị trí khác trên tài liệu.
+- `stamp_affected_fields` (`type: "array"`): mảng danh sách tên các trường duy nhất trong 12 trường trích xuất được đánh giá (loại trừ `receiverDate`), sắp xếp theo thứ tự canonical (`type`, `title`, `code`, `documentDate`, `officeSender`, `recipients`, `signer`, `priority_level`, `security_level`, `first_recipients`, `signer_title`, `province`), ghi nhận trường hợp có mực con dấu thuộc bất kỳ màu sắc nào (dấu tròn đỏ/pháp nhân, dấu chức danh, dấu đến xanh/đen, dấu độ khẩn/mật...) đè lên, nằm dưới, che khuất hoặc gây can thiệp/giao cắt trực quan thấy rõ (visible interference) với bất kỳ phần nào của nội dung giá trị chữ thực tế của trường (bao gồm cả chữ in sẵn, chữ viết tay hoặc chữ cách điệu thể hiện giá trị trường), kể cả khi văn bản vẫn đọc được. Thứ tự lớp in trước/sau không làm thay đổi phân loại. Loại trừ con dấu chỉ nằm gần kề, có khoảng trắng phân tách rõ ràng, giao cắt thuần trên khoảng trắng/bounding box mà không chạm vào nét chữ thực tế, nội dung con dấu bị nhầm là giá trị trường, và loại trừ trường hợp con dấu chỉ đè lên chữ ký tự do (autograph) mà không can thiệp vào chữ thể hiện họ tên hoặc chức danh thực tế. Đây là điều kiện trực quan (visual condition), độc lập với kết quả nhận dạng và không đồng nhất với lỗi OCR suy diễn.
+- Các trường provenance hiện hữu: `document_format` (`type: "string"`), `field` (`type: "string"`), `source_name` (`type: "string"`), `source_url_detail` (`type: "string"`), `source_url_pdf` (`type: "string"`).
 - Khi phát hiện header độc lập của văn bản kế tiếp, `next_document_start_page` đánh dấu điểm dừng; không lấy trường của phụ lục hay văn bản đính kèm làm trường của văn bản thứ nhất.
 - Người ký và chức danh lấy tại trang đầu tiên có vùng ký hợp lệ trong phạm vi văn bản thứ nhất.
 
@@ -61,12 +65,12 @@ Pipeline trích xuất văn bản chính đầu tiên trong PDF.
 Theo đúng thứ tự:
 
 1. Thay toàn bộ dấu `.` thành dấu cách.
-1. Bỏ khoảng trắng đầu và cuối.
+2. Bỏ khoảng trắng đầu và cuối.
 3. Rút nhiều whitespace liên tiếp thành một dấu cách.
 4. Xóa whitespace quanh `/` và `-`.
 5. Đổi các dấu cách còn lại thành `-`.
 6. Rút nhiều dấu `-` liên tiếp thành một dấu `-`.
-7. Bỏ `;`, `,`, `:` thừa ở cuối.
+7. Bỏ `;`, `,`, `:` thừa.
 
 Ví dụ `4977 / BVHTTDL  VP:` thành `4977/BVHTTDL-VP`.
 
@@ -86,8 +90,8 @@ Không thêm quy tắc theo tên file hoặc đáp án GT. Dạng không bắt �
 ### 3.4. Ngày và địa danh
 
 - `documentDate` và `province` được tìm trong vùng header mặc định.
-- Khi không tìm được `documentDate`, hiện tại trả `""`. Fallback lấy câu “thông qua ngày...” ở trang ký cuối đang tạm bỏ; chỉ được thử lại trong một thí nghiệm riêng và phải chứng minh cải thiện không hồi quy.
-- Fallback ngày, nếu được thử sau này, chỉ có quyền trả `documentDate`; không được xóa hoặc ghi đè `province`.
+- Ưu tiên `documentDate` ngay dưới Quốc hiệu/Tiêu ngữ tại `document_start_page`. Chỉ khi không tìm được ngày hợp lệ tại đây, tìm ngày theo sau cụm “...thông qua ngày...” trong phần kết thúc trên các trang ký/nơi nhận thuộc `document_end_pages` của văn bản chính. Câu phải nói về việc thông qua chính văn bản đang trích xuất, không phải ngày viện dẫn, ngày hiệu lực hoặc ngày của văn bản đính kèm. Không tìm được ngày hợp lệ ở cả hai nguồn thì trả `""`.
+- Fallback này chỉ trả `documentDate`; không được xóa hoặc ghi đè `province`, không thay ngày header hợp lệ bằng ngày cuối văn bản. Giữ page, anchor, source text và bbox của nguồn ngày trong evidence.
 - `receiverDate` ngoài phạm vi vòng tối ưu hiện tại: pipeline luôn trả `""` (giữ key cho ổn định schema), không trích xuất từ dấu đến/văn bản đến và benchmark không chấm trường này.
 
 ### 3.5. Các trường còn lại
@@ -95,11 +99,25 @@ Không thêm quy tắc theo tên file hoặc đáp án GT. Dạng không bắt �
 - `type` lấy hình thức văn bản chính, không lấy từ câu nhắc trong thân văn bản.
 - Văn bản hợp nhất (`code` chứa `VBHN-`): `type` là hình thức của văn bản được hợp nhất (tên in lớn, căn giữa ở đầu văn bản như `THÔNG TƯ`, `NGHỊ ĐỊNH`), không lấy nhãn wrapper `VĂN BẢN HỢP NHẤT` ở góc trên bên trái làm `type`.
 - `title` giữ nội dung có nghĩa và dấu câu nguồn; phần tiếp dòng được nối theo mục 3.1.
-- `recipients` lấy vùng Nơi nhận ở phần kết thúc.
+- `recipients` lấy toàn bộ danh sách trong vùng Nơi nhận ở phần kết thúc, bao gồm mục lưu nội bộ cuối danh sách bắt đầu bằng hoặc chứa `Lưu`, `Lưu:`, `Lưu: VT`,... và các dòng tiếp của mục đó. Giữ nội dung `Lưu` và đơn vị/ký hiệu lưu theo nguồn, áp dụng ghép dòng/phân cách ở mục 3.1; không lấy từ “lưu” xuất hiện ngoài danh sách Nơi nhận.
 - `first_recipients` lấy Kính gửi ở đầu văn bản.
 - `signer` giữ họ tên người ký theo nguồn; mỗi cụm ký một họ tên, nhiều cụm ký phân cách bằng `; ` theo mục 3.1.
 - `signer_title` giữ chức danh/thẩm quyền ký theo cụm ký ở mục 3.1: trong cụm nối dòng bằng dấu cách, giữa các cụm phân cách bằng `; `.
 - `priority_level` và `security_level` chỉ trả lớp khác mặc định khi có bằng chứng trong tài liệu.
+
+### 3.6. Thứ tự tìm `officeSender`
+
+Áp dụng theo thứ tự dưới đây, dừng ngay khi tìm được tên cơ quan/tổ chức ban hành hợp lệ có bằng chứng trong văn bản. Chuẩn hóa Unicode, khoảng trắng và so khớp không phân biệt hoa/thường để nhận diện anchor; giữ tên theo nguồn và nối dòng bằng một dấu cách ở đầu ra.
+
+1. Đọc vùng trên bên trái trang mở đầu văn bản chính, bên trái Quốc hiệu/Tiêu ngữ.
+   - Nếu là tên tổ chức hợp lệ trong vai trò cơ quan ban hành, lấy giá trị đó.
+   - Nếu là nhãn `VĂN BẢN HỢP NHẤT` (không phân biệt hoa/thường), không lấy nhãn làm tên cơ quan. Tìm trên các trang kết thúc/ký/nơi nhận của văn bản chính: tên cơ quan nằm ngay trên dòng in hoa `XÁC THỰC VĂN BẢN HỢP NHẤT`; bên dưới thường là địa danh và ngày, chức danh người ký, chữ ký/con dấu và họ tên. Nếu tên hợp lệ thì lấy và dừng. Ví dụ cụm xác thực có `BỘ TƯ PHÁP` phía trên anchor này thì `officeSender = BỘ TƯ PHÁP`.
+2. Nếu vẫn chưa có giá trị hợp lệ (vùng đầu thiếu, không đọc được, ứng viên không hợp lệ hoặc fallback VBHN thất bại):
+   - Tìm trong nội dung trang mở đầu văn bản chính mẫu `Tên công ty` hoặc `Tên tổ chức` + `phát hành` (tùy chọn) + `:` (tùy chọn) + tên tổ chức hợp lệ. Chỉ lấy phần tên, không lấy nhãn.
+   - Nếu không tìm được, tìm tên cơ quan ban hành ở vùng trên/dưới của cùng trang, gồm Quốc hiệu/header/footer, với bằng chứng về vai trò ban hành; không nhận tên tổ chức bất kỳ chỉ vì nằm sát mép trang.
+3. Loại ứng viên thuộc `Kính gửi`, `... điện:`, `Tên công ty nhận`, `Tên tổ chức nhận`, `Nơi nhận`, dấu tiếp nhận hoặc các nhãn có vai trò người nhận/liên hệ tương tự. Nhãn hình thức văn bản, chức danh và tên người ký không phải tên tổ chức hợp lệ. Nếu mọi bước thất bại thì trả `""`.
+
+Mọi bước chỉ xét văn bản chính đầu tiên, không lấy tổ chức từ phụ lục/văn bản kế tiếp hay suy ra từ tên file, GT hoặc metadata ngoài PDF. Evidence giữ nguồn trang/vùng và quy tắc chọn. Khi tên cơ quan được lấy ngoài header, vùng tìm `code` vẫn neo vào bố cục đầu trang bên trái Quốc hiệu/Tiêu ngữ (kể cả khi vùng này chứa nhãn VBHN), không chuyển sang vùng ký hoặc footer.
 
 ## 4. Ba tầng dữ liệu
 
@@ -137,9 +155,9 @@ Nhóm Exact không có bucket Acceptable. `NEM` là tỷ lệ Exact trên các m
 - Target PoC/demo: `≥ 0.80`; stretch target: `≥ 0.90` (`DOCUMENT_SUCCESS_TARGET_POC/STRETCH` trong code, không hard-code ở notebook/report).
 - Lưu trữ mỗi bundle: `document_success.csv` (`document_id`, `document_success_at_5`, `evaluated_required_fields`, `failed_required_fields`) và `summary.json → document_success_at_5` (`rate`, `passed_documents`, `evaluated_documents`, targets, `meets_poc`, `meets_stretch`).
 
-Target hiện tại cho **cả 12 field được đánh giá**: **F1, precision, recall `>=0.85`; NEM `>=0.75`**. Hallucination rate giữ ngưỡng cũ: `<=0.01` cho mọi field trừ `province` (`<=0.02`). Không có target field cho `receiverDate`.
+Target áp dụng **riêng cho từng field trong 12 field được đánh giá** (không phải target macro/gộp giữa các field): **PoC/demo: F1, precision và recall đều `>=0.85` cho mỗi field; stretch/production: cả ba metric đều `>=0.90` cho mỗi field**. NEM giữ target `>=0.75` cho mỗi field. Hallucination rate giữ ngưỡng cũ: `<=0.01` cho mọi field trừ `province` (`<=0.02`). Không có target field cho `receiverDate`.
 
-Trên slide/báo cáo, mỗi field hiển thị theo dạng **F1 (precision, recall) / NEM / VAI-style ACC (tham chiếu)**, đặt **target `0.85 (0.85, 0.85) / 0.75 / không áp dụng`** cạnh giá trị field thực tế. F1, NEM và VAI-style ACC là các chỉ số khác nhau; không lấy Document Success@5%, macro F1 hoặc ACC thay cho kết quả từng field. Trạng thái target trong artifact đã chấm bằng ngưỡng cũ chỉ có tính lịch sử; nếu muốn công bố trạng thái theo target mới, phải đối chiếu lại giá trị F1/precision/recall/NEM/hallucination trên đúng bundle, không sửa GT hay artifact gốc.
+Trên slide/báo cáo, mỗi field hiển thị theo dạng **F1 (precision, recall) / NEM / VAI-style ACC (tham chiếu)**, đặt **target PoC `0.85 (0.85, 0.85) / 0.75 / không áp dụng`** và **target stretch/production `0.90 (0.90, 0.90) / 0.75 / không áp dụng`** cạnh giá trị field thực tế. F1, NEM và VAI-style ACC là các chỉ số khác nhau; không lấy Document Success@5%, macro F1 hoặc ACC thay cho kết quả từng field. Trạng thái target trong artifact đã chấm bằng ngưỡng cũ chỉ có tính lịch sử; nếu muốn công bố trạng thái theo target mới, phải đối chiếu lại giá trị F1/precision/recall/NEM/hallucination trên đúng bundle, không sửa GT hay artifact gốc.
 
 Thiếu mẫu số hoặc thiếu lớp enum phải báo `Chưa đánh giá đầy đủ`, không tính là đạt.
 
@@ -226,7 +244,7 @@ Các artifact phân tích cũ có thể còn nhãn chi tiết `Chưa xác địn
 
 Phân bố nguyên nhân phải ghi rõ **bundle, mode chạy, tập 12 field, các bucket tính vào mẫu số, cỡ mẫu và nguồn phân loại**. Chỉ dùng `Wrong`, `Missing`, `Hallucination`; không tính `Exact`, `Acceptable`, `Correct Absent` hoặc `receiverDate`. Phải kiểm tra trực tiếp từng ô lỗi: đối chiếu text layer PDF nếu có, ảnh render trang đầu/cuối đã detect và trang/vùng liên quan đến field, cùng OCR/layout trace và crop/bbox. Ghi bằng chứng quan sát được và lý do cho nhãn; không suy nguyên nhân chỉ từ bucket, metadata, hoặc chuỗi GT/prediction. Nếu sau khi kiểm tra vẫn thiếu căn cứ, gán `Chưa xác định` (nhóm `Khác`) và nêu rõ điều gì chưa thể xác minh; không đoán. Bảng theo từng ô phải giữ liên kết tới trang, block/region, bbox và trace khi có. Số liệu và kết luận riêng của mỗi lượt chạy chỉ thuộc report/artifact gắn với bundle đó, không đưa vào spec này. Không lấy bảng nguyên nhân của bundle/split khác làm phân bố cho full inference 100 PDF.
 
-`Chữ viết tay` là yếu tố góp phần dưới `OCR/chính tả`, chỉ xét cho `code`, `documentDate`. `has_handwriting=true` chỉ cho phép ghi “Lỗi OCR (khả năng cao do chữ viết tay)”; chỉ ghi đã xác nhận khi evidence vùng field chứng minh trực tiếp.
+`Chữ viết tay` là yếu tố góp phần dưới `OCR/chính tả`, xét trong phạm vi 12 trường trích xuất được đánh giá (không xét `receiverDate`). Cờ `has_handwriting=true` (đồng nhất với `handwritten_fields` không rỗng) chỉ ghi nhận khi nội dung giá trị thực tế của một trong 12 trường có phần viết tay trực tiếp; không áp dụng cho chữ ký tự do (autograph) thay thế tên người ký in sẵn, dấu tiếp nhận đến, ghi chú lề hay nét vẽ xung quanh. `has_handwriting=true` chỉ cho phép ghi “Lỗi OCR (khả năng cao do chữ viết tay)”; chỉ ghi đã xác nhận khi evidence vùng field chứng minh trực tiếp.
 
 Báo cáo so sánh tối thiểu gồm:
 

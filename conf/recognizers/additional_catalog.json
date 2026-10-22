@@ -1,0 +1,31 @@
+{
+  "akaocr": {
+    "backend": "akaocr",
+    "package": "akaocr==2.1.6",
+    "wheel_url": "https://files.pythonhosted.org/packages/9b/46/4bef3c46839dab85e3c3dd8b44a83fe93783032fa4c7c6ccf88f3471a468/akaocr-2.1.6-py3-none-any.whl",
+    "wheel_sha256": "a7f0fad2bb061ddf455b0519484f959ca3ba9a342c38172c2cd927eb7f641f31",
+    "license": "Package declares Apache-2.0; bundled LICENSE retained. Default bundled checkpoint has limited Vietnamese vocabulary."
+  },
+  "vietocr_original_seq2seq": {
+    "backend": "vietocr_original",
+    "variant": "vgg_seq2seq",
+    "weight_url": "https://vocr.vn/data/vietocr/vgg_seq2seq.pth",
+    "source_revision": "fe8c3a7fc714aec57ab81cec844eb3adf0c1636c",
+    "license": "Upstream source LICENSE retained; README declares Apache-2.0. Verify source/checkpoint terms before distribution."
+  },
+  "vietocr_original_transformer": {
+    "backend": "vietocr_original",
+    "variant": "vgg_transformer",
+    "weight_url": "https://vocr.vn/data/vietocr/vgg_transformer.pth",
+    "source_revision": "fe8c3a7fc714aec57ab81cec844eb3adf0c1636c",
+    "license": "Upstream source LICENSE retained; README declares Apache-2.0. Verify source/checkpoint terms before distribution."
+  },
+  "vietocr_dunghugging": {
+    "backend": "vietocr_original",
+    "variant": "vgg_transformer",
+    "repo_id": "DungHugging/vietocr-handwritten-finetune",
+    "revision": "0827b42e17cb0e1c1bbda5aac11f7cc5c816e0ca",
+    "source_revision": "fe8c3a7fc714aec57ab81cec844eb3adf0c1636c",
+    "license": "Model card declares MIT; retain its README and original upstream LICENSE."
+  }
+}

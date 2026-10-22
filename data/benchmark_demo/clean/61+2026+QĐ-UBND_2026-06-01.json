@@ -22,6 +22,24 @@
         "source_url_detail": {
             "value": "https://vanban.hanoi.gov.vn/van-ban-quy-pham-phap-luat/ve-viec-quy-dinh-ve-day-them-hoc-them-tren-dia-ban-thanh-pho-ha-noi-250955",
             "type": "string"
+        },
+        "document_start_page": {
+            "value": 0,
+            "type": "integer"
+        },
+        "document_end_pages": {
+            "value": [
+                7
+            ],
+            "type": "array"
+        },
+        "handwritten_fields": {
+            "value": [],
+            "type": "array"
+        },
+        "stamp_affected_fields": {
+            "value": [],
+            "type": "array"
         }
     },
     "information": {

@@ -1,0 +1,7 @@
+# Separate --target runtime only. Never install this over the baseline venv.
+transformers==5.0.0
+sentencepiece==0.2.1
+huggingface-hub==1.33.0
+tokenizers==0.22.2
+numpy==2.2.6
+safetensors==0.8.0

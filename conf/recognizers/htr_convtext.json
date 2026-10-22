@@ -1,0 +1,11 @@
+{
+  "backend": "htr_convtext",
+  "model_dir": "scratch/ocr-recognizers/models/htr_convtext",
+  "device": "cuda",
+  "max_batch_size": 16,
+  "runtime": {
+    "pythonpath": ["scratch/ocr-recognizers/python-deps"],
+    "ipc_batch_size": 32,
+    "timeout_seconds": 900
+  }
+}

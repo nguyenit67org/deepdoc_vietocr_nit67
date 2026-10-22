@@ -4,6 +4,17 @@ import numpy as np
 
 
 @runtime_checkable
+class TextRecognitionBackend(Protocol):
+    """Recognition-only swap point: BGR uint8 crops in, ordered text/score out.
+
+    Every crop must have one result, including empty text. No detection or
+    geometry changes. The elapsed value is seconds, not a confidence score.
+    """
+
+    def __call__(self, img_list: list[np.ndarray]) -> tuple[list[tuple[str, float]], float]: ...
+
+
+@runtime_checkable
 class OCREngine(Protocol):
     """Contract a swappable OCR backend must satisfy.
 
@@ -15,7 +26,7 @@ class OCREngine(Protocol):
     """
 
     text_detector: list[Any]
-    text_recognizer: list[Any]
+    text_recognizer: list[TextRecognitionBackend]
     drop_score: float
 
     def sorted_boxes(self, dt_boxes: np.ndarray) -> list: ...

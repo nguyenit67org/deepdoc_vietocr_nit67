@@ -47,6 +47,13 @@ class PipelineConfig:
     batch_api_max_images_per_group: int
     table_enabled: bool = True
     pipeline_max_pages_per_batch: int = 64
+    remove_red_enabled: bool = False
+    remove_red_max_regions: int = 16
+    remove_red_max_area_ratio: float = 0.25
+    remove_red_padding: int = 4
+    remove_red_dense_threshold: float = 0.18
+    remove_red_dark_red_max: int = 145
+    remove_red_min_black_neighbors: int = 8
 
     @classmethod
     def from_conf(cls, conf: dict) -> "PipelineConfig":
@@ -58,6 +65,7 @@ class PipelineConfig:
         page_orientation = conf.get("page_orientation", {})
         batch_api = conf.get("batch_api", {})
         pipeline = conf.get("pipeline", {})
+        remove_red = conf.get("remove_red", {})
         return cls(
             pdf_dpi=conf.get("pdf", {}).get("dpi", 200),
             layout_threshold=conf.get("layout", {}).get("threshold", 0.2),
@@ -96,4 +104,11 @@ class PipelineConfig:
             batch_api_max_pages_per_group=batch_api.get("max_pages_per_group", 200),
             batch_api_max_images_per_group=batch_api.get("max_images_per_group", 200),
             pipeline_max_pages_per_batch=pipeline.get("max_pages_per_batch", 64),
+            remove_red_enabled=remove_red.get("enabled", False),
+            remove_red_max_regions=int(remove_red.get("max_regions_per_page", 16)),
+            remove_red_max_area_ratio=float(remove_red.get("max_probe_area_ratio", 0.25)),
+            remove_red_padding=int(remove_red.get("padding", 4)),
+            remove_red_dense_threshold=float(remove_red.get("dense_threshold", 0.18)),
+            remove_red_dark_red_max=int(remove_red.get("dark_red_max", 145)),
+            remove_red_min_black_neighbors=int(remove_red.get("min_black_neighbors", 8)),
         )

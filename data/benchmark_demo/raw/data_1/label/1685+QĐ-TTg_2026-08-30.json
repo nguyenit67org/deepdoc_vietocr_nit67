@@ -71,6 +71,30 @@
     "source_url_detail": {
       "value": "https://vanban.chinhphu.vn/?pageid=27160&docid=219346",
       "type": "string"
+    },
+    "document_start_page": {
+      "value": 0,
+      "type": "integer"
+    },
+    "document_end_pages": {
+      "value": [
+        0
+      ],
+      "type": "array"
+    },
+    "handwritten_fields": {
+      "value": [
+        "code",
+        "documentDate"
+      ],
+      "type": "array"
+    },
+    "stamp_affected_fields": {
+      "value": [
+        "signer",
+        "signer_title"
+      ],
+      "type": "array"
     }
   }
 }
