@@ -63,6 +63,22 @@ Total file-request wall time: 944.344 seconds. Maximum observed cgroup peak:
 Peaks are cumulative since startup, not independent per-file process RSS. Timings
 are WSL measurements, not UAT performance guarantees. Startup time is separate.
 
+## Exported primary release: verified
+
+- Windows directory: `D:\ocr-uat-release\py310`.
+- Archive: `deepdoc-uat-py310-cpu.tar.gz`, 1,093,283,897 bytes (about 1.09 GB).
+- Archive SHA-256: `3d38d4d63f560cbf2f770f27ad9ead22578675d07e939b48edb289271f4beb46`.
+- All release files passed `sha256sum -c SHA256SUMS`.
+- Archive loaded back into local Docker successfully and retained the exact tested
+  image identity. No UAT access was used for this round-trip test.
+- Export verified 64 runtime source files against the deployment worktree and all
+  packaged model artifacts against their manifest. The runtime model manifest is
+  identical between Python variants. Checksums and source provenance are in release.json.
+- Compose parsed successfully with 8 GiB RAM, no swap, four CPU quota, read-only root,
+  loopback-only bind and pull_policy=never. A temporary fake key was used for parsing;
+  no real production key is included in any release.
+- DEPLOY.md is the Vietnamese guide; TECHNICAL.md contains build/qualification detail.
+
 ## Source-level tests
 
 The remaining deployment branch test suite passed on the existing developer venv:
