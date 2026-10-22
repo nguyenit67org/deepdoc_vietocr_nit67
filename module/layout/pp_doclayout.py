@@ -44,10 +44,15 @@ class PPDocLayoutBackend:
         h2_types=frozenset({"paragraph_title"}),
     )
 
-    def __init__(self, model_name: str = "PP-DocLayout_plus-L", device: str = "cpu", max_batch_size: int = 8, model_dir: str | None = None):
+    def __init__(self, model_name: str = "PP-DocLayout_plus-L", device: str = "cpu", max_batch_size: int = 8, model_dir: str | None = None,
+                 enable_mkldnn: bool | None = None, cpu_threads: int | None = None):
         from paddleocr import LayoutDetection
 
         options = {"model_dir": model_dir} if model_dir else {}
+        if enable_mkldnn is not None:
+            options["enable_mkldnn"] = enable_mkldnn
+        if cpu_threads is not None:
+            options["cpu_threads"] = cpu_threads
         self._model = LayoutDetection(model_name=model_name, device=device, **options)
         logger.info("[device] Layout (%s): device=%s", model_name, device)
         self._device = device

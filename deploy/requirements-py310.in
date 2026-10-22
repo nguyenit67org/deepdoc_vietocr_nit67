@@ -1,0 +1,4 @@
+-r requirements.in
+-c constraints-py310.txt
+torch==2.13.0+cpu
+torchvision==0.28.0+cpu

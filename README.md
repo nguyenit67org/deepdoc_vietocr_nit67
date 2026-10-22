@@ -4,6 +4,8 @@ Deployment branch for `POST /api/v1/ocr/pdf`, using upstream VietOCR VGG Transfo
 ONNX text detection and PP-DocLayout_plus-L. No table processing or retained documents.
 
 - Runtime: `server.uat:app`, one worker, one PDF in flight, Bearer authentication.
+- Primary image: Python 3.10 CPU, `deploy/Dockerfile.py310`; separately tagged
+  Python 3.11 CPU backup uses `deploy/Dockerfile`.
 - Limits: 8 GiB memory including tmpfs, no swap, maximum 4 vCPU.
 - Build and offline deployment instructions: [deploy/README.md](deploy/README.md).
 - Authoritative extraction contract: [docs/ocr_pipeline_benchmark_metrics.md](docs/ocr_pipeline_benchmark_metrics.md).

@@ -13,7 +13,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from module.cancellation import check_cancelled, cancellation_scope, ProcessingCancelled
-from server.uat import create_app, run_inference
+from server.uat import PdfAdmission, create_app, run_inference
 
 
 def prediction():
@@ -142,6 +142,22 @@ class UatApiTests(unittest.TestCase):
 
 
 class CancellationTests(unittest.IsolatedAsyncioTestCase):
+    async def test_asyncio_upload_timeout_returns_408_on_python310(self):
+        state = SimpleNamespace(api_key="test-key", ready=True, busy=False)
+        scope = {"type": "http", "path": "/api/v1/ocr/pdf", "method": "POST",
+                 "headers": [(b"authorization", b"Bearer test-key")],
+                 "app": SimpleNamespace(state=state)}
+        sent = []
+        async def receive():
+            raise asyncio.TimeoutError()
+        async def send(message):
+            sent.append(message)
+        async def inner(scope, receive, send):
+            await receive()
+        await PdfAdmission(inner)(scope, receive, send)
+        self.assertEqual(sent[0]["status"], 408)
+        self.assertFalse(state.busy)
+
     async def test_disconnect_cancels_without_reloading(self):
         pipeline = FakePipeline()
         pipeline.block = True
@@ -178,6 +194,29 @@ class CancellationTests(unittest.IsolatedAsyncioTestCase):
 
 
 class PersistenceTests(unittest.TestCase):
+    def test_cpu_detector_does_not_shrink_disabled_arena(self):
+        from unittest.mock import Mock
+        from module.ocr import engine
+        with tempfile.TemporaryDirectory() as directory:
+            Path(directory, "det.onnx").touch()
+            options = Mock()
+            with patch("torch.cuda.is_available", return_value=False), \
+                 patch.object(engine.ort, "InferenceSession"), \
+                 patch.object(engine.ort, "RunOptions", return_value=options):
+                engine.load_model(directory, "det")
+            options.add_run_config_entry.assert_not_called()
+            engine.loaded_models.pop(str(Path(directory, "det.onnx")), None)
+
+    def test_layout_cpu_options_are_explicit(self):
+        import sys
+        from unittest.mock import Mock
+        from module.layout.pp_doclayout import PPDocLayoutBackend
+        constructor = Mock()
+        with patch.dict(sys.modules, {"paddleocr": SimpleNamespace(LayoutDetection=constructor)}):
+            PPDocLayoutBackend(model_dir="/models/layout", enable_mkldnn=False, cpu_threads=4)
+        constructor.assert_called_once_with(model_name="PP-DocLayout_plus-L", device="cpu",
+                                            model_dir="/models/layout", enable_mkldnn=False, cpu_threads=4)
+
     def test_no_output_directory_when_disabled(self):
         from PIL import Image
         from module.pipeline import DocumentPipeline, PipelineConfig

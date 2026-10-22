@@ -73,7 +73,7 @@ class PdfAdmission:
                 if remaining <= 0:
                     raise UploadRejected(408, "Upload total timeout")
                 message = await asyncio.wait_for(receive(), timeout=min(60, remaining))
-            except TimeoutError:
+            except asyncio.TimeoutError:
                 raise UploadRejected(408, "Upload idle timeout") from None
             if message["type"] == "http.request":
                 count += len(message.get("body", b""))

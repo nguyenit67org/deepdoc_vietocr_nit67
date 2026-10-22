@@ -1,6 +1,6 @@
 services:
   ocr-api:
-    image: ${OCR_IMAGE:-deepdoc-uat:cpu}
+    image: ${OCR_IMAGE:-deepdoc-uat:py310-cpu}
     pull_policy: never
     init: true
     restart: "no"

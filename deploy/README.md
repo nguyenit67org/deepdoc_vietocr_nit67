@@ -1,5 +1,22 @@
 # CPU UAT: build, transfer, run
 
+## Two explicitly separated variants
+
+- **Primary:** Python 3.10.22, `deploy/Dockerfile.py310`,
+  `deploy/requirements-py310.lock`, tag `deepdoc-uat:py310-cpu`.
+- **Backup:** Python 3.11, `deploy/Dockerfile`, `deploy/requirements.lock`,
+  tag `deepdoc-uat:py311-cpu`.
+- Existing developer venv is Python 3.10.12. The primary image uses a newer patch
+  of the same Python minor, not the host Ubuntu Python 3.12. Its dependency versions
+  are constrained to the observed venv versions, excluding GPU wheels. Torch and
+  Torchvision use `+cpu`; Paddle uses the CPU distribution at the same 3.3.0 version.
+- CPU layout explicitly disables MKLDNN because real inference hit Paddle's
+  `ConvertPirAttribute2RuntimeAttribute` oneDNN error. The ONNX detector does not
+  request shrinking a disabled CPU arena. Neither fix changes model weights or
+  VBHC extraction rules.
+- The backup is tested on one offline PDF; the primary on five. Transfer only the
+  primary archive to UAT unless rollback to the backup is explicitly needed.
+
 ## Contract and limits
 
 - `POST /api/v1/ocr/pdf`: multipart file field `file`, Bearer `VOCR_API_KEY`.
@@ -50,6 +67,7 @@ must remain available. Git alone does not supply the external model assets.
 
 ```bash
 uv run --no-project --python /home/nguyen/projects/deepdoc_vietocr_dh/.venv/bin/python python scripts/prepare_uat_context.py \
+  --python-version 3.10 \
   --assets-root /home/nguyen/projects/deepdoc_vietocr_dh \
   --layout-dir /home/nguyen/.paddlex/official_models/PP-DocLayout_plus-L \
   --output /tmp/opencode/deepdoc-uat-build
@@ -62,14 +80,14 @@ Check available real space during build/export. Never prune unrelated images/cac
 
 ```bash
 docker build --progress=plain -f /tmp/opencode/deepdoc-uat-build/deploy/Dockerfile \
-  -t deepdoc-uat:cpu /tmp/opencode/deepdoc-uat-build
+  -t deepdoc-uat:py310-cpu /tmp/opencode/deepdoc-uat-build
 ```
 
 If Docker requires sudo, prefix Docker commands with `sudo`. Do not make its socket
 world-writable. Docker access is effectively root access.
 
-Dependencies are locked in `deploy/requirements.lock`, with CPU Torch/torchvision
-explicitly installed from the CPU index. The image has no CUDA, MinerU, Surya or
+Dependencies for the primary are locked in `deploy/requirements-py310.lock`, including
+CPU Torch/torchvision from the CPU index. The image has no CUDA, MinerU, Surya or
 GLiNER dependencies. Build-time network access is required; runtime must not need it.
 
 ## 3. Verify before export
@@ -85,6 +103,7 @@ Real offline integration tests, once Docker works:
 ```bash
 uv run --no-project --python /home/nguyen/projects/deepdoc_vietocr_dh/.venv/bin/python python scripts/test_uat_image.py \
   --dataset /home/nguyen/projects/deepdoc_vietocr_dh/data/benchmark_demo/raw \
+  --image deepdoc-uat:py310-cpu --count 5 \
   --output /tmp/opencode/deepdoc-uat-evidence
 ```
 
@@ -102,15 +121,32 @@ If restarting a test, use a new evidence output directory.
 
 ## 4. Export and transfer
 
+Preferred automated export (refuses a changed/untested image and writes checksums):
+
+```bash
+sudo /home/nguyen/projects/deepdoc_vietocr_dh/.venv/bin/python scripts/export_uat_release.py \
+  --image deepdoc-uat:py310-cpu --evidence /tmp/opencode/deepdoc-uat-evidence-py310 \
+  --output /mnt/d/ocr-uat-release/py310
+```
+
+The output must not exist already. It contains the archive, Compose, key template,
+`SHA256SUMS`, release identity and a non-document validation summary. It does not
+include test PDFs, predictions, real keys or the developer environment. Export the
+backup separately to `py311-backup`, not into the directory transferred to UAT.
+Use the actual passing evidence path from `VALIDATION.md` when available.
+
+Manual alternative:
+
 Only after tests pass, create a release directory on a drive with sufficient space:
 
 ```bash
 mkdir -p /mnt/d/ocr-uat-release
-docker image inspect deepdoc-uat:cpu --format '{{.Size}}'
+docker image inspect deepdoc-uat:py310-cpu --format '{{.Size}}'
 set -o pipefail
-docker save deepdoc-uat:cpu | gzip -1 > /mnt/d/ocr-uat-release/deepdoc-uat-cpu.tar.gz
+docker save deepdoc-uat:py310-cpu | gzip -1 > /mnt/d/ocr-uat-release/deepdoc-uat-py310-cpu.tar.gz
 cp deploy/compose.yaml deploy/.env.example /mnt/d/ocr-uat-release/
-sha256sum /mnt/d/ocr-uat-release/deepdoc-uat-cpu.tar.gz
+cd /mnt/d/ocr-uat-release
+sha256sum deepdoc-uat-py310-cpu.tar.gz compose.yaml .env.example > SHA256SUMS
 ```
 
 Save the printed checksum separately. Check both uncompressed image size and compressed
@@ -121,6 +157,8 @@ Do not keep a separate uncompressed `.tar` or transfer a venv/dataset.
 
 Use WinSCP to transfer the archive, `compose.yaml`, and `.env.example` from Windows
 `D:\ocr-uat-release` to a new UAT directory such as `/home/app/ocr-uat`.
+For automated exports, transfer the full contents of `D:\ocr-uat-release\py310`,
+including hidden `.env.example` and `SHA256SUMS`; do not transfer the backup too.
 
 ## 5. UAT preflight and startup
 
@@ -128,15 +166,20 @@ On UAT, from `/home/app/ocr-uat`:
 
 ```bash
 df -h / /home/app
+grep -m1 '^flags' /proc/cpuinfo | grep -oE '\b(avx|avx2|fma)\b'
 sudo ss -ltnp 'sport = :8000'
-sha256sum deepdoc-uat-cpu.tar.gz
-sudo docker load -i deepdoc-uat-cpu.tar.gz
+sha256sum -c SHA256SUMS
+sudo docker load -i deepdoc-uat-py310-cpu.tar.gz
 df -h /
 ```
 
 Checksum must match WSL; port 8000 must be unused. Do not stop another service or
 change its port to make room. The archive may be removed after successful load and
 verification to reclaim space; keep the WSL release copy.
+CPU instruction features can differ between WSL and the UAT VM despite both being
+x86_64. Missing AVX, illegal-instruction crashes or native import errors must be
+investigated before serving requests. Do not install host Python packages to fix
+container dependencies.
 
 Create the key locally on UAT (do not send it to chat or commit it):
 

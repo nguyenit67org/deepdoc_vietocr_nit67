@@ -23,6 +23,8 @@ def get_layout_backend(conf: dict) -> LayoutBackend:
             device=layout_conf.get("device") or _auto_layout_device(),
             max_batch_size=layout_conf.get("max_batch_size", 8),
             model_dir=layout_conf.get("model_dir"),
+            enable_mkldnn=layout_conf.get("enable_mkldnn"),
+            cpu_threads=layout_conf.get("cpu_threads"),
         )
     raise ValueError(f"Unknown layout backend: {backend!r}")
 

@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--assets-root", type=Path, required=True)
     parser.add_argument("--layout-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--python-version", choices=("3.10", "3.11"), default="3.10")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
     original = args.assets_root / "scratch/ocr-recognizers/models/vietocr_original_transformer"
@@ -32,10 +33,15 @@ def main():
     for folder in ("module", "utils", "fastocr"):
         shutil.copytree(repo / folder, target / folder, ignore=ignore)
     for rel in ("server/__init__.py", "server/schemas.py", "server/security.py", "server/uat.py",
-                "conf/uat.yaml", "deploy/Dockerfile", "deploy/requirements.lock"):
+                "conf/uat.yaml"):
         destination = target / rel
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(repo / rel, destination)
+    (target / "deploy").mkdir()
+    variant = "Dockerfile.py310" if args.python_version == "3.10" else "Dockerfile"
+    lock = "requirements-py310.lock" if args.python_version == "3.10" else "requirements.lock"
+    shutil.copy2(repo / "deploy" / variant, target / "deploy/Dockerfile")
+    shutil.copy2(repo / "deploy" / lock, target / "deploy/requirements.lock")
     shutil.copy2(repo / "deploy/context.dockerignore", target / ".dockerignore")
     shutil.copytree(original / "source", target / "models/vietocr/source", ignore=ignore)
     for name in ("weights.pth", "config.yml", "download_manifest.json"):

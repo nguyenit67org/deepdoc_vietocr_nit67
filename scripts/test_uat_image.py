@@ -45,15 +45,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--image", default="deepdoc-uat:cpu")
+    parser.add_argument("--image", default="deepdoc-uat:py310-cpu")
+    parser.add_argument("--count", type=int, choices=(1, 5), default=5)
     parser.add_argument("--seed", type=int, default=20261022)
     args = parser.parse_args()
     # Fail before creating evidence if Docker cannot be reached.
     docker("info", "--format", "{{.OSType}}/{{.Architecture}}")
-    selected = select_samples(args.dataset, args.seed)
+    selected = select_samples(args.dataset, args.seed)[:args.count]
     args.output.mkdir(parents=True, exist_ok=False)
     manifest = {"seed": args.seed, "image": args.image,
-                "scope": "Five samples, 1..20 pages only; not a 353-page qualification",
+                "scope": f"{args.count} samples, 1..20 pages only; not a 353-page qualification",
                 "samples": [{"path": str(path), "pages": pages} for path, pages in selected]}
     (args.output / "samples.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
     name = "deepdoc-uat-smoke-" + secrets.token_hex(4)
@@ -78,7 +79,12 @@ def main():
             time.sleep(2)
         for index, (path, pages) in enumerate(selected, 1):
             remote = f"/tmp/sample-{index}.pdf"
-            subprocess.run(["docker", "cp", str(path), name + ":" + remote], check=True, capture_output=True)
+            # docker cp can reject writes for read-only containers even into a
+            # mounted tmpfs. Write through exec as the unprivileged runtime user.
+            with path.open("rb") as source:
+                subprocess.run(["docker", "exec", "-i", name, "python", "-c",
+                                f"import sys,pathlib; pathlib.Path({remote!r}).write_bytes(sys.stdin.buffer.read())"],
+                               stdin=source, check=True, capture_output=True)
             code = f'''import json, os, pathlib, urllib.request
 boundary = "uat-smoke-boundary"
 data = ("--"+boundary+'\\r\\nContent-Disposition: form-data; name="file"; filename="sample.pdf"\\r\\nContent-Type: application/pdf\\r\\n\\r\\n').encode()+pathlib.Path({remote!r}).read_bytes()+('\\r\\n--'+boundary+'--\\r\\n').encode()
@@ -98,17 +104,42 @@ pathlib.Path({remote!r}).unlink()
             response["container_peak_bytes_since_start"] = int(docker("exec", name, "cat", "/sys/fs/cgroup/memory.peak").strip())
             results.append(response)
             (args.output / "results.json").write_text(json.dumps(results, ensure_ascii=False, indent=2))
-            print(f"PASS {index}/5 pages={pages} seconds={response['wall_seconds']} peak_bytes={response['container_peak_bytes_since_start']}", flush=True)
+            print(f"PASS {index}/{args.count} pages={pages} seconds={response['wall_seconds']} peak_bytes={response['container_peak_bytes_since_start']}", flush=True)
         state = json.loads(docker("inspect", name))[0]
         assert not state["State"]["OOMKilled"] and state["State"]["Running"]
         docker("exec", name, "python", "-c",
                "from pathlib import Path; assert not Path('/tmp/ocr-unused-output').exists(); assert not list(Path('/tmp').glob('ocr-request-*'))")
         report = {"passed": True, "network_mode": state["HostConfig"]["NetworkMode"],
+                  "sample_count": len(results),
                   "memory_limit": state["HostConfig"]["Memory"], "memory_swap": state["HostConfig"]["MemorySwap"],
                   "nano_cpus": state["HostConfig"]["NanoCpus"], "image_id": state["Image"],
                   "image_bytes": int(docker("image", "inspect", "--format", "{{.Size}}", args.image)),
+                  "python_version": docker("exec", name, "python", "--version").strip(),
                   "note": "RAM peaks are cumulative cgroup peaks, not independent per-file peaks. Review results.json OCR values manually."}
+        runtime_code = '''import importlib.metadata as m, json, torch, paddle, onnxruntime
+assert torch.version.cuda is None and not torch.cuda.is_available()
+assert not paddle.is_compiled_with_cuda()
+assert not any("CUDA" in name for name in onnxruntime.get_available_providers())
+names = [d.metadata["Name"] for d in m.distributions()]
+assert not any(name.lower().startswith("nvidia-") or name.lower() == "paddlepaddle-gpu" for name in names)
+print(json.dumps({"torch": torch.__version__, "torch_cuda": torch.version.cuda,
+"paddle": paddle.__version__, "paddle_cuda": paddle.is_compiled_with_cuda(),
+"onnx_providers": onnxruntime.get_available_providers()}))
+'''
+        report["cpu_runtime"] = json.loads(docker("exec", name, "python", "-c", runtime_code))
+        report["pip_check"] = docker("exec", name, "python", "-m", "pip", "check").strip()
+        report["cgroup_memory_max"] = docker("exec", name, "cat", "/sys/fs/cgroup/memory.max").strip()
+        report["cgroup_swap_max"] = docker("exec", name, "cat", "/sys/fs/cgroup/memory.swap.max").strip()
+        report["cgroup_cpu_max"] = docker("exec", name, "cat", "/sys/fs/cgroup/cpu.max").strip()
+        assert report["network_mode"] == "none"
+        assert report["memory_limit"] == report["memory_swap"] == 8 * 1024**3
+        assert report["nano_cpus"] == 4 * 10**9
+        assert int(report["cgroup_memory_max"]) == 8 * 1024**3
+        assert report["cgroup_swap_max"] == "0"
+        quota, period = map(int, report["cgroup_cpu_max"].split())
+        assert quota == 4 * period
         (args.output / "summary.json").write_text(json.dumps(report, indent=2))
+        (args.output / "pip-freeze.txt").write_text(docker("exec", name, "python", "-m", "pip", "freeze"))
     finally:
         if created:
             (args.output / "container.log").write_text(docker("logs", name, stderr=subprocess.STDOUT))
