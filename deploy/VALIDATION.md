@@ -13,6 +13,12 @@
 - 16 deployment safety tests passed inside this exact image, using a read-only test
   source mount, no network and the same resource limits. Tests are not baked into it.
 - Evidence: `/tmp/opencode/deepdoc-uat-evidence-py311-v4/{summary.json,results.json,samples.json,container.log,pip-freeze.txt}`.
+- Backup archive exported and SHA-256 verified at
+  `D:\ocr-uat-release\py311-backup\deepdoc-uat-py311-cpu.tar.gz`: 1,132,564,934 bytes.
+  The `/usr` and `/app` runtime directories alone occupy about 3.30 GB unpacked;
+  the reported image/archive size is not the full Docker disk footprint.
+- The backup archive was loaded back into local Docker successfully; its image
+  identity remained exactly the tested identity above. No UAT access was involved.
 - This is one-PDF smoke qualification only, not a five-file qualification or accuracy
   benchmark. OCR/extraction quality is not certified by HTTP/schema success.
 

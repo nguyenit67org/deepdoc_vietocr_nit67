@@ -8,6 +8,7 @@ ONNX text detection and PP-DocLayout_plus-L. No table processing or retained doc
   Python 3.11 CPU backup uses `deploy/Dockerfile`.
 - Limits: 8 GiB memory including tmpfs, no swap, maximum 4 vCPU.
 - Build and offline deployment instructions: [deploy/README.md](deploy/README.md).
+- Hướng dẫn WinSCP, UAT và Postman bằng tiếng Việt: [deploy/UAT_VI.md](deploy/UAT_VI.md).
 - Authoritative extraction contract: [docs/ocr_pipeline_benchmark_metrics.md](docs/ocr_pipeline_benchmark_metrics.md).
 - Dataset, benchmark reports and old model binaries are absent from this branch's
   current tree, but remain in Git history and in `feature/extract-entity`.
