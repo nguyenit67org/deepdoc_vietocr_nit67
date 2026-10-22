@@ -1,8 +1,0 @@
-{
-  "backend": "vietocr_original",
-  "model_dir": "scratch/ocr-recognizers/models/vietocr_nhay_seq2seq",
-  "device": "cuda",
-  "max_batch_size": 16,
-  "max_seq_length": 128,
-  "runtime": {"env": {"TORCH_DISABLE_NATIVE_JIT": "1"}, "ipc_batch_size": 32, "timeout_seconds": 900}
-}

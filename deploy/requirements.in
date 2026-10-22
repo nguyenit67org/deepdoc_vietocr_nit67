@@ -1,0 +1,25 @@
+# CPU torch/torchvision are installed separately from the CPU wheel index.
+numpy==2.2.6
+opencv-contrib-python==4.10.0.84
+onnxruntime==1.23.2
+einops==0.8.2
+matplotlib==3.10.9
+Pillow==12.3.0
+pdfplumber==0.11.9
+huggingface-hub==0.36.2
+shapely==2.1.2
+pyclipper==1.4.0
+ruamel.yaml==0.19.1
+cachetools==7.1.7
+six==1.17.0
+fastapi==0.141.1
+starlette==1.6.0
+uvicorn==0.52.4
+python-multipart==0.0.32
+paddlepaddle==3.3.0
+paddleocr==3.7.0
+paddlex==3.7.2
+pdf2image==1.17.0
+loguru==0.7.3
+PyYAML==6.0.2
+scikit-image==0.25.2

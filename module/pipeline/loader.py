@@ -16,7 +16,7 @@ def load_pdf_pages(pdf_path: str, dpi: int = 200) -> list[Image.Image]:
 
 def load_pdf_page_count(pdf_path: str) -> int:
     """Return the PDF page count without rendering any page."""
-    return int(pdfinfo_from_path(pdf_path)["Pages"])
+    return int(pdfinfo_from_path(pdf_path, timeout=60)["Pages"])
 
 
 def load_pdf_page_window(
@@ -35,4 +35,4 @@ def load_pdf_page_window(
         kwargs["first_page"] = start + 1
     if limit is not None and limit > 0:
         kwargs["last_page"] = start + limit
-    return convert_from_path(pdf_path, dpi=dpi, **kwargs)
+    return convert_from_path(pdf_path, dpi=dpi, thread_count=1, timeout=120, **kwargs)

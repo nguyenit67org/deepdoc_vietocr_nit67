@@ -2,17 +2,6 @@
 import importlib
 
 _BACKENDS = {
-    "easyocr_latin": (".easyocr_latin", "EasyOcrLatinRecognizer"),
-    "trocr_duyle": (".candidates", "DuyleTrOcrRecognizer"),
-    "vnhtr_jit": (".candidates", "VnhtrJitRecognizer"),
-    "pytesseract_direct": (".pytesseract_direct", "PytesseractDirectRecognizer"),
-    "nom_tesseract": (".nom_tesseract", "NomTesseractRecognizer"),
-    "word_to_line": (".trocr_words", "WordToLineRecognizer"),
-    "ocrdoc_onnx": (".ocrdoc", "OcrDocRecognizer"),
-    "vietocr_onnx": (".vietocr", "VietOcrOnnxRecognizer"),
-    "htr_convtext": (".htr_convtext", "HtrConvTextRecognizer"),
-    "senocr": (".senocr", "SenOcrRecognizer"),
-    "akaocr": (".akaocr", "AkaOcrRecognizer"),
     "vietocr_original": (".vietocr_original", "VietOcrOriginalRecognizer"),
 }
 
@@ -25,8 +14,7 @@ def create_recognizer(config, device_id=0):
     options = dict(config)
     runtime = options.pop("runtime", None)
     if runtime is not None:
-        from .process import ProcessRecognizer
-        return ProcessRecognizer(options, runtime, device_id)
+        raise ValueError("Separate recognizer workers are not part of the CPU UAT deployment")
     backend = options.pop("backend", "fastocr")
     if backend == "fastocr":
         from ..engine import TextRecognizer

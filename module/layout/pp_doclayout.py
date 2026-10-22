@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 
 from .base import LayoutBlock, LayoutLabelSchema
+from ..cancellation import check_cancelled
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +44,11 @@ class PPDocLayoutBackend:
         h2_types=frozenset({"paragraph_title"}),
     )
 
-    def __init__(self, model_name: str = "PP-DocLayout_plus-L", device: str = "cpu", max_batch_size: int = 8):
+    def __init__(self, model_name: str = "PP-DocLayout_plus-L", device: str = "cpu", max_batch_size: int = 8, model_dir: str | None = None):
         from paddleocr import LayoutDetection
 
-        self._model = LayoutDetection(model_name=model_name, device=device)
+        options = {"model_dir": model_dir} if model_dir else {}
+        self._model = LayoutDetection(model_name=model_name, device=device, **options)
         logger.info("[device] Layout (%s): device=%s", model_name, device)
         self._device = device
         # Caps how many images PaddleX actually stacks into one forward
@@ -99,10 +101,13 @@ class PPDocLayoutBackend:
 
         results: list[list[LayoutBlock] | None] = [None] * len(images)
         for indices in groups.values():
-            group_images = [images[i] for i in indices]
-            group_blocks = self._detect_batch_same_shape(group_images, threshold)
-            for idx, blocks in zip(indices, group_blocks):
-                results[idx] = blocks
+            for start in range(0, len(indices), self._max_batch_size):
+                check_cancelled()
+                chunk = indices[start:start + self._max_batch_size]
+                group_images = [images[i] for i in chunk]
+                group_blocks = self._detect_batch_same_shape(group_images, threshold)
+                for idx, blocks in zip(chunk, group_blocks):
+                    results[idx] = blocks
 
         return results  # every index was filled by exactly one group above
 

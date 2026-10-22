@@ -6,6 +6,7 @@ import time
 import cv2
 import numpy as np
 from PIL import Image
+from ...cancellation import check_cancelled
 
 
 @dataclass
@@ -72,7 +73,9 @@ class BatchedRecognizer:
             self.last_oom_retries = 0
             results = []
             for start in range(0, len(images), self.max_batch_size):
+                check_cancelled()
                 results.extend(self._checked_batch([as_rgb(image) for image in images[start:start + self.max_batch_size]]))
+                check_cancelled()
             self.last_details = [{**asdict(r), "text": r.text, "pipeline_score": 1.0} for r in results]
             return results
 

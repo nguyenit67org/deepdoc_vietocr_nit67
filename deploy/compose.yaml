@@ -1,0 +1,26 @@
+services:
+  ocr-api:
+    image: ${OCR_IMAGE:-deepdoc-uat:cpu}
+    pull_policy: never
+    init: true
+    restart: "no"
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    cpus: 4.0
+    mem_limit: 8g
+    memswap_limit: 8g
+    pids_limit: 256
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=1073741824,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

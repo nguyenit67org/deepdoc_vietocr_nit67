@@ -1,7 +1,0 @@
-{
-  "backend": "vietocr_onnx",
-  "model_dir": "scratch/ocr-recognizers/models/vietocr_handwriting",
-  "device": "cuda",
-  "max_batch_size": 1,
-  "max_new_tokens": 256
-}

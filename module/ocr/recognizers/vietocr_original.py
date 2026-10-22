@@ -12,6 +12,7 @@ import numpy as np
 
 from .base import BatchedRecognizer, RecognitionResult
 from .source_utils import source_package
+from ...cancellation import check_cancelled
 
 
 class VietOcrOriginalRecognizer(BatchedRecognizer):
@@ -50,6 +51,7 @@ class VietOcrOriginalRecognizer(BatchedRecognizer):
         results = [None] * len(images)
         with torch.inference_mode():
             for width, bucket in buckets.items():
+                check_cancelled()
                 tensor = torch.cat([tensor for _, tensor in bucket], 0).to(self.device)
                 ids, probabilities = self.upstream.translate(tensor, self.model, max_seq_length=self.max_seq_length)
                 for (index, _), sequence, probability in zip(bucket, ids, probabilities):

@@ -47,6 +47,7 @@ class PipelineConfig:
     batch_api_max_images_per_group: int
     table_enabled: bool = True
     pipeline_max_pages_per_batch: int = 64
+    persist_outputs: bool = True
     remove_red_enabled: bool = False
     remove_red_max_regions: int = 16
     remove_red_max_area_ratio: float = 0.25
@@ -104,6 +105,7 @@ class PipelineConfig:
             batch_api_max_pages_per_group=batch_api.get("max_pages_per_group", 200),
             batch_api_max_images_per_group=batch_api.get("max_images_per_group", 200),
             pipeline_max_pages_per_batch=pipeline.get("max_pages_per_batch", 64),
+            persist_outputs=conf.get("output", {}).get("persist", True),
             remove_red_enabled=remove_red.get("enabled", False),
             remove_red_max_regions=int(remove_red.get("max_regions_per_page", 16)),
             remove_red_max_area_ratio=float(remove_red.get("max_probe_area_ratio", 0.25)),

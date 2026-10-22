@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 import time
+from ..cancellation import check_cancelled
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -95,6 +96,7 @@ class DocumentPipeline:
         t_process = time.perf_counter()
         t_render = time.time()
         label = source_filename or os.path.basename(pdf_path)
+        check_cancelled()
         total_pages = load_pdf_page_count(pdf_path)
         logger.info("Processing %s (%d pages)", label, total_pages)
 
@@ -116,9 +118,9 @@ class DocumentPipeline:
         if not window_size or window_size <= 0:
             window_size = total_pages
         out_dir = os.path.join(self.config.output_dir, Path(label).stem)
-        os.makedirs(out_dir, exist_ok=True)
         pages_dir = os.path.join(out_dir, "pages")
-        os.makedirs(pages_dir, exist_ok=True)
+        if self.config.persist_outputs:
+            os.makedirs(pages_dir, exist_ok=True)
 
         pages_blocks_all: list[list[PageBlock]] = []
         crop_offsets_all: list[tuple[float, float]] = []
@@ -126,7 +128,9 @@ class DocumentPipeline:
         processed_sizes_all: list[tuple[int, int]] = []
         page_image_urls: list[str] = []
         for start in range(0, total_pages, window_size):
+            check_cancelled()
             pages = load_pdf_page_window(pdf_path, dpi=self.config.pdf_dpi, start=start, limit=window_size)
+            check_cancelled()
             if not pages:
                 raise ValueError(f"Rendered 0 pages for window starting at page {start + 1}")
             logger.info(
@@ -150,7 +154,7 @@ class DocumentPipeline:
             # i.e. not /pdfs or /images), since it's meant for the test UI's
             # Preview tab (see server/static/index.html), not the
             # bulk/production paths.
-            for index, img in enumerate(prepped_imgs):
+            for index, img in enumerate(prepped_imgs if self.config.persist_outputs else []):
                 page_number = start + index + 1
                 img_path = os.path.join(pages_dir, f"page_{page_number}.png")
                 img.convert("RGB").save(img_path, "PNG")
@@ -163,11 +167,14 @@ class DocumentPipeline:
         pages_blocks, crop_offsets = pages_blocks_all, crop_offsets_all
 
         t_build = time.time()
-        markdown = build_markdown(pages_blocks, self.layout.label_schema)
-        json_out = build_json(label, pages_blocks, crop_offsets, page_image_urls)
+        markdown = (build_markdown(pages_blocks, self.layout.label_schema)
+                    if self.config.persist_outputs or debug_dir else "")
+        json_out = (build_json(label, pages_blocks, crop_offsets, page_image_urls)
+                    if self.config.persist_outputs else None)
         logger.info("Built JSON/markdown output in %.2fs", time.time() - t_build)
 
         t_extract = time.time()
+        check_cancelled()
         prediction, extraction_debug = extract_vbhc(
             pages_blocks,
             original_page_sizes=original_sizes_all,
@@ -183,15 +190,17 @@ class DocumentPipeline:
             with open(os.path.join(debug_dir, "extraction_debug.json"), "w", encoding="utf-8") as f:
                 json.dump(extraction_debug, f, ensure_ascii=False, indent=2)
 
-        shutil.copyfile(pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf"))
-        with open(os.path.join(out_dir, "output.json"), "w", encoding="utf-8") as f:
-            json.dump(json_out, f, ensure_ascii=False, indent=2)
-        with open(os.path.join(out_dir, "output.md"), "w", encoding="utf-8") as f:
-            f.write(markdown)
+        if self.config.persist_outputs:
+            shutil.copyfile(pdf_path, os.path.join(out_dir, label if label.lower().endswith(".pdf") else f"{label}.pdf"))
+            with open(os.path.join(out_dir, "output.json"), "w", encoding="utf-8") as f:
+                json.dump(json_out, f, ensure_ascii=False, indent=2)
+            with open(os.path.join(out_dir, "output.md"), "w", encoding="utf-8") as f:
+                f.write(markdown)
 
         prediction["processing_time"] = time.perf_counter() - t_process
-        with open(os.path.join(out_dir, "prediction.json"), "w", encoding="utf-8") as f:
-            json.dump(prediction, f, ensure_ascii=False, indent=2)
+        if self.config.persist_outputs:
+            with open(os.path.join(out_dir, "prediction.json"), "w", encoding="utf-8") as f:
+                json.dump(prediction, f, ensure_ascii=False, indent=2)
 
         response = dict(prediction)
         if debug_trace is not None:
@@ -469,7 +478,9 @@ class DocumentPipeline:
         # Phase 2: layout detection for this call's pages in ONE batched PaddleX
         # call instead of one call per page -- see PPDocLayoutBackend.detect_batch.
         t_layout = time.time()
+        check_cancelled()
         raw_blocks_per_page = self.layout.detect_batch([p.img for p in prepped], self.config.layout_threshold)
+        check_cancelled()
         if debug_trace is not None:
             debug_trace.layout_blocks.extend(raw_blocks_per_page)
         logger.info("Layout-detected %d pages in one batch in %.2fs", len(pages), time.time() - t_layout)
@@ -589,6 +600,7 @@ class DocumentPipeline:
         # text ending up assigned to a different page.
         crop_owner_pn: list[int] = []
         for pn in range(len(pages)):
+            check_cancelled()
             page_crop_debug_dir = (
                 os.path.join(debug_dir, f"page_{pn + 1 + pn_offset}_fastocr_crops") if debug_dir else None
             )
@@ -624,6 +636,7 @@ class DocumentPipeline:
         # by ocr.fastocr_max_batch_size (see module/ocr/engine.py), so this
         # stays memory-bounded even for a huge multi-page document.
         t_ocr_rec = time.time()
+        check_cancelled()
         fresh_rec_res_all, _ = self.ocr.text_recognizer[0](all_ocr_crops) if all_ocr_crops else ([], 0.0)
         logger.info(
             "Recognized %d text crop(s) (batched across whole document) in %.2fs",

@@ -16,6 +16,9 @@ conf/local.*.yaml
 
 # Local-only model weights (fine-tuned checkpoints not meant for the shared repo)
 fastocr/weight/finetune_*.pth
+/models/
+/uat-evidence/
+*.tar.gz
 
 __pycache__/
 *.pyc
