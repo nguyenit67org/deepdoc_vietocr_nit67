@@ -27,14 +27,41 @@ test file transfer into a read-only container was corrected, CPU MKLDNN was disa
 after a real Paddle PIR/oneDNN failure, and an invalid ONNX disabled-arena shrink request
 was removed. No model weights, GT or extraction rules were changed for these fixes.
 
-## Python 3.10 primary: pending real-image validation
+## Python 3.10 primary: passed five-file offline qualification
 
-- Planned tag: `deepdoc-uat:py310-cpu`, Python 3.10.22 (developer venv: 3.10.12).
+- Tag: `deepdoc-uat:py310-cpu`, Python 3.10.22 (developer venv: 3.10.12).
+- Tested image identity: `sha256:531d41895ca94358d6e192393dfac6d61abb0fc5fe88a7f87d773bf6194223a7`.
 - Runtime dependency versions constrained to existing venv versions, with GPU Torch/
   Torchvision and Paddle replaced by same-version CPU distributions.
 - Five reproducible PDFs selected with seed 20261022: 2, 5, 9, 16 and 17 pages.
-- No statement of successful deployment, inference or RAM peak for this image until
-  its own container tests have completed. PDFs longer than 20 pages are not qualified.
+- All five returned HTTP 200 and the 13-field schema with meaningful, nonempty text.
+  This is smoke qualification, not GT-based accuracy certification. PDFs longer than
+  20 pages, including 353-page PDFs, remain unqualified.
+- 16 deployment safety tests passed inside this exact image, with no network,
+  read-only root and the same resource limits. No pytest/test sources are baked in.
+- No CUDA Torch/Paddle or CUDA ONNX provider; `pip check` passed.
+- Limits verified both in Docker configuration and actual cgroup v2 files:
+  memory.max=8589934592, memory.swap.max=0, cpu.max="400000 100000".
+- Temporary file cleanup and no persistent output directory verified after all files.
+- Evidence: `/tmp/opencode/deepdoc-uat-evidence-py310/{summary.json,results.json,samples.json,container.log,pip-freeze.txt}`.
+- The shared two-page sample returned identical 13-field values on Python 3.10 and
+  Python 3.11. This single-case consistency check is not a broader accuracy claim.
+- Reported image bytes: 1,099,507,108. `/usr` plus `/app` occupy about 3.16 GB unpacked;
+  Docker may keep compressed layers as well. Budget for archive, extraction and
+  Docker storage, not only the image size reported by its API.
+
+| PDF pages | Wall seconds | Cumulative whole-container peak GiB |
+| --- | --- | --- |
+| 2 | 37.136 | 1.88 |
+| 5 | 124.133 | 2.31 |
+| 9 | 198.024 | 2.31 |
+| 16 | 163.722 | 2.33 |
+| 17 | 421.329 | 2.60 |
+
+Total file-request wall time: 944.344 seconds. Maximum observed cgroup peak:
+2,793,594,880 bytes (about 2.60 GiB), including the in-container HTTP test client.
+Peaks are cumulative since startup, not independent per-file process RSS. Timings
+are WSL measurements, not UAT performance guarantees. Startup time is separate.
 
 ## Source-level tests
 

@@ -44,6 +44,9 @@ grep -m1 '^flags' /proc/cpuinfo | grep -oE '\b(avx|avx2|fma)\b'
   không tắt dịch vụ đang chiếm cổng.
 - Tính cả archive, image đã load và chừa tối thiểu khoảng 4 GB đĩa trống cho host.
   Docker có thể giữ cả layer nén và layer giải nén; không chỉ nhìn kích thước archive.
+  Với bản hiện tại, sau khi chuyển archive lên nên còn khoảng **10 GB trống trở lên**
+  trước bước load để có dư địa giải nén và buffer. Nếu thiếu, dừng để tính lại;
+  không tự dọn cache/image của dịch vụ khác.
 - Nếu VM thiếu AVX hoặc gặp `Illegal instruction`, báo lại; không tự nâng packages
   trên host hoặc tự thử các image khác không kiểm chứng.
 
