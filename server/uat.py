@@ -21,6 +21,7 @@ from .security import load_api_key, require_api_key
 logger = logging.getLogger(__name__)
 MAX_FILE_BYTES = 100 * 1024 * 1024
 MAX_BODY_BYTES = MAX_FILE_BYTES + 64 * 1024
+UPLOAD_TOTAL_SECONDS = 300
 
 
 class UploadRejected(Exception):
@@ -54,7 +55,8 @@ class PdfAdmission:
         state.busy = True
         count = 0
         started = False
-        upload_deadline = time.monotonic() + 300
+        upload_deadline = time.monotonic() + UPLOAD_TOTAL_SECONDS
+        upload_complete = False
 
         async def tracked_send(message):
             nonlocal started
@@ -63,7 +65,9 @@ class PdfAdmission:
             await send(message)
 
         async def limited_receive():
-            nonlocal count
+            nonlocal count, upload_complete
+            if upload_complete:
+                return await receive()
             try:
                 remaining = upload_deadline - time.monotonic()
                 if remaining <= 0:
@@ -75,6 +79,7 @@ class PdfAdmission:
                 count += len(message.get("body", b""))
                 if count > MAX_BODY_BYTES:
                     raise UploadRejected(413, "Upload exceeds 100 MiB plus multipart overhead")
+                upload_complete = not message.get("more_body", False)
             return message
 
         try:

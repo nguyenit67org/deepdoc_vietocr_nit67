@@ -98,6 +98,18 @@ class UatApiTests(unittest.TestCase):
                 self.pipeline.release.set()
             self.assertEqual(first.result(5).status_code, 200)
 
+    def test_upload_deadline_does_not_limit_inference(self):
+        self.pipeline.block = True
+        with patch("server.uat.UPLOAD_TOTAL_SECONDS", 0.1):
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                first = pool.submit(self.upload)
+                try:
+                    self.assertTrue(self.pipeline.entered.wait(5))
+                    time.sleep(0.35)
+                finally:
+                    self.pipeline.release.set()
+                self.assertEqual(first.result(5).status_code, 200)
+
     def test_body_limit_and_slot_released(self):
         with patch("server.uat.MAX_BODY_BYTES", 4):
             self.assertEqual(self.upload().status_code, 413)
